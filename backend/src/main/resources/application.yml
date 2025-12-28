@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: company-portal
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/company_portal?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: root
+    password: 1111  # 여기에 MySQL 비밀번호 입력
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+  
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      location: ./uploads
+
+server:
+  port: 8080
+
+jwt:
+  secret: company-portal-secret-key-for-jwt-token-generation-minimum-256-bits-required
+  expiration: 86400000  # 24시간 (밀리초)
+
+file:
+  upload-dir: ./uploads
+  allowed-extensions: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,hwp
+
+logging:
+  level:
+    com.company.portal: DEBUG
+    org.springframework.security: DEBUG
