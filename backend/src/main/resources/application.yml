@@ -29,8 +29,8 @@ server:
   port: 8080
 
 jwt:
-  secret: company-portal-secret-key-for-jwt-token-generation-minimum-256-bits-required
-  expiration: 86400000  # 24시간 (밀리초)
+  secret: your-very-long-secret-key-at-least-256-bits-long-for-hs256-algorithm
+  expiration: 86400000
 
 file:
   upload-dir: ./uploads

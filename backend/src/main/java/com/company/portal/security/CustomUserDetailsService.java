@@ -1,14 +1,12 @@
 package com.company.portal.security;
 
+import com.company.portal.entity.Employee;
+import com.company.portal.repository.EmployeeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import com.company.portal.entity.Employee;
-import com.company.portal.repository.EmployeeRepository;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

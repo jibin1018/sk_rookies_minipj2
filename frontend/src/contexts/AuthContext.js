@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUser = authService.getCurrentUser();
+    console.log('저장된 사용자:', storedUser); // 디버깅용
     if (storedUser) {
       setUser(storedUser);
     }
@@ -17,16 +18,21 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (employeeId, password) => {
     try {
+      console.log('AuthContext - 로그인 요청:', employeeId); // 디버깅용
       const response = await authService.login(employeeId, password);
+      console.log('AuthContext - 응답:', response); // 디버깅용
+      
       if (response.success) {
         const userData = response.data;
         localStorage.setItem('token', userData.token);
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
+        console.log('AuthContext - 사용자 정보 저장 완료'); // 디버깅용
         return { success: true };
       }
       return { success: false, message: response.message };
     } catch (error) {
+      console.error('AuthContext - 로그인 에러:', error); // 디버깅용
       return { 
         success: false, 
         message: error.response?.data?.message || '로그인에 실패했습니다' 

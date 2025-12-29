@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Container,
   Grid,
@@ -22,25 +22,25 @@ const DashboardPage = () => {
   const stats = [
     {
       title: '사내 게시판',
-      value: '5',
+      value: '-',
       icon: <Article fontSize="large" />,
       color: '#1976d2',
     },
     {
       title: '팀 일정',
-      value: '3',
+      value: '-',
       icon: <Schedule fontSize="large" />,
       color: '#2e7d32',
     },
     {
       title: '결재 대기',
-      value: '2',
+      value: '-',
       icon: <Description fontSize="large" />,
       color: '#ed6c02',
     },
     {
       title: '건의사항',
-      value: '1',
+      value: '-',
       icon: <Feedback fontSize="large" />,
       color: '#9c27b0',
     },
@@ -57,7 +57,10 @@ const DashboardPage = () => {
           환영합니다, {user?.name}님!
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          부서: {user?.departmentName} | 팀: {user?.teamName} | 직급: {user?.position}
+          부서: {user?.departmentName || '-'} | 팀: {user?.teamName || '-'} | 직급: {user?.position || '-'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          역할: {user?.role || '-'}
         </Typography>
       </Paper>
 
@@ -94,7 +97,7 @@ const DashboardPage = () => {
               최근 공지사항
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              공지사항이 없습니다.
+              좌측 메뉴에서 사내 게시판을 확인하세요.
             </Typography>
           </Paper>
         </Grid>
@@ -105,7 +108,7 @@ const DashboardPage = () => {
               이번 주 일정
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              일정이 없습니다.
+              좌측 메뉴에서 팀 일정을 확인하세요.
             </Typography>
           </Paper>
         </Grid>

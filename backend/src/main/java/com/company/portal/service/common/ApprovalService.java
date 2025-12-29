@@ -64,7 +64,7 @@ public class ApprovalService {
                     .approval(approval)
                     .approver(approver)
                     .stepOrder(i + 1)
-                    .status(i == 0 ? ApprovalStatus.PENDING : ApprovalStatus.PENDING)
+                    .status(ApprovalStatus.PENDING)
                     .build();
 
             approval.getApprovalLines().add(line);
@@ -96,12 +96,26 @@ public class ApprovalService {
     @Transactional(readOnly = true)
     public List<ApprovalResponse> getPendingApprovals() {
         Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
+        log.info("결재 대기 조회 시작 - Employee ID: {}", currentEmployeeId);
 
-        List<ApprovalLine> pendingLines = approvalLineRepository.findPendingApprovalsByApproverId(
-                currentEmployeeId, ApprovalStatus.IN_PROGRESS);
+        // 현재 사용자가 결재자로 등록되어 있고 PENDING 상태인 결재선 찾기
+        List<ApprovalLine> pendingLines = approvalLineRepository.findByApproverIdAndStatus(
+                currentEmployeeId,
+                ApprovalStatus.PENDING
+        );
 
-        return pendingLines.stream()
-                .map(line -> convertToResponse(line.getApproval()))
+        log.info("PENDING 상태 결재선 개수: {}", pendingLines.size());
+
+        // 결재선에서 결재 문서 추출
+        List<Approval> approvals = pendingLines.stream()
+                .map(ApprovalLine::getApproval)
+                .distinct()
+                .collect(Collectors.toList());
+
+        log.info("결재 대기 문서 개수: {}", approvals.size());
+
+        return approvals.stream()
+                .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -164,7 +178,6 @@ public class ApprovalService {
             approval.setStatus(ApprovalStatus.REJECTED);
 
             log.info("결재 반려: approval={}, step={}", id, currentLine.getStepOrder());
-
         } else {
             throw new BadRequestException("잘못된 액션입니다");
         }
@@ -184,7 +197,7 @@ public class ApprovalService {
 
         // 요청자 본인만 취소 가능
         if (!approval.getRequester().getId().equals(currentEmployeeId)) {
-            throw new UnauthorizedException("결재를 취소할 권한이 없습니다");
+            throw new UnauthorizedException("취소할 권한이 없습니다");
         }
 
         // 이미 승인되거나 반려된 경우 취소 불가

@@ -6,8 +6,11 @@ import com.company.portal.dto.response.ApiResponse;
 import com.company.portal.dto.response.ApprovalResponse;
 import com.company.portal.enums.ApprovalStatus;
 import com.company.portal.service.common.ApprovalService;
+import com.company.portal.util.SecurityUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/approvals")
 @RequiredArgsConstructor
@@ -52,8 +56,13 @@ public class ApprovalController {
 
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<List<ApprovalResponse>>> getPendingApprovals() {
-        List<ApprovalResponse> response = approvalService.getPendingApprovals();
-        return ResponseEntity.ok(ApiResponse.success(response));
+        Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
+        log.info("결재 대기 문서 조회 - Employee ID: {}", currentEmployeeId);
+
+        List<ApprovalResponse> approvals = approvalService.getPendingApprovals();
+        log.info("결재 대기 문서 개수: {}", approvals.size());
+
+        return ResponseEntity.ok(ApiResponse.success("조회 성공", approvals));
     }
 
     @GetMapping("/{id}")
@@ -67,7 +76,7 @@ public class ApprovalController {
             @PathVariable Long id,
             @Valid @RequestBody ApprovalActionRequest request) {
         ApprovalResponse response = approvalService.processApproval(id, request);
-        return ResponseEntity.ok(ApiResponse.success("결재 처리 성공", response));
+        return ResponseEntity.ok(ApiResponse.success("처리 완료", response));
     }
 
     @DeleteMapping("/{id}")

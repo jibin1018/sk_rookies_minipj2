@@ -11,43 +11,39 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
-  TextField,
-  Grid,
   Card,
   CardContent,
+  Grid,
 } from '@mui/material';
-import { Login, Logout, Schedule } from '@mui/icons-material';
+import { Login, Logout, AccessTime } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
-import { useSecurityMode } from '../../contexts/SecurityModeContext';
 import attendanceService from '../../services/attendanceService';
 
 const AttendancePage = () => {
   const { user } = useAuth();
-  const { isSecure } = useSecurityMode();
   const [attendances, setAttendances] = useState([]);
   const [todayAttendance, setTodayAttendance] = useState(null);
-  const [startDate, setStartDate] = useState(
-    new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]
-  );
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Vulnerable 모드용 시간 조작
-  const [customCheckInTime, setCustomCheckInTime] = useState('');
-  const [customCheckOutTime, setCustomCheckOutTime] = useState('');
+  // 이번 달 첫날과 오늘 날짜
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  const [startDate] = useState(firstDay.toISOString().split('T')[0]);
+  const [endDate] = useState(today.toISOString().split('T')[0]);
 
   useEffect(() => {
     fetchAttendances();
-  }, [startDate, endDate]);
+  }, []);
 
   const fetchAttendances = async () => {
     try {
       const response = await attendanceService.getMyAttendances(startDate, endDate);
+      
       if (response.success) {
         setAttendances(response.data);
         
-        const today = new Date().toISOString().split('T')[0];
-        const todayRecord = response.data.find(a => a.workDate === today);
+        // 오늘 날짜의 근태 찾기
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayRecord = response.data.find(a => a.workDate === todayStr);
         setTodayAttendance(todayRecord);
       }
     } catch (error) {
@@ -56,17 +52,18 @@ const AttendancePage = () => {
   };
 
   const handleCheckIn = async () => {
-    try {
-      let checkInTime = null;
-      
-      if (!isSecure && customCheckInTime) {
-        checkInTime = new Date(customCheckInTime).toISOString();
-      }
+    if (todayAttendance?.checkIn) {
+      alert('이미 출근 처리되었습니다');
+      return;
+    }
 
-      const response = await attendanceService.checkIn(checkInTime);
+    try {
+      const response = await attendanceService.checkIn();
       
       if (response.success) {
-        alert('출근 처리되었습니다');
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('ko-KR');
+        alert(`출근 완료: ${timeStr}`);
         fetchAttendances();
       }
     } catch (error) {
@@ -76,17 +73,23 @@ const AttendancePage = () => {
   };
 
   const handleCheckOut = async () => {
-    try {
-      let checkOutTime = null;
-      
-      if (!isSecure && customCheckOutTime) {
-        checkOutTime = new Date(customCheckOutTime).toISOString();
-      }
+    if (!todayAttendance?.checkIn) {
+      alert('출근 기록이 없습니다');
+      return;
+    }
 
-      const response = await attendanceService.checkOut(checkOutTime);
+    if (todayAttendance?.checkOut) {
+      alert('이미 퇴근 처리되었습니다');
+      return;
+    }
+
+    try {
+      const response = await attendanceService.checkOut();
       
       if (response.success) {
-        alert('퇴근 처리되었습니다');
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('ko-KR');
+        alert(`퇴근 완료: ${timeStr}`);
         fetchAttendances();
       }
     } catch (error) {
@@ -95,38 +98,37 @@ const AttendancePage = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      PRESENT: 'success',
-      LATE: 'warning',
-      EARLY_LEAVE: 'warning',
-      ABSENT: 'error',
-      VACATION: 'info',
-      HALF_VACATION: 'info',
-      SICK_LEAVE: 'secondary',
-      BUSINESS_TRIP: 'primary',
-    };
-    return colors[status] || 'default';
-  };
-
-  const getStatusLabel = (status) => {
-    const labels = {
-      PRESENT: '정상',
-      LATE: '지각',
-      EARLY_LEAVE: '조퇴',
-      ABSENT: '결근',
-      VACATION: '휴가',
-      HALF_VACATION: '반차',
-      SICK_LEAVE: '병가',
-      BUSINESS_TRIP: '출장',
-    };
-    return labels[status] || status;
-  };
-
-  const formatDateTime = (dateString) => {
+  const formatTime = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleTimeString('ko-KR');
+    return date.toLocaleTimeString('ko-KR', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false 
+    });
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      weekday: 'short'
+    });
+  };
+
+  const calculateWorkHours = (checkIn, checkOut) => {
+    if (!checkIn || !checkOut) return '-';
+    
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const diff = end - start;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours}시간 ${minutes}분`;
   };
 
   return (
@@ -135,46 +137,46 @@ const AttendancePage = () => {
         근태 관리
       </Typography>
 
-      {!isSecure && (
-        <Box sx={{ mb: 2, p: 2, bgcolor: 'error.light', borderRadius: 1 }}>
-          <Typography variant="body2" color="error.contrastText">
-            ⚠️ 취약 모드: 출퇴근 시간 조작이 가능합니다
-          </Typography>
-        </Box>
-      )}
-
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
+        {/* 오늘의 출퇴근 */}
+        <Grid item xs={12} md={8}>
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                오늘의 출퇴근
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <AccessTime sx={{ mr: 1, fontSize: 28, color: 'primary.main' }} />
+                <Typography variant="h6">
+                  오늘의 출퇴근 ({new Date().toLocaleDateString('ko-KR')})
+                </Typography>
+              </Box>
               
-              {!isSecure && (
-                <Box sx={{ mb: 2, p: 1, bgcolor: 'warning.light', borderRadius: 1 }}>
-                  <Typography variant="caption">
-                    시간 조작 (취약 모드)
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 2, bgcolor: 'primary.light' }}>
+                    <Typography variant="body2" color="primary.contrastText" gutterBottom>
+                      출근 시간
+                    </Typography>
+                    <Typography variant="h5" color="primary.contrastText">
+                      {todayAttendance?.checkIn ? formatTime(todayAttendance.checkIn) : '미등록'}
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 2, bgcolor: 'secondary.light' }}>
+                    <Typography variant="body2" color="secondary.contrastText" gutterBottom>
+                      퇴근 시간
+                    </Typography>
+                    <Typography variant="h5" color="secondary.contrastText">
+                      {todayAttendance?.checkOut ? formatTime(todayAttendance.checkOut) : '미등록'}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+
+              {todayAttendance?.checkIn && todayAttendance?.checkOut && (
+                <Box sx={{ mb: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    총 근무시간: <strong>{calculateWorkHours(todayAttendance.checkIn, todayAttendance.checkOut)}</strong>
                   </Typography>
-                  <TextField
-                    fullWidth
-                    type="datetime-local"
-                    label="출근 시간"
-                    value={customCheckInTime}
-                    onChange={(e) => setCustomCheckInTime(e.target.value)}
-                    size="small"
-                    sx={{ mt: 1, mb: 1 }}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                  <TextField
-                    fullWidth
-                    type="datetime-local"
-                    label="퇴근 시간"
-                    value={customCheckOutTime}
-                    onChange={(e) => setCustomCheckOutTime(e.target.value)}
-                    size="small"
-                    InputLabelProps={{ shrink: true }}
-                  />
                 </Box>
               )}
 
@@ -182,9 +184,10 @@ const AttendancePage = () => {
                 <Button
                   variant="contained"
                   color="primary"
+                  size="large"
                   startIcon={<Login />}
                   onClick={handleCheckIn}
-                  disabled={todayAttendance?.checkIn}
+                  disabled={!!todayAttendance?.checkIn}
                   fullWidth
                 >
                   출근
@@ -192,110 +195,88 @@ const AttendancePage = () => {
                 <Button
                   variant="contained"
                   color="secondary"
+                  size="large"
                   startIcon={<Logout />}
                   onClick={handleCheckOut}
-                  disabled={!todayAttendance?.checkIn || todayAttendance?.checkOut}
+                  disabled={!todayAttendance?.checkIn || !!todayAttendance?.checkOut}
                   fullWidth
                 >
                   퇴근
                 </Button>
               </Box>
-
-              {todayAttendance && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="body2">
-                    출근: {formatDateTime(todayAttendance.checkIn)}
-                  </Typography>
-                  <Typography variant="body2">
-                    퇴근: {formatDateTime(todayAttendance.checkOut)}
-                  </Typography>
-                  <Chip
-                    label={getStatusLabel(todayAttendance.status)}
-                    color={getStatusColor(todayAttendance.status)}
-                    size="small"
-                    sx={{ mt: 1 }}
-                  />
-                </Box>
-              )}
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        {/* 이번 달 통계 */}
+        <Grid item xs={12} md={4}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                근태 통계
+                이번 달 출근 현황
               </Typography>
-              <Typography variant="body2">
-                정상 출근: {attendances.filter(a => a.status === 'PRESENT').length}일
-              </Typography>
-              <Typography variant="body2">
-                지각: {attendances.filter(a => a.status === 'LATE').length}일
-              </Typography>
-              <Typography variant="body2">
-                조퇴: {attendances.filter(a => a.status === 'EARLY_LEAVE').length}일
-              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="h3" color="primary.main" align="center">
+                  {attendances.length}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" align="center">
+                  일 출근
+                </Typography>
+              </Box>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <TextField
-            label="시작일"
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            label="종료일"
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-          />
+      {/* 근태 기록 */}
+      <Paper>
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography variant="h6">이번 달 근태 기록</Typography>
         </Box>
-      </Paper>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">날짜</TableCell>
-              <TableCell align="center">출근 시간</TableCell>
-              <TableCell align="center">퇴근 시간</TableCell>
-              <TableCell align="center">상태</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {attendances.length === 0 ? (
+        
+        <TableContainer>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={4} align="center">
-                  근태 기록이 없습니다
-                </TableCell>
+                <TableCell>날짜</TableCell>
+                <TableCell align="center">출근 시간</TableCell>
+                <TableCell align="center">퇴근 시간</TableCell>
+                <TableCell align="center">근무 시간</TableCell>
               </TableRow>
-            ) : (
-              attendances.map((attendance) => (
-                <TableRow key={attendance.id}>
-                  <TableCell align="center">{attendance.workDate}</TableCell>
-                  <TableCell align="center">{formatDateTime(attendance.checkIn)}</TableCell>
-                  <TableCell align="center">{formatDateTime(attendance.checkOut)}</TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      label={getStatusLabel(attendance.status)}
-                      color={getStatusColor(attendance.status)}
-                      size="small"
-                    />
+            </TableHead>
+            <TableBody>
+              {attendances.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
+                    <Typography color="text.secondary">
+                      이번 달 근태 기록이 없습니다
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : (
+                attendances.slice().reverse().map((attendance) => (
+                  <TableRow key={attendance.id}>
+                    <TableCell>{formatDate(attendance.workDate)}</TableCell>
+                    <TableCell align="center">
+                      <Typography color="primary.main" fontWeight="medium">
+                        {formatTime(attendance.checkIn)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography color="secondary.main" fontWeight="medium">
+                        {formatTime(attendance.checkOut)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      {calculateWorkHours(attendance.checkIn, attendance.checkOut)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
     </Container>
   );
 };

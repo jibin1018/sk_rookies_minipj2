@@ -13,28 +13,14 @@ import PrivateRoute from './components/common/PrivateRoute';
 
 import LoginPage from './pages/login/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
-
-// Board
 import BoardList from './components/board/BoardList';
 import BoardDetail from './components/board/BoardDetail';
 import BoardForm from './components/board/BoardForm';
-
-// Schedule
 import ScheduleList from './components/schedule/ScheduleList';
-
-// Attendance
 import AttendancePage from './components/attendance/AttendancePage';
-
-// File
 import FilePage from './components/file/FilePage';
-
-// Suggestion
 import SuggestionPage from './components/suggestion/SuggestionPage';
-
-// Cafeteria
 import CafeteriaPage from './components/cafeteria/CafeteriaPage';
-
-// Approval
 import ApprovalPage from './components/approval/ApprovalPage';
 
 const theme = createTheme({
@@ -62,16 +48,17 @@ function App() {
                 path="/*"
                 element={
                   <PrivateRoute>
-                    <Box sx={{ display: 'flex' }}>
+                    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
                       <Header />
                       <Sidebar />
                       <Box
                         component="main"
                         sx={{
                           flexGrow: 1,
-                          p: 3,
-                          mt: 8,
-                          ml: '240px',
+                          marginTop: '64px',
+                          marginLeft: '240px',
+                          padding: '24px',
+                          backgroundColor: '#f5f5f5',
                         }}
                       >
                         <Routes>
@@ -102,7 +89,7 @@ function App() {
                           {/* 전자결재 */}
                           <Route path="/approvals" element={<ApprovalPage />} />
                           
-                          <Route path="*" element={<DashboardPage />} />
+                          <Route path="*" element={<Navigate to="/dashboard" />} />
                         </Routes>
                       </Box>
                     </Box>

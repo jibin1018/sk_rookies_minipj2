@@ -7,7 +7,6 @@ import {
   Box,
   Card,
   CardContent,
-  CardActions,
   Grid,
   Chip,
   Tabs,
@@ -25,7 +24,7 @@ import {
   Step,
   StepLabel,
 } from '@mui/material';
-import { Add, Description, Check, Close } from '@mui/icons-material';
+import { Add, Check, Close } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import approvalService from '../../services/approvalService';
 import employeeService from '../../services/employeeService';
@@ -55,23 +54,30 @@ const ApprovalPage = () => {
 
   const fetchMyApprovals = async () => {
     try {
+      console.log('내 결재 문서 조회 시작');
       const response = await approvalService.getMyApprovals(0, 20);
+      console.log('내 결재 문서 응답:', response);
+      
       if (response.success) {
-        setMyApprovals(response.data.content);
+        setMyApprovals(response.data.content || response.data);
       }
     } catch (error) {
-      console.error('결재 목록 조회 실패:', error);
+      console.error('내 결재 문서 조회 실패:', error);
     }
   };
 
   const fetchPendingApprovals = async () => {
     try {
+      console.log('결재 대기 문서 조회 시작');
       const response = await approvalService.getPendingApprovals();
+      console.log('결재 대기 문서 응답:', response);
+      
       if (response.success) {
+        console.log('결재 대기 문서 개수:', response.data.length);
         setPendingApprovals(response.data);
       }
     } catch (error) {
-      console.error('대기 결재 조회 실패:', error);
+      console.error('결재 대기 문서 조회 실패:', error);
     }
   };
 
@@ -79,7 +85,8 @@ const ApprovalPage = () => {
     try {
       const response = await employeeService.getAllEmployees();
       if (response.success) {
-        setEmployees(response.data);
+        const otherEmployees = response.data.filter(emp => emp.id !== user?.id);
+        setEmployees(otherEmployees);
       }
     } catch (error) {
       console.error('사원 목록 조회 실패:', error);
@@ -93,7 +100,10 @@ const ApprovalPage = () => {
     }
 
     try {
+      console.log('결재 상신 데이터:', formData);
       const response = await approvalService.createApproval(formData);
+      console.log('결재 상신 응답:', response);
+
       if (response.success) {
         alert('결재가 상신되었습니다');
         setDialogOpen(false);
@@ -107,19 +117,23 @@ const ApprovalPage = () => {
       }
     } catch (error) {
       console.error('결재 상신 실패:', error);
-      alert('결재 상신에 실패했습니다');
+      alert(error.response?.data?.message || '결재 상신에 실패했습니다');
     }
   };
 
   const handleViewDetail = async (approvalId) => {
     try {
+      console.log('상세보기 클릭 - ID:', approvalId);
       const response = await approvalService.getApproval(approvalId);
+      console.log('상세 응답:', response);
+      
       if (response.success) {
         setSelectedApproval(response.data);
         setDetailDialogOpen(true);
       }
     } catch (error) {
       console.error('결재 상세 조회 실패:', error);
+      alert('상세 정보를 불러올 수 없습니다');
     }
   };
 
@@ -174,47 +188,57 @@ const ApprovalPage = () => {
     return date.toLocaleDateString('ko-KR');
   };
 
-  const renderApprovalList = (list) => (
-    <Grid container spacing={3}>
-      {list.length === 0 ? (
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3, textAlign: 'center' }}>
-            <Typography color="text.secondary">결재 문서가 없습니다</Typography>
-          </Paper>
-        </Grid>
-      ) : (
-        list.map((approval) => (
-          <Grid item xs={12} md={6} key={approval.id}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="h6">{approval.title}</Typography>
-                  <Chip
-                    label={getStatusLabel(approval.status)}
-                    color={getStatusColor(approval.status)}
-                    size="small"
-                  />
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  문서 종류: {approval.documentType}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  요청자: {approval.requesterName}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {formatDate(approval.createdAt)}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button size="small" onClick={() => handleViewDetail(approval.id)}>
-                  상세보기
-                </Button>
-              </CardActions>
-            </Card>
+  const renderApprovalList = (list, title) => (
+    <Box>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        {title} ({list.length})
+      </Typography>
+      <Grid container spacing={3}>
+        {list.length === 0 ? (
+          <Grid item xs={12}>
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
+              <Typography color="text.secondary">결재 문서가 없습니다</Typography>
+            </Paper>
           </Grid>
-        ))
-      )}
-    </Grid>
+        ) : (
+          list.map((approval) => (
+            <Grid item xs={12} md={6} key={approval.id}>
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="h6">{approval.title}</Typography>
+                    <Chip
+                      label={getStatusLabel(approval.status)}
+                      color={getStatusColor(approval.status)}
+                      size="small"
+                    />
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    문서 종류: {approval.documentType}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    요청자: {approval.requesterName}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {formatDate(approval.createdAt)}
+                  </Typography>
+                </CardContent>
+                <Box sx={{ p: 2, pt: 0 }}>
+                  <Button 
+                    size="small" 
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => handleViewDetail(approval.id)}
+                  >
+                    상세보기
+                  </Button>
+                </Box>
+              </Card>
+            </Grid>
+          ))
+        )}
+      </Grid>
+    </Box>
   );
 
   return (
@@ -233,12 +257,12 @@ const ApprovalPage = () => {
       <Paper sx={{ mb: 3 }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
           <Tab label="내 결재 문서" />
-          <Tab label="결재 대기" />
+          <Tab label={`결재 대기 (${pendingApprovals.length})`} />
         </Tabs>
       </Paper>
 
-      {tabValue === 0 && renderApprovalList(myApprovals)}
-      {tabValue === 1 && renderApprovalList(pendingApprovals)}
+      {tabValue === 0 && renderApprovalList(myApprovals, "내 결재 문서")}
+      {tabValue === 1 && renderApprovalList(pendingApprovals, "결재 대기")}
 
       {/* 결재 상신 Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
@@ -280,16 +304,19 @@ const ApprovalPage = () => {
           />
 
           <FormControl fullWidth>
-            <InputLabel>결재자 선택</InputLabel>
+            <InputLabel>결재자 선택 (순서대로)</InputLabel>
             <Select
               multiple
               value={formData.approverIds}
-              label="결재자 선택"
+              label="결재자 선택 (순서대로)"
               onChange={(e) => setFormData({ ...formData, approverIds: e.target.value })}
+              renderValue={(selected) => 
+                selected.map(id => employees.find(emp => emp.id === id)?.name).join(' → ')
+              }
             >
               {employees.map((emp) => (
                 <MenuItem key={emp.id} value={emp.id}>
-                  {emp.name} ({emp.position})
+                  {emp.name} ({emp.position}) - {emp.departmentName}
                 </MenuItem>
               ))}
             </Select>
@@ -329,7 +356,7 @@ const ApprovalPage = () => {
 
             <Typography variant="h6" gutterBottom>결재선</Typography>
             <Stepper activeStep={selectedApproval.currentStep - 1} orientation="vertical">
-              {selectedApproval.approvalLines.map((line, index) => (
+              {selectedApproval.approvalLines.map((line) => (
                 <Step key={line.id}>
                   <StepLabel
                     StepIconProps={{

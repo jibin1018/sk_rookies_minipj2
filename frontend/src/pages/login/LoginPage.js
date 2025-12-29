@@ -26,14 +26,21 @@ const LoginPage = () => {
     setError('');
     setLoading(true);
 
+    console.log('로그인 시도:', employeeId);
+
     try {
       const result = await login(employeeId, password);
+      console.log('로그인 결과:', result);
+      
       if (result.success) {
+        console.log('로그인 성공, 대시보드로 이동');
         navigate('/dashboard');
       } else {
+        console.log('로그인 실패:', result.message);
         setError(result.message || '로그인에 실패했습니다');
       }
     } catch (err) {
+      console.error('로그인 에러:', err);
       setError('로그인 중 오류가 발생했습니다');
     } finally {
       setLoading(false);

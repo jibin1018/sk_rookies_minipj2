@@ -4,13 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "cafeteria_menus", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"menu_date", "meal_type"})
-})
+@Table(name = "cafeteria_menus")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,31 +19,26 @@ public class CafeteriaMenu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "menu_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate menuDate;
 
-    @Column(name = "meal_type", length = 20)
-    private String mealType;  // 조식, 중식, 석식
+    @Column(nullable = false, length = 20)
+    private String mealType;
 
-    @Column(name = "menu_items", nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String menuItems;
 
     @Column
     private Integer calories;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private Employee createdBy;
+    @Column(updatable = false)
+    private Long createdBy;
 
-    @Column(name = "created_at")
-    private java.time.LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<MenuReview> reviews = new ArrayList<>();
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = java.time.LocalDateTime.now();
+        createdAt = LocalDateTime.now();
     }
 }

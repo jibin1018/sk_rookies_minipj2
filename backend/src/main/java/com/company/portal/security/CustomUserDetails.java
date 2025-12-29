@@ -2,6 +2,7 @@ package com.company.portal.security;
 
 import com.company.portal.entity.Employee;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,39 +11,34 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Getter
+@RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    private final Long id;
-    private final String employeeId;
-    private final String password;
-    private final String name;
-    private final Collection<? extends GrantedAuthority> authorities;
-    private final boolean isActive;
-
-    public CustomUserDetails(Employee employee) {
-        this.id = employee.getId();
-        this.employeeId = employee.getEmployeeId();
-        this.password = employee.getPassword();
-        this.name = employee.getName();
-        this.authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + employee.getRole().name())
-        );
-        this.isActive = employee.getIsActive();
-    }
+    private final Employee employee;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return Collections.singletonList(
+                new SimpleGrantedAuthority("ROLE_" + employee.getRole().name())
+        );
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return employee.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return employeeId;
+        return employee.getEmployeeId();
+    }
+
+    public String getEmployeeId() {
+        return employee.getEmployeeId();
+    }
+
+    public Long getId() {
+        return employee.getId();
     }
 
     @Override
@@ -62,6 +58,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isActive;
+        return employee.getIsActive();
     }
 }
