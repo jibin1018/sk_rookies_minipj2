@@ -1,6 +1,5 @@
 package com.company.portal.service.secure;
 
-import com.company.portal.dto.request.AttendanceRequest;
 import com.company.portal.dto.response.AttendanceResponse;
 import com.company.portal.entity.Attendance;
 import com.company.portal.entity.Employee;
@@ -97,11 +96,53 @@ public class SecureAttendanceService {
     }
 
     @Transactional(readOnly = true)
+    public AttendanceResponse getTodayAttendance() {
+        Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
+        LocalDate today = LocalDate.now();
+
+        return attendanceRepository.findByEmployeeIdAndWorkDate(currentEmployeeId, today)
+                .map(this::convertToResponse)
+                .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AttendanceResponse> getMyAttendance(Integer year, Integer month) {
+        Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
+
+        LocalDate startDate;
+        LocalDate endDate;
+
+        if (year != null && month != null) {
+            startDate = LocalDate.of(year, month, 1);
+            endDate = startDate.plusMonths(1).minusDays(1);
+        } else {
+            LocalDate now = LocalDate.now();
+            startDate = now.withDayOfMonth(1);
+            endDate = now.withDayOfMonth(now.lengthOfMonth());
+        }
+
+        return getMyAttendances(startDate, endDate);
+    }
+
+    @Transactional(readOnly = true)
     public List<AttendanceResponse> getMyAttendances(LocalDate startDate, LocalDate endDate) {
         Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
 
         return attendanceRepository.findByEmployeeIdAndWorkDateBetween(currentEmployeeId, startDate, endDate)
                 .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AttendanceResponse> getAllAttendance(LocalDate date) {
+        LocalDate targetDate = date != null ? date : LocalDate.now();
+
+        log.info("관리자 전체 근태 조회 - 날짜: {}", targetDate);
+
+        List<Attendance> attendances = attendanceRepository.findByWorkDate(targetDate);
+
+        return attendances.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
@@ -127,9 +168,14 @@ public class SecureAttendanceService {
     }
 
     private AttendanceResponse convertToResponse(Attendance attendance) {
+        Employee employee = attendance.getEmployee();
+
         return AttendanceResponse.builder()
                 .id(attendance.getId())
-                .employeeName(attendance.getEmployee().getName())
+                .employeeId(employee.getEmployeeId())
+                .employeeName(employee.getName())
+                .departmentName(employee.getDepartment() != null ? employee.getDepartment().getName() : null)
+                .teamName(employee.getTeam() != null ? employee.getTeam().getName() : null)
                 .workDate(attendance.getWorkDate())
                 .checkIn(attendance.getCheckIn())
                 .checkOut(attendance.getCheckOut())

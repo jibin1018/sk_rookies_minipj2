@@ -1,29 +1,35 @@
 import api from './api';
 
 const attendanceService = {
-  // 현재 시간으로 출근
+  // 출근
   checkIn: async () => {
-    const response = await api.post('/attendance/check-in', {});
+    const response = await api.post('/attendance/check-in');
     return response.data;
   },
 
-  // 현재 시간으로 퇴근
+  // 퇴근
   checkOut: async () => {
-    const response = await api.post('/attendance/check-out', {});
+    const response = await api.post('/attendance/check-out');
     return response.data;
   },
 
   // 내 근태 조회
-  getMyAttendances: async (startDate, endDate) => {
+  getMyAttendance: async (year, month) => {
     const response = await api.get('/attendance/my', {
-      params: { startDate, endDate },
+      params: { year, month },
     });
     return response.data;
   },
 
-  // 팀 근태 조회 (팀장/관리자용)
-  getTeamAttendances: async (teamId, date) => {
-    const response = await api.get(`/attendance/team/${teamId}`, {
+  // 오늘 근태 조회
+  getTodayAttendance: async () => {
+    const response = await api.get('/attendance/today');
+    return response.data;
+  },
+
+  // 관리자 전체 근태 조회 ← 이 메서드 추가!
+  getAllAttendance: async (date) => {
+    const response = await api.get('/attendance/admin/all', {
       params: { date },
     });
     return response.data;

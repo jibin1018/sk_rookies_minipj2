@@ -67,7 +67,7 @@ public class VulnerableAttendanceService {
         Attendance attendance = Attendance.builder()
                 .employee(employee)
                 .workDate(today)
-                .checkIn(checkInTime) // 조작된 시간 저장!
+                .checkIn(checkInTime)
                 .status(status)
                 .build();
 
@@ -76,6 +76,11 @@ public class VulnerableAttendanceService {
         log.warn("Vulnerable 모드 - 출근 (시간 조작 가능): employee={}, time={}", currentEmployeeId, checkInTime);
 
         return convertToResponse(savedAttendance);
+    }
+
+    @Transactional
+    public AttendanceResponse checkIn() {
+        return checkIn(new AttendanceRequest());
     }
 
     @Transactional
@@ -117,6 +122,40 @@ public class VulnerableAttendanceService {
         return convertToResponse(updatedAttendance);
     }
 
+    @Transactional
+    public AttendanceResponse checkOut() {
+        return checkOut(new AttendanceRequest());
+    }
+
+    @Transactional(readOnly = true)
+    public AttendanceResponse getTodayAttendance() {
+        Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
+        LocalDate today = LocalDate.now();
+
+        return attendanceRepository.findByEmployeeIdAndWorkDate(currentEmployeeId, today)
+                .map(this::convertToResponse)
+                .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AttendanceResponse> getMyAttendance(Integer year, Integer month) {
+        Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
+
+        LocalDate startDate;
+        LocalDate endDate;
+
+        if (year != null && month != null) {
+            startDate = LocalDate.of(year, month, 1);
+            endDate = startDate.plusMonths(1).minusDays(1);
+        } else {
+            LocalDate now = LocalDate.now();
+            startDate = now.withDayOfMonth(1);
+            endDate = now.withDayOfMonth(now.lengthOfMonth());
+        }
+
+        return getMyAttendances(startDate, endDate);
+    }
+
     @Transactional(readOnly = true)
     public List<AttendanceResponse> getMyAttendances(LocalDate startDate, LocalDate endDate) {
         Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
@@ -128,8 +167,20 @@ public class VulnerableAttendanceService {
     }
 
     @Transactional(readOnly = true)
+    public List<AttendanceResponse> getAllAttendance(LocalDate date) {
+        LocalDate targetDate = date != null ? date : LocalDate.now();
+
+        log.info("관리자 전체 근태 조회 (Vulnerable) - 날짜: {}", targetDate);
+
+        List<Attendance> attendances = attendanceRepository.findByWorkDate(targetDate);
+
+        return attendances.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<AttendanceResponse> getTeamAttendances(Long teamId, LocalDate date) {
-        // 권한 체크 없음 - 모든 사용자가 다른 팀 근태 조회 가능!
         Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
 
         Employee employee = employeeRepository.findById(currentEmployeeId)
@@ -158,9 +209,14 @@ public class VulnerableAttendanceService {
     }
 
     private AttendanceResponse convertToResponse(Attendance attendance) {
+        Employee employee = attendance.getEmployee();
+
         return AttendanceResponse.builder()
                 .id(attendance.getId())
-                .employeeName(attendance.getEmployee().getName())
+                .employeeId(employee.getEmployeeId())
+                .employeeName(employee.getName())
+                .departmentName(employee.getDepartment() != null ? employee.getDepartment().getName() : null)
+                .teamName(employee.getTeam() != null ? employee.getTeam().getName() : null)
                 .workDate(attendance.getWorkDate())
                 .checkIn(attendance.getCheckIn())
                 .checkOut(attendance.getCheckOut())
