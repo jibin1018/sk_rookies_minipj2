@@ -50,20 +50,26 @@ FLUSH PRIVILEGES;
 USE company_portal;
 
 #### 초기 데이터 삽입
-부서 생성
+-- 부서 생성
 INSERT INTO departments (name, description, created_at, updated_at) VALUES
 ('개발부', 'IT 개발 및 운영', NOW(), NOW()),
 ('영업부', '영업 및 마케팅', NOW(), NOW()),
-('인사부', '인사 및 총무', NOW(), NOW());-- 팀 생성
+('인사부', '인사 및 총무', NOW(), NOW());
+
+-- 팀 생성
 INSERT INTO teams (name, department_id, description, created_at, updated_at) VALUES
 ('프론트엔드팀', 1, 'React, Vue 등 프론트엔드 개발', NOW(), NOW()),
 ('백엔드팀', 1, 'Spring, Node.js 등 백엔드 개발', NOW(), NOW()),
 ('영업1팀', 2, '국내 영업', NOW(), NOW()),
-('인사팀', 3, '채용 및 인사 관리', NOW(), NOW());-- 테스트 계정 생성 (비밀번호: admin123, 평문 저장)
+('인사팀', 3, '채용 및 인사 관리', NOW(), NOW());
+
+-- 테스트 계정 생성 (비밀번호: admin123, 평문 저장)
 INSERT INTO employees (employee_id, password, name, email, department_id, team_id, position, role, hire_date, is_active, created_at, updated_at) VALUES
 ('admin', 'admin123', '관리자', 'admin@company.com', 3, 4, 'EXECUTIVE', 'ADMIN', '2020-01-01', 1, NOW(), NOW()),
 ('EMP001', 'admin123', '박지빈', 'jibin@company.com', 1, 2, 'SENIOR', 'USER', '2023-03-01', 1, NOW(), NOW()),
-('EMP002', 'admin123', '김팀장', 'leader@company.com', 1, 2, 'MANAGER', 'TEAM_LEADER', '2021-01-01', 1, NOW(), NOW());-- 샘플 식단 데이터 (일주일치)
+('EMP002', 'admin123', '김팀장', 'leader@company.com', 1, 2, 'MANAGER', 'TEAM_LEADER', '2021-01-01', 1, NOW(), NOW());
+
+-- 샘플 식단 데이터 (일주일치)
 INSERT INTO cafeteria_menus (menu_date, meal_type, menu_items, calories, created_at) VALUES
 ('2025-12-29', '중식', '순두부찌개, 생선구이, 시금치나물, 김치, 밥', 750, NOW()),
 ('2025-12-29', '석식', '된장찌개, 불고기, 계란말이, 깍두기, 밥', 850, NOW()),
