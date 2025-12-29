@@ -43,41 +43,42 @@ SK Shieldus 루키즈 현장실습 미니 프로젝트 2
 
 #### MySQL 접속
 #### 데이터베이스 및 사용자 생성
-'''sql
+```sql
 CREATE DATABASE company_portal CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'portal_user'@'localhost' IDENTIFIED BY 'portal_password';
 GRANT ALL PRIVILEGES ON company_portal.* TO 'portal_user'@'localhost';
 FLUSH PRIVILEGES;
 USE company_portal;
-'''
+```
 
 #### 초기 데이터 삽입
 ##### 부서 생성
-'''sql
+```sql
 INSERT INTO departments (name, description, created_at, updated_at) VALUES
 ('개발부', 'IT 개발 및 운영', NOW(), NOW()),
 ('영업부', '영업 및 마케팅', NOW(), NOW()),
 ('인사부', '인사 및 총무', NOW(), NOW());
-'''
+```
 
 ##### 팀 생성
-'''sql
+```sql
 INSERT INTO teams (name, department_id, description, created_at, updated_at) VALUES
 ('프론트엔드팀', 1, 'React, Vue 등 프론트엔드 개발', NOW(), NOW()),
 ('백엔드팀', 1, 'Spring, Node.js 등 백엔드 개발', NOW(), NOW()),
 ('영업1팀', 2, '국내 영업', NOW(), NOW()),
 ('인사팀', 3, '채용 및 인사 관리', NOW(), NOW());
-'''
+```
 
 ##### 테스트 계정 생성 (비밀번호: admin123, 평문 저장)
-'''sql
+```sql
 INSERT INTO employees (employee_id, password, name, email, department_id, team_id, position, role, hire_date, is_active, created_at, updated_at) VALUES
 ('admin', 'admin123', '관리자', 'admin@company.com', 3, 4, 'EXECUTIVE', 'ADMIN', '2020-01-01', 1, NOW(), NOW()),
 ('EMP001', 'admin123', '박지빈', 'jibin@company.com', 1, 2, 'SENIOR', 'USER', '2023-03-01', 1, NOW(), NOW()),
 ('EMP002', 'admin123', '김팀장', 'leader@company.com', 1, 2, 'MANAGER', 'TEAM_LEADER', '2021-01-01', 1, NOW(), NOW());
+```
 
 ##### 샘플 식단 데이터 (일주일치)
-'''sql
+```sql
 INSERT INTO cafeteria_menus (menu_date, meal_type, menu_items, calories, created_at) VALUES
 ('2025-12-29', '중식', '순두부찌개, 생선구이, 시금치나물, 김치, 밥', 750, NOW()),
 ('2025-12-29', '석식', '된장찌개, 불고기, 계란말이, 깍두기, 밥', 850, NOW()),
@@ -87,24 +88,26 @@ INSERT INTO cafeteria_menus (menu_date, meal_type, menu_items, calories, created
 ('2025-12-31', '석식', '갈비탕, 잡채, 무생채, 깍두기, 밥', 900, NOW()),
 ('2026-01-01', '중식', '떡국, 전, 나물, 김치, 밥', 750, NOW()),
 ('2026-01-01', '석식', '갈비찜, 잡채, 김치, 과일, 밥', 950, NOW());
-'''
+```
 
 ### 3. 백엔드 실행
 
 #### application.yml 설정 확인
+```yaml
 `backend/src/main/resources/application.yml`:
 spring:
 datasource:
 url: jdbc:mysql://localhost:3306/company_portal?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
 username: portal_user
 password: portal_password
+```
 
 #### 실행
-'''bash
+```bash
 cd backend
 mvnw.cmd clean install -DskipTests
 mvnw.cmd spring-boot:run
-'''
+```
 
 **백엔드 실행 확인**: http://localhost:8080/api/auth/test
 
@@ -114,11 +117,11 @@ mvnw.cmd spring-boot:run
 `frontend/.env`:REACT_APP_API_URL=http://localhost:8080/api
 
 #### 의존성 설치 및 실행
-'''bash
+```bash
 cd frontend
 npm install
 npm start
-'''
+```
 
 **프론트엔드 실행 확인**: http://localhost:3000
 
@@ -201,7 +204,7 @@ npm start
 ---
 
 ## 📂 프로젝트 구조sk_rookies_minipj2/
-'''bash
+```bash
 ├── backend/
 │   ├── src/main/java/com/company/portal/
 │   │   ├── controller/        # REST API 컨트롤러
@@ -225,7 +228,7 @@ npm start
 │   └── public/
 │
 └── README.md
-'''
+```
 
 ---
 
