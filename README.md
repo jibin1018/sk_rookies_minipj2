@@ -39,35 +39,46 @@ SK Shieldus 루키즈 현장실습 미니 프로젝트 2
 - MySQL 8.0
 - Maven 3.6 이상
 
-#### MySQL 접속
-```bashmysql -u root -p
+### 2. 데이터베이스 설정
 
+#### MySQL 접속
 #### 데이터베이스 및 사용자 생성
-```sqlCREATE DATABASE company_portal CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;CREATE USER 'portal_user'@'localhost' IDENTIFIED BY 'portal_password';GRANT ALL PRIVILEGES ON company_portal.* TO 'portal_user'@'localhost';FLUSH PRIVILEGES;USE company_portal;
+'''sql
+CREATE DATABASE company_portal CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'portal_user'@'localhost' IDENTIFIED BY 'portal_password';
+GRANT ALL PRIVILEGES ON company_portal.* TO 'portal_user'@'localhost';
+FLUSH PRIVILEGES;
+USE company_portal;
+'''
 
 #### 초기 데이터 삽입
-
-**부서 생성**
-```sqlINSERT INTO departments (name, description, created_at, updated_at) VALUES
+##### 부서 생성
+'''sql
+INSERT INTO departments (name, description, created_at, updated_at) VALUES
 ('개발부', 'IT 개발 및 운영', NOW(), NOW()),
 ('영업부', '영업 및 마케팅', NOW(), NOW()),
 ('인사부', '인사 및 총무', NOW(), NOW());
+'''
 
-**팀 생성**
-```sqlINSERT INTO teams (name, department_id, description, created_at, updated_at) VALUES
+##### 팀 생성
+'''sql
+INSERT INTO teams (name, department_id, description, created_at, updated_at) VALUES
 ('프론트엔드팀', 1, 'React, Vue 등 프론트엔드 개발', NOW(), NOW()),
 ('백엔드팀', 1, 'Spring, Node.js 등 백엔드 개발', NOW(), NOW()),
 ('영업1팀', 2, '국내 영업', NOW(), NOW()),
 ('인사팀', 3, '채용 및 인사 관리', NOW(), NOW());
+'''
 
-**테스트 계정 생성** (비밀번호: admin123, 평문 저장)
-```sqlINSERT INTO employees (employee_id, password, name, email, department_id, team_id, position, role, hire_date, is_active, created_at, updated_at) VALUES
+##### 테스트 계정 생성 (비밀번호: admin123, 평문 저장)
+'''sql
+INSERT INTO employees (employee_id, password, name, email, department_id, team_id, position, role, hire_date, is_active, created_at, updated_at) VALUES
 ('admin', 'admin123', '관리자', 'admin@company.com', 3, 4, 'EXECUTIVE', 'ADMIN', '2020-01-01', 1, NOW(), NOW()),
 ('EMP001', 'admin123', '박지빈', 'jibin@company.com', 1, 2, 'SENIOR', 'USER', '2023-03-01', 1, NOW(), NOW()),
 ('EMP002', 'admin123', '김팀장', 'leader@company.com', 1, 2, 'MANAGER', 'TEAM_LEADER', '2021-01-01', 1, NOW(), NOW());
 
-**샘플 식단 데이터** (일주일치)
-```sqlINSERT INTO cafeteria_menus (menu_date, meal_type, menu_items, calories, created_at) VALUES
+##### 샘플 식단 데이터 (일주일치)
+'''sql
+INSERT INTO cafeteria_menus (menu_date, meal_type, menu_items, calories, created_at) VALUES
 ('2025-12-29', '중식', '순두부찌개, 생선구이, 시금치나물, 김치, 밥', 750, NOW()),
 ('2025-12-29', '석식', '된장찌개, 불고기, 계란말이, 깍두기, 밥', 850, NOW()),
 ('2025-12-30', '중식', '김치찌개, 제육볶음, 잡채, 배추김치, 밥', 800, NOW()),
@@ -76,59 +87,50 @@ SK Shieldus 루키즈 현장실습 미니 프로젝트 2
 ('2025-12-31', '석식', '갈비탕, 잡채, 무생채, 깍두기, 밥', 900, NOW()),
 ('2026-01-01', '중식', '떡국, 전, 나물, 김치, 밥', 750, NOW()),
 ('2026-01-01', '석식', '갈비찜, 잡채, 김치, 과일, 밥', 950, NOW());
+'''
 
----
-
-### 3️⃣ 백엔드 실행
+### 3. 백엔드 실행
 
 #### application.yml 설정 확인
-파일 위치: `backend/src/main/resources/application.yml`
-```yamlspring:
+`backend/src/main/resources/application.yml`:
+spring:
 datasource:
 url: jdbc:mysql://localhost:3306/company_portal?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
 username: portal_user
 password: portal_password
 
-#### 백엔드 빌드 및 실행
-```bashcd backend
+#### 실행
+'''bash
+cd backend
 mvnw.cmd clean install -DskipTests
 mvnw.cmd spring-boot:run
+'''
 
-#### 백엔드 실행 확인
-브라우저에서 접속: http://localhost:8080/api/auth/test
+**백엔드 실행 확인**: http://localhost:8080/api/auth/test
 
-예상 응답:
-```json{
-"success": true,
-"message": "성공",
-"data": "Hello from backend!"
-}
-
----
-
-### 4️⃣ 프론트엔드 실행
+### 4. 프론트엔드 실행
 
 #### 환경 변수 설정
-파일 생성: `frontend/.env`
-```envREACT_APP_API_URL=http://localhost:8080/api
+`frontend/.env`:REACT_APP_API_URL=http://localhost:8080/api
 
 #### 의존성 설치 및 실행
-```bashcd frontend
+'''bash
+cd frontend
 npm install
 npm start
+'''
 
-#### 프론트엔드 실행 확인
-브라우저에서 자동으로 열림: http://localhost:3000
+**프론트엔드 실행 확인**: http://localhost:3000
 
 ---
 
 ## 🔐 테스트 계정
 
-| 사번 | 비밀번호 | 이름 | 역할 | 설명 |
-|------|---------|------|------|------|
-| `admin` | `admin123` | 관리자 | ADMIN | 전체 관리 권한 |
-| `EMP001` | `admin123` | 박지빈 | USER | 일반 사원 |
-| `EMP002` | `admin123` | 김팀장 | TEAM_LEADER | 팀장 권한 |
+| 사번 | 비밀번호 | 이름 | 역할 |
+|------|---------|------|------|
+| admin | admin123 | 관리자 | ADMIN |
+| EMP001 | admin123 | 박지빈 | USER |
+| EMP002 | admin123 | 김팀장 | TEAM_LEADER |
 
 ---
 
@@ -198,48 +200,35 @@ npm start
 
 ---
 
-## 📂 프로젝트 구조
-```
-sk_rookies_minipj2/
-│
+## 📂 프로젝트 구조sk_rookies_minipj2/
+'''bash
 ├── backend/
 │   ├── src/main/java/com/company/portal/
-│   │   ├── controller/              # REST API 컨트롤러
+│   │   ├── controller/        # REST API 컨트롤러
 │   │   ├── service/
-│   │   │   ├── secure/             # 안전한 구현
-│   │   │   ├── vulnerable/         # 취약한 구현
-│   │   │   └── common/             # 공통 서비스
-│   │   ├── entity/                 # JPA 엔티티
-│   │   ├── repository/             # 데이터 접근 계층
-│   │   ├── security/               # 보안 설정 (JWT, Filter 등)
-│   │   ├── dto/                    # 데이터 전송 객체
-│   │   ├── exception/              # 예외 처리
-│   │   └── util/                   # 유틸리티
+│   │   │   ├── secure/       # 안전한 구현
+│   │   │   └── vulnerable/   # 취약한 구현
+│   │   ├── entity/           # JPA 엔티티
+│   │   ├── repository/       # 데이터 접근
+│   │   ├── security/         # 보안 설정
+│   │   ├── dto/              # 데이터 전송 객체
+│   │   └── exception/        # 예외 처리
 │   └── src/main/resources/
-│       ├── application.yml         # 설정 파일
-│       └── data.sql                # 초기 데이터 (옵션)
+│       └── application.yml   # 설정 파일
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── components/             # React 컴포넌트
-│   │   │   ├── common/            # 공통 컴포넌트 (Header, Sidebar)
-│   │   │   ├── board/             # 게시판
-│   │   │   ├── schedule/          # 일정
-│   │   │   ├── attendance/        # 근태
-│   │   │   ├── file/              # 자료실
-│   │   │   ├── suggestion/        # 건의함
-│   │   │   ├── cafeteria/         # 식당
-│   │   │   └── approval/          # 전자결재
-│   │   ├── services/              # API 서비스
-│   │   ├── contexts/              # Context API (인증, 보안모드)
-│   │   └── pages/                 # 페이지 컴포넌트
-│   ├── public/
-│   └── .env                        # 환경 변수
+│   │   ├── components/       # React 컴포넌트
+│   │   ├── services/         # API 서비스
+│   │   ├── contexts/         # Context API
+│   │   └── pages/            # 페이지 컴포넌트
+│   └── public/
 │
-└── README.md                       # 프로젝트 문서
-```
+└── README.md
+'''
 
 ---
+
 ## 🧪 보안 테스트 가이드
 
 ### ⚠️ 현재 상태
