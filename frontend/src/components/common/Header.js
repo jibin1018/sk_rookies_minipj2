@@ -1,13 +1,13 @@
 "use client"
 import { AppBar, Toolbar, Typography, Button, Switch, FormControlLabel, Box, Chip, Avatar } from "@mui/material"
-import { BusinessCenter, Shield, ShieldOff } from "@mui/icons-material"
+import { BusinessCenter, Shield, GppBad } from "@mui/icons-material"
 import { useAuth } from "../../contexts/AuthContext"
 import { useSecurityMode } from "../../contexts/SecurityModeContext"
 import { useNavigate } from "react-router-dom"
 
 const Header = () => {
   const { user, logout } = useAuth()
-  const { securityMode, toggleSecurityMode, isSecure } = useSecurityMode()
+  const { toggleSecurityMode, isSecure } = useSecurityMode()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -68,7 +68,7 @@ const Header = () => {
               }
               label={
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  {isSecure ? <Shield sx={{ fontSize: 18 }} /> : <ShieldOff sx={{ fontSize: 18 }} />}
+                  {isSecure ? <Shield sx={{ fontSize: 18 }} /> : <GppBad sx={{ fontSize: 18 }} />}
                   <Chip
                     label={isSecure ? "보안 모드" : "취약 모드"}
                     size="small"
