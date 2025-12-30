@@ -6,6 +6,7 @@ import com.company.portal.entity.Employee;
 import com.company.portal.entity.SecurityLog;
 import com.company.portal.entity.Team;
 import com.company.portal.entity.TeamSchedule;
+import com.company.portal.enums.Role;
 import com.company.portal.exception.ResourceNotFoundException;
 import com.company.portal.repository.EmployeeRepository;
 import com.company.portal.repository.SecurityLogRepository;
@@ -101,6 +102,25 @@ public class VulnerableScheduleService {
     @Transactional(readOnly = true)
     public List<ScheduleResponse> getTeamSchedulesByDateRange(Long teamId, LocalDateTime start, LocalDateTime end) {
         return scheduleRepository.findByTeamIdAndDateRange(teamId, start, end).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScheduleResponse> getAllSchedules() {
+        Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
+
+        Employee employee = employeeRepository.findById(currentEmployeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다"));
+
+        // Enum 비교로 수정
+        if (employee.getRole() != Role.ADMIN) {
+            log.warn("Vulnerable 모드 - 비관리자가 모든 일정 조회!");
+            logSecurityEvent("UNAUTHORIZED_ALL_SCHEDULE_VIEW",
+                    "Non-admin viewing all schedules: employee=" + currentEmployeeId);
+        }
+
+        return scheduleRepository.findAll().stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }

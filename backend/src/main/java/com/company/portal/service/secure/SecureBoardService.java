@@ -103,7 +103,7 @@ public class SecureBoardService {
         CompanyBoard board = boardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다"));
 
-        // 권한 체크 - 작성자 본인만 수정 가능
+        // 권한 체크 - 작성자 본인만 ��정 가능
         if (!board.getAuthor().getId().equals(currentEmployeeId)) {
             log.warn("Secure 모드 - 권한 없는 수정 시도 차단: board={}, employee={}", id, currentEmployeeId);
             throw new UnauthorizedException("게시글을 수정할 권한이 없습니다");

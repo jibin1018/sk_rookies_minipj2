@@ -5,6 +5,7 @@ import com.company.portal.dto.response.ScheduleResponse;
 import com.company.portal.entity.Employee;
 import com.company.portal.entity.Team;
 import com.company.portal.entity.TeamSchedule;
+import com.company.portal.enums.Role;
 import com.company.portal.exception.ResourceNotFoundException;
 import com.company.portal.exception.UnauthorizedException;
 import com.company.portal.repository.EmployeeRepository;
@@ -103,6 +104,23 @@ public class SecureScheduleService {
         }
 
         return scheduleRepository.findByTeamIdAndDateRange(teamId, start, end).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScheduleResponse> getAllSchedules() {
+        Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
+
+        Employee employee = employeeRepository.findById(currentEmployeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다"));
+
+        // Enum 비교로 수정
+        if (employee.getRole() != Role.ADMIN) {
+            throw new UnauthorizedException("관리자만 모든 일정을 조회할 수 있습니다");
+        }
+
+        return scheduleRepository.findAll().stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }

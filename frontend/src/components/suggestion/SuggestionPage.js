@@ -137,7 +137,7 @@ const SuggestionPage = () => {
                 {suggestion.adminReply && (
                   <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
                     <Typography variant="caption" fontWeight="bold" display="block">
-                      관리자 답변:
+                      관리자 ��변:
                     </Typography>
                     <Typography variant="body2">
                       {suggestion.adminReply}

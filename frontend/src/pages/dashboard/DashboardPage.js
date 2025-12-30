@@ -9,7 +9,7 @@ const DashboardPage = () => {
   const stats = [
     {
       title: "사내 게시판",
-      value: "24",
+      value: "0",
       subtitle: "새 글",
       icon: <Article fontSize="large" />,
       color: "#3b82f6",
@@ -17,7 +17,7 @@ const DashboardPage = () => {
     },
     {
       title: "팀 일정",
-      value: "8",
+      value: "1",
       subtitle: "이번 주",
       icon: <Schedule fontSize="large" />,
       color: "#10b981",
@@ -25,7 +25,7 @@ const DashboardPage = () => {
     },
     {
       title: "결재 대기",
-      value: "3",
+      value: "0",
       subtitle: "처리 필요",
       icon: <Description fontSize="large" />,
       color: "#f59e0b",
@@ -33,7 +33,7 @@ const DashboardPage = () => {
     },
     {
       title: "건의사항",
-      value: "12",
+      value: "2",
       subtitle: "진행중",
       icon: <Feedback fontSize="large" />,
       color: "#8b5cf6",
@@ -47,23 +47,25 @@ const DashboardPage = () => {
         sx={{
           p: 4,
           mb: 4,
-          background: "linear-gradient(135deg, #1e3a5f 0%, #2d5278 100%)",
+          backgroundColor: "#1a2332",
           color: "white",
           borderRadius: 2,
+          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <TrendingUp sx={{ fontSize: 40 }} />
+          <TrendingUp sx={{ fontSize: 40, color: "white" }} />
           <Box>
-            <Typography variant="h4" gutterBottom sx={{ mb: 1, fontWeight: 700 }}>
+            <Typography variant="h4" gutterBottom sx={{ mb: 1, fontWeight: 700, color: "white" }}>
               환영합니다, {user?.name}님
             </Typography>
-            <Typography variant="body1" sx={{ opacity: 0.95 }}>
+            <Typography variant="body1" sx={{ color: "rgba(255, 255, 255, 0.9)" }}>
               {user?.departmentName || "-"} / {user?.teamName || "-"} · {user?.position || "-"} · {user?.role || "-"}
             </Typography>
           </Box>
         </Box>
       </Paper>
+      {/* </CHANGE> */}
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {stats.map((stat, index) => (
@@ -160,3 +162,4 @@ const DashboardPage = () => {
 }
 
 export default DashboardPage
+
