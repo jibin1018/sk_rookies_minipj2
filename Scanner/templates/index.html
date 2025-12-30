@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통합 보안 취약점 스캐너</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 50px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #999;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 1em;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .hint {
+            margin-top: 5px;
+            color: #999;
+            font-size: 0.85em;
+        }
+        
+        .checkbox-group {
+            margin-bottom: 25px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 5px;
+        }
+        
+        .checkbox-label:hover {
+            background: #f5f5f5;
+        }
+        
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .scan-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .scan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .scan-btn:active {
+            transform: translateY(0);
+        }
+        
+        .scan-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .features {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .features h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .feature-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .feature-item span {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 통합 보안 취약점 스캐너</h1>
+        <p class="subtitle">OWASP TOP 10 2025 + KISA 가이드 기반 자동화 진단</p>
+        
+        <!-- 탭 -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('web')">웹 애플리케이션</button>
+            <button class="tab" onclick="switchTab('infra')">인프라 진단</button>
+        </div>
+        
+        <!-- 웹 애플리케이션 스캔 폼 -->
+        <div id="web-tab" class="tab-content active">
+            <form id="webScanForm">
+                <div class="input-group">
+                    <label for="targetUrl">대상 웹사이트 URL *</label>
+                    <input 
+                        type="text" 
+                        id="targetUrl" 
+                        name="targetUrl" 
+                        placeholder="http://localhost:3000 또는 example.com"
+                        required
+                    />
+                    <p class="hint">진단할 웹 애플리케이션의 URL을 입력하세요</p>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="useClaude" name="useClaude">
+                        <span>Claude AI 분석 사용 (상세한 보안 분석 및 권장사항 제공)</span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="scan-btn" id="webScanBtn">
+                    웹 애플리케이션 진단 시작
+                </button>
+            </form>
+        </div>
+        
+        <!-- 인프라 진단 폼 -->
+        <div id="infra-tab" class="tab-content">
+            <form id="infraScanForm">
+                <div class="input-group">
+                    <label for="sshHost">서버 IP 또는 호스트명 *</label>
+                    <input 
+                        type="text" 
+                        id="sshHost" 
+                        placeholder="192.168.1.100 또는 server.example.com"
+                        required
+                    />
+                </div>
+                
+                <div class="input-group">
+                    <label for="sshUser">SSH 사용자명 *</label>
+                    <input 
+                        type="text" 
+                        id="sshUser" 
+                        placeholder="admin"
+                        required
+                    />
+                </div>
+                
+                <div class="input-group">
+                    <label for="sshPass">SSH 비밀번호 *</label>
+                    <input 
+                        type="password" 
+                        id="sshPass" 
+                        placeholder="비밀번호"
+                        required
+                    />
+                    <p class="hint">⚠️ 비밀번호는 암호화되어 전송되며 저장되지 않습니다</p>
+                </div>
+                
+                <div class="input-group">
+                    <label for="sshPort">SSH 포트</label>
+                    <input 
+                        type="number" 
+                        id="sshPort" 
+                        value="22"
+                        min="1"
+                        max="65535"
+                    />
+                </div>
+                
+                <button type="submit" class="scan-btn" id="infraScanBtn">
+                    인프라 보안 진단 시작
+                </button>
+            </form>
+        </div>
+        
+        <!-- 에러 메시지 -->
+        <div class="error" id="errorMsg"></div>
+        
+        <!-- 로딩 -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: #667eea; font-weight: 600;">스캔 준비 중...</p>
+        </div>
+        
+        <!-- 기능 소개 -->
+        <div class="features">
+            <h3>📋 진단 항목</h3>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <strong>웹 취약점</strong>
+                    <span>18개 항목</span>
+                </div>
+                <div class="feature-item">
+                    <strong>OWASP TOP 10</strong>
+                    <span>2025 최신 기준</span>
+                </div>
+                <div class="feature-item">
+                    <strong>OS 보안</strong>
+                    <span>KISA 가이드</span>
+                </div>
+                <div class="feature-item">
+                    <strong>AI 분석</strong>
+                    <span>Claude Sonnet 4</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function switchTab(tab) {
+            // 탭 버튼 활성화
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 탭 콘텐츠 활성화
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`${tab}-tab`).classList.add('active');
+        }
+        
+        // 웹 스캔 폼 제출
+        document.getElementById('webScanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const targetUrl = document.getElementById('targetUrl').value.trim();
+            const useClaude = document.getElementById('useClaude').checked;
+            const scanBtn = document.getElementById('webScanBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const loading = document.getElementById('loading');
+            
+            errorMsg.style.display = 'none';
+            loading.style.display = 'block';
+            scanBtn.disabled = true;
+            scanBtn.textContent = '진단 시작 중...';
+            
+            try {
+                const response = await fetch('/api/scan/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target_url: targetUrl,
+                        use_claude: useClaude,
+                        scan_types: ['all']
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '스캔 시작 실패');
+                }
+                
+                const data = await response.json();
+                const scanId = data.scan_id;
+                
+                // 스캔 진행 페이지로 이동
+                window.location.href = `/report/${scanId}`;
+                
+            } catch (error) {
+                errorMsg.textContent = error.message;
+                errorMsg.style.display = 'block';
+                scanBtn.disabled = false;
+                scanBtn.textContent = '웹 애플리케이션 진단 시작';
+                loading.style.display = 'none';
+            }
+        });
+        
+        // 인프라 스캔 폼 제출
+        document.getElementById('infraScanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const sshHost = document.getElementById('sshHost').value.trim();
+            const sshUser = document.getElementById('sshUser').value.trim();
+            const sshPass = document.getElementById('sshPass').value.trim();
+            const sshPort = parseInt(document.getElementById('sshPort').value);
+            
+            const scanBtn = document.getElementById('infraScanBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const loading = document.getElementById('loading');
+            
+            errorMsg.style.display = 'none';
+            loading.style.display = 'block';
+            scanBtn.disabled = true;
+            scanBtn.textContent = '진단 시작 중...';
+            
+            try {
+                const response = await fetch('/api/infra/scan/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ssh_host: sshHost,
+                        ssh_user: sshUser,
+                        ssh_pass: sshPass,
+                        ssh_port: sshPort,
+                        categories: ['all']
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '스캔 시작 실패');
+                }
+                
+                const data = await response.json();
+                const scanId = data.scan_id;
+                
+                // 스캔 진행 페이지로 이동
+                window.location.href = `/report/${scanId}`;
+                
+            } catch (error) {
+                errorMsg.textContent = error.message;
+                errorMsg.style.display = 'block';
+                scanBtn.disabled = false;
+                scanBtn.textContent = '인프라 보안 진단 시작';
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
