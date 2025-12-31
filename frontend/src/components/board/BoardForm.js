@@ -16,13 +16,11 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import boardService from '../../services/boardService';
 import { useAuth } from '../../contexts/AuthContext';
-import { useSecurityMode } from '../../contexts/SecurityModeContext';
 
 const BoardForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isSecure } = useSecurityMode();
 
   const [formData, setFormData] = useState({
     category: 'FREE',
@@ -30,7 +28,7 @@ const BoardForm = () => {
     content: '',
     isNotice: false,
   });
-  
+
   const [loading, setLoading] = useState(false);
   const isEditMode = !!id;
 
@@ -61,7 +59,7 @@ const BoardForm = () => {
 
   const handleChange = (e) => {
     const { name, value, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: name === 'isNotice' ? checked : value,
     }));
@@ -77,13 +75,10 @@ const BoardForm = () => {
 
     try {
       setLoading(true);
-      
-      let response;
-      if (isEditMode) {
-        response = await boardService.updateBoard(id, formData);
-      } else {
-        response = await boardService.createBoard(formData);
-      }
+
+      const response = isEditMode
+        ? await boardService.updateBoard(id, formData)
+        : await boardService.createBoard(formData);
 
       if (response.success) {
         alert(isEditMode ? '게시글이 수정되었습니다' : '게시글이 작성되었습니다');
@@ -103,17 +98,6 @@ const BoardForm = () => {
         <Typography variant="h5" gutterBottom>
           {isEditMode ? '게시글 수정' : '게시글 작성'}
         </Typography>
-
-        {!isSecure && (
-          <Box sx={{ mb: 2, p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
-            <Typography variant="body2">
-              ⚠️ 취약 모드: XSS 공격 코드를 삽입할 수 있습니다
-            </Typography>
-            <Typography variant="caption" display="block">
-              예시: &lt;script&gt;alert('XSS')&lt;/script&gt;
-            </Typography>
-          </Box>
-        )}
 
         <Box component="form" onSubmit={handleSubmit}>
           <FormControl fullWidth sx={{ mb: 2 }}>
@@ -170,15 +154,9 @@ const BoardForm = () => {
           />
 
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-            <Button onClick={() => navigate('/boards')}>
-              취소
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-            >
-              {loading ? '저장 중...' : (isEditMode ? '수정' : '작성')}
+            <Button onClick={() => navigate('/boards')}>취소</Button>
+            <Button type="submit" variant="contained" disabled={loading}>
+              {loading ? '저장 중...' : isEditMode ? '수정' : '작성'}
             </Button>
           </Box>
         </Box>

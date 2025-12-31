@@ -7,6 +7,7 @@ import com.company.portal.entity.Department;
 import com.company.portal.entity.Employee;
 import com.company.portal.entity.Team;
 import com.company.portal.enums.Role;
+import com.company.portal.enums.Position;
 import com.company.portal.exception.BadRequestException;
 import com.company.portal.exception.ResourceNotFoundException;
 import com.company.portal.repository.DepartmentRepository;
@@ -76,7 +77,7 @@ public class EmployeeService {
                 .email(request.getEmail())
                 .department(department)
                 .team(team)
-                .position(request.getPosition())
+                .position(Position.valueOf(request.getPosition().toUpperCase()))
                 .role(request.getRole() != null ? request.getRole() : Role.USER)
                 .hireDate(request.getHireDate())
                 .phone(request.getPhone())
@@ -121,7 +122,7 @@ public class EmployeeService {
             employee.setName(request.getName());
         }
         if (request.getPosition() != null) {
-            employee.setPosition(request.getPosition());
+            employee.setPosition(Position.valueOf(request.getPosition().toUpperCase()));
         }
         if (request.getRole() != null) {
             employee.setRole(request.getRole());
@@ -161,7 +162,7 @@ public class EmployeeService {
                 .departmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null)
                 .teamName(employee.getTeam() != null ? employee.getTeam().getName() : null)
                 .teamId(employee.getTeam() != null ? employee.getTeam().getId() : null)
-                .position(employee.getPosition())
+                .position(employee.getPosition().name())
                 .role(employee.getRole())
                 .hireDate(employee.getHireDate())
                 .phone(employee.getPhone())

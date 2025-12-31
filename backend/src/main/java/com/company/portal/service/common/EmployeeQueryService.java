@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmployeeService {
+public class EmployeeQueryService {
 
     private final EmployeeRepository employeeRepository;
 
@@ -68,11 +68,10 @@ public class EmployeeService {
                 .email(employee.getEmail())
                 .departmentName(employee.getDepartment() != null ? employee.getDepartment().getName() : null)
                 .teamName(employee.getTeam() != null ? employee.getTeam().getName() : null)
-                .position(employee.getPosition())
+                .position(employee.getPosition().name())
                 .role(employee.getRole())
                 .hireDate(employee.getHireDate())
                 .phone(employee.getPhone())
-                .profileImage(employee.getProfileImage())
                 .isActive(employee.getIsActive())
                 .build();
     }

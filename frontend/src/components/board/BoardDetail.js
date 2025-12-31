@@ -21,13 +21,11 @@ import { Edit, Delete, Reply } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import boardService from '../../services/boardService';
 import { useAuth } from '../../contexts/AuthContext';
-import { useSecurityMode } from '../../contexts/SecurityModeContext';
 
 const BoardDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isSecure } = useSecurityMode();
 
   const [board, setBoard] = useState(null);
   const [comments, setComments] = useState([]);
@@ -92,7 +90,7 @@ const BoardDetail = () => {
         commentContent,
         replyTo
       );
-      
+
       if (response.success) {
         setCommentContent('');
         setReplyTo(null);
@@ -146,16 +144,13 @@ const BoardDetail = () => {
       >
         <ListItemText
           primary={
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography variant="body2" fontWeight="bold">
                 {comment.authorName}
               </Typography>
               <Box>
                 {depth === 0 && (
-                  <IconButton
-                    size="small"
-                    onClick={() => setReplyTo(comment.id)}
-                  >
+                  <IconButton size="small" onClick={() => setReplyTo(comment.id)}>
                     <Reply fontSize="small" />
                   </IconButton>
                 )}
@@ -184,7 +179,8 @@ const BoardDetail = () => {
           }
         />
       </ListItem>
-      {comment.replies && comment.replies.map(reply => renderComment(reply, depth + 1))}
+      {comment.replies &&
+        comment.replies.map((reply) => renderComment(reply, depth + 1))}
     </Box>
   );
 
@@ -196,21 +192,11 @@ const BoardDetail = () => {
     );
   }
 
-  if (!board) {
-    return null;
-  }
+  if (!board) return null;
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Paper sx={{ p: 4 }}>
-        {!isSecure && (
-          <Box sx={{ mb: 2, p: 2, bgcolor: 'error.light', borderRadius: 1 }}>
-            <Typography variant="body2" color="error.contrastText">
-              ⚠️ 취약 모드: XSS 공격이 실행될 수 있습니다
-            </Typography>
-          </Box>
-        )}
-
         <Box sx={{ mb: 2 }}>
           <Chip label={getCategoryLabel(board.category)} color="primary" />
           {board.isNotice && (
@@ -219,9 +205,7 @@ const BoardDetail = () => {
         </Box>
 
         <Typography variant="h4" gutterBottom>
-          {isSecure ? board.title : (
-            <span dangerouslySetInnerHTML={{ __html: board.title }} />
-          )}
+          {board.title}
         </Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
@@ -233,11 +217,9 @@ const BoardDetail = () => {
               작성일: {formatDate(board.createdAt)}
             </Typography>
           </Box>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              조회수: {board.views}
-            </Typography>
-          </Box>
+          <Typography variant="body2" color="text.secondary">
+            조회수: {board.views}
+          </Typography>
         </Box>
 
         <Divider sx={{ my: 3 }} />
@@ -251,9 +233,7 @@ const BoardDetail = () => {
         <Divider sx={{ my: 3 }} />
 
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <Button onClick={() => navigate('/boards')}>
-            목록
-          </Button>
+          <Button onClick={() => navigate('/boards')}>목록</Button>
           {user?.id === board.authorId && (
             <>
               <Button
@@ -281,15 +261,13 @@ const BoardDetail = () => {
           댓글 ({comments.length})
         </Typography>
 
-        <List>
-          {comments.map(comment => renderComment(comment))}
-        </List>
+        <List>{comments.map((c) => renderComment(c))}</List>
 
         <Box sx={{ mt: 3 }}>
           {replyTo && (
             <Box sx={{ mb: 1, p: 1, bgcolor: 'info.light', borderRadius: 1 }}>
               <Typography variant="caption">
-                답글 작성 중...
+                답글 작성 중…
                 <Button size="small" onClick={() => setReplyTo(null)}>
                   취소
                 </Button>
@@ -319,7 +297,9 @@ const BoardDetail = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>취소</Button>
-          <Button onClick={handleDelete} color="error">삭제</Button>
+          <Button onClick={handleDelete} color="error">
+            삭제
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>
