@@ -11,16 +11,16 @@ import com.company.portal.exception.BadRequestException;
 import com.company.portal.repository.DepartmentRepository;
 import com.company.portal.repository.EmployeeRepository;
 import com.company.portal.repository.TeamRepository;
-import com.company.portal.security.CustomUserDetails;
 import com.company.portal.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 
 @Slf4j
 @Service
@@ -30,29 +30,37 @@ public class SecureAuthService {
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
     private final TeamRepository teamRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
-        // Spring Security를 통한 인증
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmployeeId(),
-                        request.getPassword()
-                )
-        );
+        log.info("Secure 모드 - 로그인 시도: {}", request.getEmployeeId());
+        log.info("받은 비밀번호 (SHA-256 해시): {}", request.getPassword());
 
-        // JWT 토큰 생성
-        String token = tokenProvider.generateToken(authentication);
+        // 사용자 조회
+        Employee employee = employeeRepository.findByEmployeeId(request.getEmployeeId())
+                .orElseThrow(() -> new BadRequestException("아이디 또는 비밀번호가 올바르지 않습니다"));
 
-        // 사용자 정보 조회
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Employee employee = employeeRepository.findById(userDetails.getId())
-                .orElseThrow(() -> new BadRequestException("사용자를 찾을 수 없습니다"));
+        // SHA-256 해시 비교
+        String hashedPassword = request.getPassword();
+        String storedPassword = employee.getPassword();
+
+        log.info("DB 저장 비밀번호: {}", storedPassword);
+
+        if (!storedPassword.equals(hashedPassword)) {
+            log.error("비밀번호 불일치");
+            throw new BadRequestException("아이디 또는 비밀번호가 올바르지 않습니다");
+        }
 
         log.info("Secure 모드 - 로그인 성공: {}", employee.getEmployeeId());
+
+        // JWT 토큰 생성
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                employee.getEmployeeId(),
+                employee.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + employee.getRole().name()))
+        );
+        String token = tokenProvider.generateToken(authentication);
 
         return LoginResponse.builder()
                 .token(token)
@@ -91,13 +99,15 @@ public class SecureAuthService {
                     .orElseThrow(() -> new BadRequestException("팀을 찾을 수 없습니다"));
         }
 
-        // 비밀번호 암호화 (Secure 모드)
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        // SHA-256 해시된 비밀번호 저장 (클라이언트에서 이미 해시됨)
+        String hashedPassword = request.getPassword();
+
+        log.info("Secure 모드 - 회원가입: SHA-256 해시 저장");
 
         // 사원 생성
         Employee employee = Employee.builder()
                 .employeeId(request.getEmployeeId())
-                .password(encodedPassword)
+                .password(hashedPassword) // SHA-256 해시 저장
                 .name(request.getName())
                 .email(request.getEmail())
                 .department(department)

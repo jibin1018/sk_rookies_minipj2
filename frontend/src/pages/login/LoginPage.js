@@ -1,19 +1,34 @@
+// src/pages/auth/LoginPage.jsx
+
 "use client"
 
 import { useState } from "react"
-import { Container, Box, TextField, Button, Typography, Paper, Alert, CircularProgress, Divider } from "@mui/material"
-import { BusinessCenter, Lock, Person } from "@mui/icons-material"
+import { 
+  Container, Box, TextField, Button, Typography, Paper, 
+  Alert, CircularProgress, Divider, FormControl, 
+  FormLabel, RadioGroup, FormControlLabel, Radio, Chip 
+} from "@mui/material"
+import { BusinessCenter, Lock, Person, Security, Warning } from "@mui/icons-material"
 import { useAuth } from "../../contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
+import authService from "../../services/authService"
 
 const LoginPage = () => {
   const [employeeId, setEmployeeId] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [securityMode, setSecurityMode] = useState(authService.getSecurityMode())
 
   const { login } = useAuth()
   const navigate = useNavigate()
+
+  const handleSecurityModeChange = (event) => {
+    const mode = event.target.value
+    setSecurityMode(mode)
+    authService.setSecurityMode(mode)
+    console.log('보안 모드 변경:', mode)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -21,6 +36,7 @@ const LoginPage = () => {
     setLoading(true)
 
     console.log("로그인 시도:", employeeId)
+    console.log("보안 모드:", securityMode)
 
     try {
       const result = await login(employeeId, password)
@@ -94,6 +110,69 @@ const LoginPage = () => {
             <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 4 }}>
               로그인하여 시스템을 이용하세요
             </Typography>
+
+            {/* 보안 모드 선택 UI */}
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 2, 
+                mb: 3, 
+                bgcolor: securityMode === 'secure' ? '#e8f5e9' : '#fff3e0',
+                border: '1px solid',
+                borderColor: securityMode === 'secure' ? '#4caf50' : '#ff9800'
+              }}
+            >
+              <FormControl component="fieldset" fullWidth>
+                <FormLabel component="legend" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {securityMode === 'secure' ? <Security color="success" /> : <Warning color="warning" />}
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    보안 모드
+                  </Typography>
+                </FormLabel>
+                <RadioGroup
+                  row
+                  value={securityMode}
+                  onChange={handleSecurityModeChange}
+                >
+                  <FormControlLabel 
+                    value="secure" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <span>보안 모드</span>
+                        <Chip 
+                          label="SHA-256" 
+                          size="small" 
+                          color="success" 
+                          sx={{ height: 20 }}
+                        />
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel 
+                    value="vulnerable" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <span>취약 모드</span>
+                        <Chip 
+                          label="평문" 
+                          size="small" 
+                          color="warning" 
+                          sx={{ height: 20 }}
+                        />
+                      </Box>
+                    }
+                  />
+                </RadioGroup>
+              </FormControl>
+              
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                {securityMode === 'secure' 
+                  ? '✓ 비밀번호가 SHA-256으로 해시되어 전송됩니다' 
+                  : '⚠ 비밀번호가 평문으로 전송됩니다 (교육용)'}
+              </Typography>
+            </Paper>
 
             {error && (
               <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
