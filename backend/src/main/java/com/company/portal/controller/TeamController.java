@@ -1,7 +1,7 @@
 package com.company.portal.controller;
 
 import com.company.portal.dto.response.ApiResponse;
-import com.company.portal.entity.Team;
+import com.company.portal.dto.response.TeamResponse;
 import com.company.portal.service.common.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,21 +17,25 @@ public class TeamController {
     private final TeamService teamService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Team>>> getAllTeams() {
-        List<Team> teams = teamService.getAllTeams();
-        return ResponseEntity.ok(ApiResponse.success(teams));
+    public ResponseEntity<ApiResponse<List<TeamResponse>>> getAllTeams() {
+        return ResponseEntity.ok(
+                ApiResponse.success(teamService.getAllTeams())
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Team>> getTeam(@PathVariable Long id) {
-        Team team = teamService.getTeam(id);
-        return ResponseEntity.ok(ApiResponse.success(team));
+    public ResponseEntity<ApiResponse<TeamResponse>> getTeam(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                ApiResponse.success(teamService.getTeam(id))
+        );
     }
 
     @GetMapping("/department/{departmentId}")
-    public ResponseEntity<ApiResponse<List<Team>>> getTeamsByDepartment(
+    public ResponseEntity<ApiResponse<List<TeamResponse>>> getTeamsByDepartment(
             @PathVariable Long departmentId) {
-        List<Team> teams = teamService.getTeamsByDepartment(departmentId);
-        return ResponseEntity.ok(ApiResponse.success(teams));
+
+        return ResponseEntity.ok(
+                ApiResponse.success(teamService.getTeamsByDepartment(departmentId))
+        );
     }
 }

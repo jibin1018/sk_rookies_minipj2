@@ -1,7 +1,7 @@
 package com.company.portal.controller;
 
 import com.company.portal.dto.response.ApiResponse;
-import com.company.portal.entity.Department;
+import com.company.portal.dto.response.DepartmentResponse;
 import com.company.portal.service.common.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +17,18 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Department>>> getAllDepartments() {
-        List<Department> departments = departmentService.getAllDepartments();
-        return ResponseEntity.ok(ApiResponse.success(departments));
+    public ResponseEntity<ApiResponse<List<DepartmentResponse>>> getAllDepartments() {
+        return ResponseEntity.ok(
+                ApiResponse.success(departmentService.getAllDepartments())
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Department>> getDepartment(@PathVariable Long id) {
-        Department department = departmentService.getDepartment(id);
-        return ResponseEntity.ok(ApiResponse.success(department));
+    public ResponseEntity<ApiResponse<DepartmentResponse>> getDepartment(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                ApiResponse.success(departmentService.getDepartment(id))
+        );
     }
 }
