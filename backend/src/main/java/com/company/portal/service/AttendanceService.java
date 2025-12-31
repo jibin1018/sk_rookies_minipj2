@@ -1,4 +1,4 @@
-package com.company.portal.service.secure;
+package com.company.portal.service;
 
 import com.company.portal.dto.response.AttendanceResponse;
 import com.company.portal.entity.Attendance;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SecureAttendanceService {
+public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
     private final EmployeeRepository employeeRepository;

@@ -1,7 +1,6 @@
 package com.company.portal.config;
 
 import com.company.portal.security.JwtAuthenticationFilter;
-import com.company.portal.security.SecurityModeFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +30,6 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final SecurityModeFilter securityModeFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -65,7 +63,6 @@ public class SecurityConfig {
                 );
 
         http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(securityModeFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

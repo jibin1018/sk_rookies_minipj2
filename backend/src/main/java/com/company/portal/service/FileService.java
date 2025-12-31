@@ -1,4 +1,4 @@
-package com.company.portal.service.vulnerable;
+package com.company.portal.service;
 
 import com.company.portal.dto.response.FileResponse;
 import com.company.portal.entity.Employee;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class VulnerableFileService {
+public class FileService {
 
     private final TeamFileRepository teamFileRepository;
     private final EmployeeRepository employeeRepository;

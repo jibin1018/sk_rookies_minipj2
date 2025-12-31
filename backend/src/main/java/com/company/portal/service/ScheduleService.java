@@ -1,4 +1,4 @@
-package com.company.portal.service.vulnerable;
+package com.company.portal.service;
 
 import com.company.portal.dto.request.ScheduleRequest;
 import com.company.portal.dto.response.ScheduleResponse;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class VulnerableScheduleService {
+public class ScheduleService {
 
     private final TeamScheduleRepository scheduleRepository;
     private final EmployeeRepository employeeRepository;

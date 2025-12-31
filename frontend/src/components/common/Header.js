@@ -1,25 +1,22 @@
+// src/components/common/Header.jsx
+
 "use client"
 import {
   AppBar,
   Toolbar,
   Typography,
   Button,
-  Switch,
-  FormControlLabel,
   Box,
-  Chip,
   Avatar,
   IconButton,
   Badge,
 } from "@mui/material"
-import { BusinessCenter, Shield, GppBad, Notifications, Settings } from "@mui/icons-material"
+import { BusinessCenter, Notifications, Settings } from "@mui/icons-material"
 import { useAuth } from "../../contexts/AuthContext"
-import { useSecurityMode } from "../../contexts/SecurityModeContext"
 import { useNavigate } from "react-router-dom"
 
 const Header = () => {
   const { user, logout } = useAuth()
-  const { toggleSecurityMode, isSecure } = useSecurityMode()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -93,46 +90,6 @@ const Header = () => {
               <Settings sx={{ fontSize: 26 }} />
             </IconButton>
 
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isSecure}
-                  onChange={toggleSecurityMode}
-                  size="medium"
-                  sx={{
-                    "& .MuiSwitch-switchBase.Mui-checked": {
-                      color: "#0f766e",
-                    },
-                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                      backgroundColor: "#0f766e",
-                    },
-                  }}
-                />
-              }
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                  {isSecure ? (
-                    <Shield sx={{ fontSize: 18, color: "#0f766e" }} />
-                  ) : (
-                    <GppBad sx={{ fontSize: 18, color: "#dc2626" }} />
-                  )}
-                  <Chip
-                    label={isSecure ? "보안" : "취약"}
-                    size="medium"
-                    sx={{
-                      backgroundColor: isSecure ? "#d1fae5" : "#fee2e2",
-                      color: isSecure ? "#0f766e" : "#dc2626",
-                      fontWeight: 500,
-                      height: "26px",
-                      fontSize: "0.8125rem",
-                      border: "none",
-                    }}
-                  />
-                </Box>
-              }
-              sx={{ margin: 0, mr: 1 }}
-            />
-
             <Box
               sx={{
                 display: "flex",
@@ -200,7 +157,6 @@ const Header = () => {
         )}
       </Toolbar>
     </AppBar>
-    // </CHANGE>
   )
 }
 

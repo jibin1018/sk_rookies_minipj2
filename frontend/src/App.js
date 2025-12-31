@@ -1,10 +1,11 @@
+// src/App.js
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import { Box } from "@mui/material"
 
 import { AuthProvider } from "./contexts/AuthContext"
-import { SecurityModeProvider } from "./contexts/SecurityModeContext"
 
 import Header from "./components/common/Header"
 import Sidebar from "./components/common/Sidebar"
@@ -154,67 +155,65 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <SecurityModeProvider>
-          <Router>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
+        <Router>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
 
-              <Route
-                path="/*"
-                element={
-                  <PrivateRoute>
-                    <Box sx={{ display: "flex", minHeight: "100vh", backgroundColor: "#ffffff" }}>
-                      <Header />
-                      <Sidebar />
-                      <Box
-                        component="main"
-                        sx={{
-                          flexGrow: 1,
-                          marginTop: "56px",
-                          marginLeft: "240px",
-                          padding: "48px 96px 96px",
-                          backgroundColor: "#ffffff",
-                          minHeight: "calc(100vh - 56px)",
-                          maxWidth: "1600px",
-                          margin: "56px auto 0",
-                          paddingLeft: "240px",
-                        }}
-                      >
-                        <Routes>
-                          <Route path="/" element={<Navigate to="/dashboard" />} />
-                          <Route path="/dashboard" element={<DashboardPage />} />
+            <Route
+              path="/*"
+              element={
+                <PrivateRoute>
+                  <Box sx={{ display: "flex", minHeight: "100vh", backgroundColor: "#ffffff" }}>
+                    <Header />
+                    <Sidebar />
+                    <Box
+                      component="main"
+                      sx={{
+                        flexGrow: 1,
+                        marginTop: "56px",
+                        marginLeft: "240px",
+                        padding: "48px 96px 96px",
+                        backgroundColor: "#ffffff",
+                        minHeight: "calc(100vh - 56px)",
+                        maxWidth: "1600px",
+                        margin: "56px auto 0",
+                        paddingLeft: "240px",
+                      }}
+                    >
+                      <Routes>
+                        <Route path="/" element={<Navigate to="/dashboard" />} />
+                        <Route path="/dashboard" element={<DashboardPage />} />
 
-                          <Route path="/boards" element={<BoardList />} />
-                          <Route path="/boards/new" element={<BoardForm />} />
-                          <Route path="/boards/:id" element={<BoardDetail />} />
-                          <Route path="/boards/:id/edit" element={<BoardForm />} />
+                        <Route path="/boards" element={<BoardList />} />
+                        <Route path="/boards/new" element={<BoardForm />} />
+                        <Route path="/boards/:id" element={<BoardDetail />} />
+                        <Route path="/boards/:id/edit" element={<BoardForm />} />
 
-                          <Route path="/schedules" element={<ScheduleList />} />
-                          <Route path="/attendance" element={<AttendancePage />} />
-                          <Route path="/files" element={<FilePage />} />
-                          <Route path="/suggestions" element={<SuggestionPage />} />
-                          <Route path="/cafeteria" element={<CafeteriaPage />} />
-                          <Route path="/approvals" element={<ApprovalPage />} />
+                        <Route path="/schedules" element={<ScheduleList />} />
+                        <Route path="/attendance" element={<AttendancePage />} />
+                        <Route path="/files" element={<FilePage />} />
+                        <Route path="/suggestions" element={<SuggestionPage />} />
+                        <Route path="/cafeteria" element={<CafeteriaPage />} />
+                        <Route path="/approvals" element={<ApprovalPage />} />
 
-                          <Route
-                            path="/employees"
-                            element={
-                              <PrivateRoute adminOnly={true}>
-                                <EmployeeManagementPage />
-                              </PrivateRoute>
-                            }
-                          />
+                        <Route
+                          path="/employees"
+                          element={
+                            <PrivateRoute adminOnly={true}>
+                              <EmployeeManagementPage />
+                            </PrivateRoute>
+                          }
+                        />
 
-                          <Route path="*" element={<Navigate to="/dashboard" />} />
-                        </Routes>
-                      </Box>
+                        <Route path="*" element={<Navigate to="/dashboard" />} />
+                      </Routes>
                     </Box>
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
-          </Router>
-        </SecurityModeProvider>
+                  </Box>
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </Router>
       </AuthProvider>
     </ThemeProvider>
   )

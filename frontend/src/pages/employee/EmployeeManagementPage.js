@@ -18,11 +18,14 @@ import {
 } from "@mui/material"
 import { Delete, Edit, PersonAdd } from "@mui/icons-material"
 import employeeService from "../../services/employeeService"
+import departmentService from "../../services/departmentService"
+import teamService from "../../services/teamService"
+import EmployeeDialog from "../../components/employee/EmployeeDialog"
 
 const EmployeeManagementPage = () => {
-  console.log("[v0] EmployeeManagementPage - Component mounted")
-
   const [employees, setEmployees] = useState([])
+  const [departments, setDepartments] = useState([])
+  const [teams, setTeams] = useState([])
   const [loading, setLoading] = useState(true)
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState(null)
@@ -30,22 +33,46 @@ const EmployeeManagementPage = () => {
   const [success, setSuccess] = useState("")
 
   useEffect(() => {
-    console.log("[v0] EmployeeManagementPage - useEffect triggered")
-    fetchEmployees()
+    fetchData()
   }, [])
 
-  const fetchEmployees = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true)
-      console.log("[v0] EmployeeManagementPage - Fetching employees")
-      const response = await employeeService.getAllEmployees()
-      console.log("[v0] EmployeeManagementPage - Employees response:", response)
-      setEmployees(response.data || [])
+      const [employeesRes, departmentsRes, teamsRes] = await Promise.all([
+        employeeService.getAllEmployees(),
+        departmentService.getAllDepartments(),
+        teamService.getAllTeams(),
+      ])
+      
+      setEmployees(employeesRes.data || [])
+      setDepartments(departmentsRes.data || [])
+      setTeams(teamsRes.data || [])
     } catch (error) {
-      console.error("[v0] 사원 목록 조회 실패:", error)
-      setError("사원 목록을 불러오는데 실패했습니다.")
+      console.error("데이터 조회 실패:", error)
+      setError("데이터를 불러오는데 실패했습니다.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSave = async (formData) => {
+    try {
+      if (selectedEmployee) {
+        // 수정
+        await employeeService.updateEmployee(selectedEmployee.id, formData)
+        setSuccess("사원 정보가 수정되었습니다.")
+      } else {
+        // 생성
+        await employeeService.createEmployee(formData)
+        setSuccess("사원이 추가되었습니다.")
+      }
+      
+      fetchData()
+      setOpenDialog(false)
+      setTimeout(() => setSuccess(""), 3000)
+    } catch (error) {
+      throw error
     }
   }
 
@@ -57,7 +84,7 @@ const EmployeeManagementPage = () => {
     try {
       await employeeService.deleteEmployee(employeeId)
       setSuccess("사원이 삭제되었습니다.")
-      fetchEmployees()
+      fetchData()
       setTimeout(() => setSuccess(""), 3000)
     } catch (error) {
       console.error("사원 삭제 실패:", error)
@@ -69,8 +96,8 @@ const EmployeeManagementPage = () => {
   const getRoleText = (role) => {
     const roleMap = {
       ADMIN: "관리자",
-      TEAM_LEADER: "팀장",
-      EMPLOYEE: "사원",
+      MANAGER: "팀장",
+      USER: "사원",
     }
     return roleMap[role] || role
   }
@@ -78,8 +105,8 @@ const EmployeeManagementPage = () => {
   const getRoleColor = (role) => {
     const colorMap = {
       ADMIN: "error",
-      TEAM_LEADER: "warning",
-      EMPLOYEE: "default",
+      MANAGER: "warning",
+      USER: "default",
     }
     return colorMap[role] || "default"
   }
@@ -88,15 +115,7 @@ const EmployeeManagementPage = () => {
     <Box>
       {/* Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 700,
-            fontSize: "2rem",
-            color: "#37352f",
-            letterSpacing: "-0.01em",
-          }}
-        >
+        <Typography variant="h4" sx={{ fontWeight: 700, fontSize: "2rem", color: "#37352f" }}>
           사원 관리
         </Typography>
         <Button
@@ -111,15 +130,7 @@ const EmployeeManagementPage = () => {
             color: "#ffffff",
             px: 3,
             py: 1.25,
-            fontSize: "1rem",
-            fontWeight: 500,
-            textTransform: "none",
-            borderRadius: "6px",
-            boxShadow: "rgba(15, 15, 15, 0.1) 0px 1px 2px",
-            "&:hover": {
-              backgroundColor: "#2e2c28",
-              boxShadow: "rgba(15, 15, 15, 0.2) 0px 2px 4px",
-            },
+            "&:hover": { backgroundColor: "#2e2c28" },
           }}
         >
           사원 추가
@@ -127,105 +138,50 @@ const EmployeeManagementPage = () => {
       </Box>
 
       {/* Alerts */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>{error}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess("")}>{success}</Alert>}
 
       {/* Employee Table */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          borderRadius: "8px",
-          border: "1px solid rgba(55, 53, 47, 0.09)",
-          boxShadow: "rgba(15, 15, 15, 0.03) 0px 1px 2px",
-        }}
-      >
+      <TableContainer component={Paper} sx={{ borderRadius: "8px", border: "1px solid rgba(55, 53, 47, 0.09)" }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 600, fontSize: "1rem", color: "#37352f" }}>사번</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: "1rem", color: "#37352f" }}>이름</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: "1rem", color: "#37352f" }}>이메일</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: "1rem", color: "#37352f" }}>부서</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: "1rem", color: "#37352f" }}>직급</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: "1rem", color: "#37352f" }}>역할</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: "1rem", color: "#37352f" }} align="center">
-                관리
-              </TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>사번</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>이름</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>이메일</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>부서</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>팀</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>직급</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>역할</TableCell>
+              <TableCell sx={{ fontWeight: 600 }} align="center">관리</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
-                  <Typography sx={{ color: "#787774" }}>로딩 중...</Typography>
-                </TableCell>
+                <TableCell colSpan={8} align="center" sx={{ py: 8 }}>로딩 중...</TableCell>
               </TableRow>
             ) : employees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
-                  <Typography sx={{ color: "#787774" }}>등록된 사원이 없습니다.</Typography>
-                </TableCell>
+                <TableCell colSpan={8} align="center" sx={{ py: 8 }}>등록된 사원이 없습니다.</TableCell>
               </TableRow>
             ) : (
               employees.map((employee) => (
-                <TableRow
-                  key={employee.id}
-                  sx={{
-                    "&:hover": {
-                      backgroundColor: "rgba(55, 53, 47, 0.03)",
-                    },
-                  }}
-                >
-                  <TableCell sx={{ fontSize: "1rem", color: "#37352f" }}>{employee.employeeId}</TableCell>
-                  <TableCell sx={{ fontSize: "1rem", color: "#37352f", fontWeight: 500 }}>{employee.name}</TableCell>
-                  <TableCell sx={{ fontSize: "1rem", color: "#787774" }}>{employee.email}</TableCell>
-                  <TableCell sx={{ fontSize: "1rem", color: "#37352f" }}>{employee.department}</TableCell>
-                  <TableCell sx={{ fontSize: "1rem", color: "#37352f" }}>{employee.position}</TableCell>
+                <TableRow key={employee.id} sx={{ "&:hover": { backgroundColor: "rgba(55, 53, 47, 0.03)" } }}>
+                  <TableCell>{employee.employeeId}</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>{employee.name}</TableCell>
+                  <TableCell>{employee.email}</TableCell>
+                  <TableCell>{employee.departmentName}</TableCell>
+                  <TableCell>{employee.teamName || '-'}</TableCell>
+                  <TableCell>{employee.position}</TableCell>
                   <TableCell>
-                    <Chip
-                      label={getRoleText(employee.role)}
-                      color={getRoleColor(employee.role)}
-                      size="small"
-                      sx={{ fontWeight: 500 }}
-                    />
+                    <Chip label={getRoleText(employee.role)} color={getRoleColor(employee.role)} size="small" />
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setSelectedEmployee(employee)
-                        setOpenDialog(true)
-                      }}
-                      sx={{
-                        color: "#787774",
-                        "&:hover": {
-                          color: "#37352f",
-                          backgroundColor: "rgba(55, 53, 47, 0.08)",
-                        },
-                      }}
-                    >
+                    <IconButton size="small" onClick={() => { setSelectedEmployee(employee); setOpenDialog(true); }}>
                       <Edit fontSize="small" />
                     </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDelete(employee.id)}
-                      sx={{
-                        color: "#787774",
-                        ml: 1,
-                        "&:hover": {
-                          color: "#dc2626",
-                          backgroundColor: "rgba(220, 38, 38, 0.08)",
-                        },
-                      }}
-                    >
+                    <IconButton size="small" onClick={() => handleDelete(employee.id)} sx={{ ml: 1 }}>
                       <Delete fontSize="small" />
                     </IconButton>
                   </TableCell>
@@ -235,6 +191,16 @@ const EmployeeManagementPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Employee Dialog */}
+      <EmployeeDialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        employee={selectedEmployee}
+        onSave={handleSave}
+        departments={departments}
+        teams={teams}
+      />
     </Box>
   )
 }

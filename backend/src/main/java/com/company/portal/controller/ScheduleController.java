@@ -3,9 +3,7 @@ package com.company.portal.controller;
 import com.company.portal.dto.request.ScheduleRequest;
 import com.company.portal.dto.response.ApiResponse;
 import com.company.portal.dto.response.ScheduleResponse;
-import com.company.portal.service.secure.SecureScheduleService;
-import com.company.portal.service.vulnerable.VulnerableScheduleService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.company.portal.service.ScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,58 +19,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScheduleController {
 
-    private final SecureScheduleService secureScheduleService;
-    private final VulnerableScheduleService vulnerableScheduleService;
+    private final ScheduleService scheduleService;
 
-    // 관리자용 - 모든 일정 조회 (새로 추가)
     @GetMapping("/api/schedules/all")
-    public ResponseEntity<ApiResponse<List<ScheduleResponse>>> getAllSchedules(
-            HttpServletRequest httpRequest) {
-
-        String securityMode = (String) httpRequest.getAttribute("securityMode");
-
-        List<ScheduleResponse> response;
-        if ("vulnerable".equals(securityMode)) {
-            response = vulnerableScheduleService.getAllSchedules();
-        } else {
-            response = secureScheduleService.getAllSchedules();
-        }
-
+    public ResponseEntity<ApiResponse<List<ScheduleResponse>>> getAllSchedules() {
+        List<ScheduleResponse> response = scheduleService.getAllSchedules();
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping("/api/teams/{teamId}/schedules")
     public ResponseEntity<ApiResponse<ScheduleResponse>> createSchedule(
             @PathVariable Long teamId,
-            @Valid @RequestBody ScheduleRequest request,
-            HttpServletRequest httpRequest) {
+            @Valid @RequestBody ScheduleRequest request) {
 
-        String securityMode = (String) httpRequest.getAttribute("securityMode");
-
-        ScheduleResponse response;
-        if ("vulnerable".equals(securityMode)) {
-            response = vulnerableScheduleService.createSchedule(teamId, request);
-        } else {
-            response = secureScheduleService.createSchedule(teamId, request);
-        }
-
+        ScheduleResponse response = scheduleService.createSchedule(teamId, request);
         return ResponseEntity.ok(ApiResponse.success("일정 생성 성공", response));
     }
 
     @GetMapping("/api/teams/{teamId}/schedules")
-    public ResponseEntity<ApiResponse<List<ScheduleResponse>>> getTeamSchedules(
-            @PathVariable Long teamId,
-            HttpServletRequest httpRequest) {
-
-        String securityMode = (String) httpRequest.getAttribute("securityMode");
-
-        List<ScheduleResponse> response;
-        if ("vulnerable".equals(securityMode)) {
-            response = vulnerableScheduleService.getTeamSchedules(teamId);
-        } else {
-            response = secureScheduleService.getTeamSchedules(teamId);
-        }
-
+    public ResponseEntity<ApiResponse<List<ScheduleResponse>>> getTeamSchedules(@PathVariable Long teamId) {
+        List<ScheduleResponse> response = scheduleService.getTeamSchedules(teamId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -80,35 +46,18 @@ public class ScheduleController {
     public ResponseEntity<ApiResponse<List<ScheduleResponse>>> getTeamSchedulesByDateRange(
             @PathVariable Long teamId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
-            HttpServletRequest httpRequest) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
 
-        String securityMode = (String) httpRequest.getAttribute("securityMode");
-
-        List<ScheduleResponse> response;
-        if ("vulnerable".equals(securityMode)) {
-            response = vulnerableScheduleService.getTeamSchedulesByDateRange(teamId, start, end);
-        } else {
-            response = secureScheduleService.getTeamSchedulesByDateRange(teamId, start, end);
-        }
-
+        List<ScheduleResponse> response = scheduleService.getTeamSchedulesByDateRange(teamId, start, end);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @DeleteMapping("/api/teams/{teamId}/schedules/{scheduleId}")
     public ResponseEntity<ApiResponse<Void>> deleteSchedule(
             @PathVariable Long teamId,
-            @PathVariable Long scheduleId,
-            HttpServletRequest httpRequest) {
+            @PathVariable Long scheduleId) {
 
-        String securityMode = (String) httpRequest.getAttribute("securityMode");
-
-        if ("vulnerable".equals(securityMode)) {
-            vulnerableScheduleService.deleteSchedule(scheduleId);
-        } else {
-            secureScheduleService.deleteSchedule(scheduleId);
-        }
-
+        scheduleService.deleteSchedule(scheduleId);
         return ResponseEntity.ok(ApiResponse.success("일정 삭제 성공", null));
     }
 }

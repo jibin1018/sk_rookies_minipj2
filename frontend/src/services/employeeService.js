@@ -1,25 +1,41 @@
-import api from "./api"
+// src/services/employeeService.js
+
+import api from './api';
+import CryptoJS from 'crypto-js';
 
 const employeeService = {
-  getCurrentEmployee: async () => {
-    const response = await api.get("/employees/me")
-    return response.data
-  },
-
   getAllEmployees: async () => {
-    const response = await api.get("/employees")
-    return response.data
+    const response = await api.get('/employees');
+    return response.data;
   },
 
-  getEmployeesByTeam: async (teamId) => {
-    const response = await api.get(`/employees/team/${teamId}`)
-    return response.data
+  getEmployee: async (id) => {
+    const response = await api.get(`/employees/${id}`);
+    return response.data;
   },
 
-  deleteEmployee: async (employeeId) => {
-    const response = await api.delete(`/employees/${employeeId}`)
-    return response.data
-  },
-}
+  createEmployee: async (employeeData) => {
+    // 항상 SHA-256 해시
+    const hashedPassword = CryptoJS.SHA256(employeeData.password).toString();
 
-export default employeeService
+    const requestData = {
+      ...employeeData,
+      password: hashedPassword,
+    };
+
+    const response = await api.post('/employees', requestData);
+    return response.data;
+  },
+
+  updateEmployee: async (id, employeeData) => {
+    const response = await api.put(`/employees/${id}`, employeeData);
+    return response.data;
+  },
+
+  deleteEmployee: async (id) => {
+    const response = await api.delete(`/employees/${id}`);
+    return response.data;
+  },
+};
+
+export default employeeService;

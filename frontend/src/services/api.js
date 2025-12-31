@@ -1,3 +1,5 @@
+// src/services/api.js
+
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
@@ -9,17 +11,14 @@ const api = axios.create({
   },
 });
 
-// 요청 인터셉터 - JWT 토큰 및 보안 모드 추가
+// 요청 인터셉터 - JWT 토큰만 추가
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    const securityMode = localStorage.getItem('securityMode') || 'secure';
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
-    config.headers['X-Security-Mode'] = securityMode;
     
     return config;
   },

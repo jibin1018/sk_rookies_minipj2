@@ -5,46 +5,30 @@ import CryptoJS from 'crypto-js';
 
 const authService = {
   login: async (employeeId, password) => {
-    // 보안 모드 확인
-    const securityMode = localStorage.getItem('securityMode') || 'secure';
+    // 항상 SHA-256 해시 적용
+    const hashedPassword = CryptoJS.SHA256(password).toString();
     
-    // Secure 모드일 때만 SHA-256 해시
-    const finalPassword = securityMode === 'secure' 
-      ? CryptoJS.SHA256(password).toString() 
-      : password;
-    
-    console.log('로그인 모드:', securityMode);
-    console.log('원본 비밀번호:', password);
-    console.log('전송 비밀번호:', finalPassword);
+    console.log('로그인 시도:', employeeId);
+    console.log('해시된 비밀번호:', hashedPassword);
     
     const response = await api.post('/auth/login', {
       employeeId,
-      password: finalPassword,
+      password: hashedPassword,
     });
     
     return response.data;
   },
 
   signup: async (userData) => {
-    const securityMode = localStorage.getItem('securityMode') || 'secure';
+    // 회원가입도 SHA-256 해시
+    const hashedPassword = CryptoJS.SHA256(userData.password).toString();
     
-    const signupData = {
+    const response = await api.post('/auth/signup', {
       ...userData,
-      password: securityMode === 'secure' 
-        ? CryptoJS.SHA256(userData.password).toString() 
-        : userData.password
-    };
+      password: hashedPassword
+    });
     
-    const response = await api.post('/auth/signup', signupData);
     return response.data;
-  },
-
-  setSecurityMode: (mode) => {
-    localStorage.setItem('securityMode', mode);
-  },
-
-  getSecurityMode: () => {
-    return localStorage.getItem('securityMode') || 'secure';
   },
 
   logout: () => {

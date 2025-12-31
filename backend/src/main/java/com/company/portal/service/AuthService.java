@@ -1,4 +1,4 @@
-package com.company.portal.service.secure;
+package com.company.portal.service;
 
 import com.company.portal.dto.request.LoginRequest;
 import com.company.portal.dto.request.SignupRequest;
@@ -25,7 +25,7 @@ import java.util.Collections;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SecureAuthService {
+public class AuthService {
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
