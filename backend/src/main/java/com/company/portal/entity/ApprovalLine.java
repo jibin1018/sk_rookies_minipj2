@@ -8,12 +8,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "approval_lines")
-@Getter
-@Setter
+@Data  // ← @Getter, @Setter 대신 @Data 사용
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ApprovalLine {
+public class ApprovalLine extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,17 +26,17 @@ public class ApprovalLine {
     @JoinColumn(name = "approver_id", nullable = false)
     private Employee approver;
 
-    @Column(name = "step_order", nullable = false)
-    private Integer stepOrder;  // 결재 순서
+    @Column(nullable = false, name = "approval_order")
+    private Integer approvalOrder;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(nullable = false)
     @Builder.Default
     private ApprovalStatus status = ApprovalStatus.PENDING;
 
-    @Column(columnDefinition = "TEXT")
-    private String comment;  // 결재 의견
-
-    @Column(name = "approved_at")
     private LocalDateTime approvedAt;
+
+    private LocalDateTime rejectedAt;
+
+    private String comment;
 }

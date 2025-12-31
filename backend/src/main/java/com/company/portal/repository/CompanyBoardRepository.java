@@ -16,9 +16,12 @@ public interface CompanyBoardRepository extends JpaRepository<CompanyBoard, Long
 
     Page<CompanyBoard> findByIsNoticeTrue(Pageable pageable);
 
+    long countByIsNoticeTrue();
+
     @Query("SELECT b FROM CompanyBoard b WHERE b.title LIKE %:keyword% OR b.content LIKE %:keyword%")
     Page<CompanyBoard> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT b FROM CompanyBoard b WHERE b.category = :category AND (b.title LIKE %:keyword% OR b.content LIKE %:keyword%)")
     Page<CompanyBoard> searchByCategoryAndKeyword(@Param("category") BoardCategory category, @Param("keyword") String keyword, Pageable pageable);
+
 }

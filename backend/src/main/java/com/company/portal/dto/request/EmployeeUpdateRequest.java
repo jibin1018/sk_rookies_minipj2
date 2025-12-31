@@ -1,5 +1,6 @@
 package com.company.portal.dto.request;
 
+import com.company.portal.enums.Position;
 import com.company.portal.enums.Role;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ public class EmployeeUpdateRequest {
 
     private Long teamId;
 
-    private String position;
+    private Position position;  // ← Enum으로 변경
 
     private Role role;
 

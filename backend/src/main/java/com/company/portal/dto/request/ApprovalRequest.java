@@ -1,20 +1,24 @@
 package com.company.portal.dto.request;
 
-import java.util.List;
-
+import com.company.portal.enums.ApprovalType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ApprovalRequest {
 
-    @NotBlank(message = "문서 유형을 선택해주세요")
-    private String documentType;
+    @NotNull(message = "결재 유형을 선택해주세요")
+    private ApprovalType type;
 
     @NotBlank(message = "제목을 입력해주세요")
     private String title;
@@ -23,5 +27,5 @@ public class ApprovalRequest {
     private String content;
 
     @NotEmpty(message = "결재자를 선택해주세요")
-    private List<Long> approverIds;  // 결재선 (순서대로)
+    private List<Long> approverIds;
 }

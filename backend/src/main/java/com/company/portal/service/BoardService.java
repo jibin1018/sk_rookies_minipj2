@@ -47,8 +47,8 @@ public class BoardService {
                 .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다"));
 
         // XSS 취약점 - 입력값 검증 없이 그대로 저장
-        String title = request.getTitle();  // HTML 이스케이프 없음!
-        String content = request.getContent();  // HTML 이스케이프 없음!
+        String title = request.getTitle();
+        String content = request.getContent();
 
         // XSS 패턴 감지 시 로그 기록
         if (title.contains("<script") || content.contains("<script")) {
@@ -56,9 +56,9 @@ public class BoardService {
         }
 
         CompanyBoard board = CompanyBoard.builder()
-                .category(request.getCategory())
-                .title(title) // 위험!
-                .content(content) // 위험!
+                .category(request.getCategory()) // Enum 타입 그대로 사용
+                .title(title)
+                .content(content)
                 .author(author)
                 .isNotice(request.getIsNotice())
                 .views(0)
@@ -116,7 +116,7 @@ public class BoardService {
         CompanyBoard board = boardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다"));
 
-        // 조회수 증가 (클라이언트에서 조작 가능 - 취약점)
+        // 조회수 증가
         board.setViews(board.getViews() + 1);
         boardRepository.save(board);
 
@@ -128,7 +128,7 @@ public class BoardService {
         CompanyBoard board = boardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다"));
 
-        // 권한 체크 없음 - 누구나 수정 가능! (심각한 취약점)
+        // 권한 체크 없음 - 누구나 수정 가능
         Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
         if (!board.getAuthor().getId().equals(currentEmployeeId)) {
             log.warn("Vulnerable 모드 - 권한 없는 수정 성공! board={}, employee={}", id, currentEmployeeId);
@@ -139,7 +139,7 @@ public class BoardService {
         // XSS 취약점
         board.setTitle(request.getTitle());
         board.setContent(request.getContent());
-        board.setCategory(request.getCategory());
+        board.setCategory(request.getCategory());  // Enum 타입 그대로 사용
 
         CompanyBoard updatedBoard = boardRepository.save(board);
 
@@ -153,7 +153,7 @@ public class BoardService {
         CompanyBoard board = boardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다"));
 
-        // 권한 체크 없음 - 누구나 삭제 가능!
+        // 권한 체크 없음 - 누구나 삭제 가능
         Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
         if (!board.getAuthor().getId().equals(currentEmployeeId)) {
             log.warn("Vulnerable 모드 - 권한 없는 삭제 성공! board={}, employee={}", id, currentEmployeeId);
@@ -192,7 +192,7 @@ public class BoardService {
         Comment comment = Comment.builder()
                 .board(board)
                 .parent(parent)
-                .content(content) // 위험!
+                .content(content)
                 .author(author)
                 .build();
 
@@ -254,9 +254,9 @@ public class BoardService {
 
         return BoardResponse.builder()
                 .id(board.getId())
-                .category(board.getCategory())
-                .title(board.getTitle()) // XSS 위험!
-                .content(board.getContent()) // XSS 위험!
+                .category(board.getCategory()) // Enum 타입 그대로 반환
+                .title(board.getTitle())
+                .content(board.getContent())
                 .authorName(board.getAuthor().getName())
                 .authorId(board.getAuthor().getId())
                 .views(board.getViews())
@@ -276,7 +276,7 @@ public class BoardService {
 
         return CommentResponse.builder()
                 .id(comment.getId())
-                .content(comment.getContent()) // XSS 위험!
+                .content(comment.getContent())
                 .authorName(comment.getAuthor().getName())
                 .authorId(comment.getAuthor().getId())
                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)

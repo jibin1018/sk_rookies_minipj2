@@ -1,5 +1,6 @@
 package com.company.portal.dto.response;
 
+import com.company.portal.enums.Position;
 import com.company.portal.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +24,7 @@ public class EmployeeResponse {
     private Long departmentId;
     private String teamName;
     private Long teamId;
-    private String position;
+    private Position position;  // ← Enum으로 변경
     private Role role;
     private LocalDate hireDate;
     private String phone;

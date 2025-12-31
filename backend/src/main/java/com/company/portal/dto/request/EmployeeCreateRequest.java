@@ -1,5 +1,6 @@
 package com.company.portal.dto.request;
 
+import com.company.portal.enums.Position;
 import com.company.portal.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -35,8 +36,8 @@ public class EmployeeCreateRequest {
 
     private Long teamId;
 
-    @NotBlank(message = "직급은 필수입니다")
-    private String position;
+    @NotNull(message = "직급은 필수입니다")
+    private Position position;  // ← Enum으로 변경
 
     @NotNull(message = "역할은 필수입니다")
     private Role role;

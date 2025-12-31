@@ -1,6 +1,9 @@
 package com.company.portal.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -8,8 +11,10 @@ import lombok.*;
 @AllArgsConstructor
 public class DashboardSummaryResponse {
 
-    private long boardCount;        // 사내 게시판 새 글
-    private long weeklySchedule;    // 이번 주 일정
-    private long pendingApproval;   // 결재 대기
-    private long suggestionCount;   // 진행중 건의사항
+    private Long totalEmployees;
+    private Long presentToday;
+    private Long absentToday;
+    private Long lateToday;
+    private Long pendingApprovals;
+    private Long unreadNotices;
 }

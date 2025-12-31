@@ -1,72 +1,79 @@
 package com.company.portal.service;
 
 import com.company.portal.dto.response.DashboardSummaryResponse;
+import com.company.portal.entity.Attendance;
 import com.company.portal.entity.Employee;
-import com.company.portal.repository.*;
+import com.company.portal.enums.AttendanceStatus;
+import com.company.portal.exception.ResourceNotFoundException;
+import com.company.portal.repository.AttendanceRepository;
+import com.company.portal.repository.CompanyBoardRepository;
+import com.company.portal.repository.EmployeeRepository;
+import com.company.portal.repository.ApprovalRepository;
+import com.company.portal.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class DashboardService {
 
-    private final CompanyBoardRepository companyBoardRepository;
-    private final TeamScheduleRepository teamScheduleRepository;
-    private final ApprovalRepository approvalRepository;
-    private final SuggestionRepository suggestionRepository;
     private final EmployeeRepository employeeRepository;
+    private final AttendanceRepository attendanceRepository;
+    private final CompanyBoardRepository boardRepository;
+    private final ApprovalRepository approvalRepository;
 
+    @Transactional(readOnly = true)
     public DashboardSummaryResponse getDashboardSummary() {
-
-        // ✅ 로그인 사용자
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String employeeId = authentication.getName();
-
-        Employee employee = employeeRepository.findByEmployeeId(employeeId)
-                .orElseThrow(() -> new IllegalStateException("로그인 사용자 정보 없음"));
+        Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
+        Employee employee = employeeRepository.findById(currentEmployeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다"));
 
         Long teamId = employee.getTeam() != null ? employee.getTeam().getId() : null;
-
-        // 📅 이번 주 범위
         LocalDate today = LocalDate.now();
-        LocalDate startOfWeekDate = today.with(DayOfWeek.MONDAY);
-        LocalDate endOfWeekDate = today.with(DayOfWeek.SUNDAY);
 
-        LocalDateTime startOfWeek = startOfWeekDate.atStartOfDay();
-        LocalDateTime endOfWeek = endOfWeekDate.atTime(23, 59, 59);
+        long totalEmployees;
+        long presentToday;
+        long absentToday;
+        long lateToday;
 
-        // 📰 사내 게시판 (전체 기준)
-        long boardCount = companyBoardRepository.count();
-
-        // 📅 팀 일정 (이번 주와 겹치는 일정)
-        long weeklySchedule = 0;
         if (teamId != null) {
-            weeklySchedule = teamScheduleRepository.countWeeklySchedules(
-                    teamId,
-                    startOfWeek,
-                    endOfWeek
-            );
+            totalEmployees = employeeRepository.countByTeamId(teamId);
+            List<Attendance> todayAttendance = attendanceRepository.findByWorkDate(today);
+
+            presentToday = todayAttendance.stream()
+                    .filter(a -> a.getStatus() == AttendanceStatus.PRESENT)
+                    .count();
+
+            absentToday = todayAttendance.stream()
+                    .filter(a -> a.getStatus() == AttendanceStatus.ABSENT)
+                    .count();
+
+            lateToday = todayAttendance.stream()
+                    .filter(a -> a.getStatus() == AttendanceStatus.LATE)
+                    .count();
+        } else {
+            totalEmployees = 0;
+            presentToday = 0;
+            absentToday = 0;
+            lateToday = 0;
         }
 
-        // 📝 결재 대기 (본인이 결재자)
-        long pendingApproval = approvalRepository.countPendingByApprover(employee.getId());
-
-        // 💬 건의사항 (진행중)
-        long suggestionCount = suggestionRepository.countByStatus("SUBMITTED");
+        long pendingApprovals = approvalRepository.countPendingByApprover(employee.getId());
+        long unreadNotices = boardRepository.countByIsNoticeTrue();
 
         return DashboardSummaryResponse.builder()
-                .boardCount(boardCount)
-                .weeklySchedule(weeklySchedule)
-                .pendingApproval(pendingApproval)
-                .suggestionCount(suggestionCount)
+                .totalEmployees(totalEmployees)
+                .presentToday(presentToday)
+                .absentToday(absentToday)
+                .lateToday(lateToday)
+                .pendingApprovals(pendingApprovals)
+                .unreadNotices(unreadNotices)
                 .build();
     }
 }

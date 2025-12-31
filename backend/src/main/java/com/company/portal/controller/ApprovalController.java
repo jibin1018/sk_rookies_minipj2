@@ -4,17 +4,10 @@ import com.company.portal.dto.request.ApprovalActionRequest;
 import com.company.portal.dto.request.ApprovalRequest;
 import com.company.portal.dto.response.ApiResponse;
 import com.company.portal.dto.response.ApprovalResponse;
-import com.company.portal.enums.ApprovalStatus;
-import com.company.portal.service.common.ApprovalService;
-import com.company.portal.util.SecurityUtil;
-import jakarta.servlet.http.HttpServletRequest;
+import com.company.portal.service.ApprovalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,40 +22,27 @@ public class ApprovalController {
     private final ApprovalService approvalService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ApprovalResponse>> createApproval(
-            @Valid @RequestBody ApprovalRequest request) {
+    public ResponseEntity<ApiResponse<ApprovalResponse>> createApproval(@Valid @RequestBody ApprovalRequest request) {
         ApprovalResponse response = approvalService.createApproval(request);
-        return ResponseEntity.ok(ApiResponse.success("결재 상신 성공", response));
+        return ResponseEntity.ok(ApiResponse.success("결재 요청 성공", response));
     }
 
     @GetMapping("/my")
-    public ResponseEntity<ApiResponse<Page<ApprovalResponse>>> getMyApprovals(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<ApprovalResponse> response = approvalService.getMyApprovals(pageable);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @GetMapping("/my/status/{status}")
-    public ResponseEntity<ApiResponse<Page<ApprovalResponse>>> getMyApprovalsByStatus(
-            @PathVariable ApprovalStatus status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<ApprovalResponse> response = approvalService.getMyApprovalsByStatus(status, pageable);
+    public ResponseEntity<ApiResponse<List<ApprovalResponse>>> getMyApprovals() {
+        List<ApprovalResponse> response = approvalService.getMyApprovals();
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<List<ApprovalResponse>>> getPendingApprovals() {
-        Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
-        log.info("결재 대기 문서 조회 - Employee ID: {}", currentEmployeeId);
+        List<ApprovalResponse> response = approvalService.getPendingApprovals();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 
-        List<ApprovalResponse> approvals = approvalService.getPendingApprovals();
-        log.info("결재 대기 문서 개수: {}", approvals.size());
-
-        return ResponseEntity.ok(ApiResponse.success("조회 성공", approvals));
+    @GetMapping("/completed")
+    public ResponseEntity<ApiResponse<List<ApprovalResponse>>> getCompletedApprovals() {
+        List<ApprovalResponse> response = approvalService.getCompletedApprovals();
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/{id}")
@@ -71,17 +51,25 @@ public class ApprovalController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PostMapping("/{id}/process")
-    public ResponseEntity<ApiResponse<ApprovalResponse>> processApproval(
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<ApiResponse<ApprovalResponse>> approveApproval(
             @PathVariable Long id,
-            @Valid @RequestBody ApprovalActionRequest request) {
-        ApprovalResponse response = approvalService.processApproval(id, request);
-        return ResponseEntity.ok(ApiResponse.success("처리 완료", response));
+            @RequestBody ApprovalActionRequest request) {
+        ApprovalResponse response = approvalService.approveApproval(id, request);
+        return ResponseEntity.ok(ApiResponse.success("결재 승인 완료", response));
+    }
+
+    @PostMapping("/{id}/reject")
+    public ResponseEntity<ApiResponse<ApprovalResponse>> rejectApproval(
+            @PathVariable Long id,
+            @RequestBody ApprovalActionRequest request) {
+        ApprovalResponse response = approvalService.rejectApproval(id, request);
+        return ResponseEntity.ok(ApiResponse.success("결재 반려 완료", response));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> cancelApproval(@PathVariable Long id) {
         approvalService.cancelApproval(id);
-        return ResponseEntity.ok(ApiResponse.success("결재 취소 성공", null));
+        return ResponseEntity.ok(ApiResponse.success("결재 취소 완료", null));
     }
 }
