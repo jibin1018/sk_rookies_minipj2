@@ -1,5 +1,7 @@
 package com.company.portal.repository;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,5 +15,18 @@ public interface ApprovalRepository extends JpaRepository<Approval, Long> {
 
     Page<Approval> findByRequesterId(Long requesterId, Pageable pageable);
 
-    Page<Approval> findByRequesterIdAndStatus(Long requesterId, ApprovalStatus status, Pageable pageable);
+    Page<Approval> findByRequesterIdAndStatus(
+            Long requesterId,
+            ApprovalStatus status,
+            Pageable pageable
+    );
+
+    // ✅ Dashboard용 추가
+    @Query("""
+        SELECT COUNT(al)
+        FROM ApprovalLine al
+        WHERE al.approver.id = :employeeId
+          AND al.status = 'WAITING'
+    """)
+    long countPendingByApprover(@Param("employeeId") Long employeeId);
 }

@@ -12,10 +12,32 @@ import java.util.List;
 @Repository
 public interface TeamScheduleRepository extends JpaRepository<TeamSchedule, Long> {
 
+    // ✅ ScheduleService 용
     List<TeamSchedule> findByTeamId(Long teamId);
 
-    @Query("SELECT s FROM TeamSchedule s WHERE s.team.id = :teamId AND s.startDate >= :start AND s.endDate <= :end")
+    // ✅ ScheduleService 용
+    @Query("""
+        SELECT s
+        FROM TeamSchedule s
+        WHERE s.team.id = :teamId
+          AND s.startDate >= :start
+          AND s.endDate <= :end
+    """)
     List<TeamSchedule> findByTeamIdAndDateRange(
+            @Param("teamId") Long teamId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    // ✅ Dashboard용 (이미 있음)
+    @Query("""
+        SELECT COUNT(s)
+        FROM TeamSchedule s
+        WHERE s.team.id = :teamId
+          AND s.startDate <= :end
+          AND s.endDate >= :start
+    """)
+    long countWeeklySchedules(
             @Param("teamId") Long teamId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end

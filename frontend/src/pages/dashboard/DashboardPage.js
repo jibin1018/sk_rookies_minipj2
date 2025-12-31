@@ -1,15 +1,35 @@
 "use client"
+
+import { useEffect, useState } from "react"
 import { Container, Grid, Paper, Typography, Box, Card, CardContent } from "@mui/material"
 import { Article, Schedule, Description, Feedback, TrendingUp } from "@mui/icons-material"
 import { useAuth } from "../../contexts/AuthContext"
+import api from "../../services/api"
 
 const DashboardPage = () => {
   const { user } = useAuth()
+  const [summary, setSummary] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchDashboard()
+  }, [])
+
+  const fetchDashboard = async () => {
+    try {
+      const res = await api.get("/dashboard/summary")
+      setSummary(res.data.data)
+    } catch (err) {
+      console.error("대시보드 데이터 조회 실패", err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const stats = [
     {
       title: "사내 게시판",
-      value: "0",
+      value: summary?.boardCount ?? 0,
       subtitle: "새 글",
       icon: <Article fontSize="large" />,
       color: "#3b82f6",
@@ -17,7 +37,7 @@ const DashboardPage = () => {
     },
     {
       title: "팀 일정",
-      value: "1",
+      value: summary?.weeklySchedule ?? 0,
       subtitle: "이번 주",
       icon: <Schedule fontSize="large" />,
       color: "#10b981",
@@ -25,7 +45,7 @@ const DashboardPage = () => {
     },
     {
       title: "결재 대기",
-      value: "0",
+      value: summary?.pendingApproval ?? 0,
       subtitle: "처리 필요",
       icon: <Description fontSize="large" />,
       color: "#f59e0b",
@@ -33,7 +53,7 @@ const DashboardPage = () => {
     },
     {
       title: "건의사항",
-      value: "2",
+      value: summary?.suggestionCount ?? 0,
       subtitle: "진행중",
       icon: <Feedback fontSize="large" />,
       color: "#8b5cf6",
@@ -43,6 +63,7 @@ const DashboardPage = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 1 }}>
+      {/* ===== 상단 환영 영역 ===== */}
       <Paper
         sx={{
           p: 4,
@@ -50,10 +71,10 @@ const DashboardPage = () => {
           backgroundColor: "#1a2332",
           color: "white",
           borderRadius: 2,
-          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <TrendingUp sx={{ fontSize: 40, color: "white" }} />
           <Box>
             <Typography variant="h4" gutterBottom sx={{ mb: 1, fontWeight: 700, color: "white" }}>
@@ -65,8 +86,8 @@ const DashboardPage = () => {
           </Box>
         </Box>
       </Paper>
-      {/* </CHANGE> */}
 
+      {/* ===== 통계 카드 ===== */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {stats.map((stat, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
@@ -162,4 +183,3 @@ const DashboardPage = () => {
 }
 
 export default DashboardPage
-
