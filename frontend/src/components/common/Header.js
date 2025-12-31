@@ -8,10 +8,8 @@ import {
   Button,
   Box,
   Avatar,
-  IconButton,
-  Badge,
 } from "@mui/material"
-import { BusinessCenter, Notifications, Settings } from "@mui/icons-material"
+import { BusinessCenter } from "@mui/icons-material"
 import { useAuth } from "../../contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
 
@@ -37,6 +35,7 @@ const Header = () => {
       }}
     >
       <Toolbar sx={{ minHeight: "68px !important", px: 3 }}>
+        {/* 로고 영역 */}
         <Box
           sx={{
             display: "flex",
@@ -50,11 +49,9 @@ const Header = () => {
           <BusinessCenter sx={{ fontSize: 28, color: "#37352f" }} />
           <Typography
             variant="h6"
-            component="div"
             sx={{
               fontWeight: 600,
               fontSize: "1.125rem",
-              color: "#37352f",
               letterSpacing: "-0.005em",
             }}
           >
@@ -62,34 +59,9 @@ const Header = () => {
           </Typography>
         </Box>
 
+        {/* 사용자 영역 */}
         {user && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2.5 }}>
-            <IconButton
-              size="large"
-              sx={{
-                color: "#787774",
-                "&:hover": {
-                  backgroundColor: "rgba(55, 53, 47, 0.08)",
-                },
-              }}
-            >
-              <Badge badgeContent={3} color="error" sx={{ "& .MuiBadge-badge": { fontSize: "0.75rem" } }}>
-                <Notifications sx={{ fontSize: 26 }} />
-              </Badge>
-            </IconButton>
-
-            <IconButton
-              size="large"
-              sx={{
-                color: "#787774",
-                "&:hover": {
-                  backgroundColor: "rgba(55, 53, 47, 0.08)",
-                },
-              }}
-            >
-              <Settings sx={{ fontSize: 26 }} />
-            </IconButton>
-
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box
               sx={{
                 display: "flex",
@@ -110,14 +82,14 @@ const Header = () => {
               >
                 {user.name?.charAt(0) || "U"}
               </Avatar>
+
               <Box sx={{ minWidth: 70 }}>
                 <Typography
                   variant="body2"
                   sx={{
                     fontWeight: 600,
-                    lineHeight: 1.3,
                     fontSize: "0.9375rem",
-                    color: "#37352f",
+                    lineHeight: 1.3,
                   }}
                 >
                   {user.name}
@@ -125,7 +97,6 @@ const Header = () => {
                 <Typography
                   variant="caption"
                   sx={{
-                    lineHeight: 1.2,
                     fontSize: "0.8125rem",
                     color: "#787774",
                   }}
