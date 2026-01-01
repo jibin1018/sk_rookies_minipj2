@@ -299,9 +299,9 @@ const ScheduleList = () => {
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}
-                >
-                  {schedule.title}
-                </Typography>
+                  dangerouslySetInnerHTML={{ __html: schedule.content }}
+                />
+                {/* dangerouslySetInnerHTML 삽입(제목XSS)   */}
                 <Typography
                   sx={{
                     fontSize: "0.8125rem",
