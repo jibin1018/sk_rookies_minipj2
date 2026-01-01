@@ -102,7 +102,7 @@ public class FileService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional //ReadOnly 항목삭제
     public List<FileResponse> getTeamFiles(Long teamId, String folderPath) {
         // 권한 체크 없음 - 모든 팀 파일 조회 가능!
         Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();

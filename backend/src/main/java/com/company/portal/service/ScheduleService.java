@@ -80,7 +80,7 @@ public class ScheduleService {
         return convertToResponse(savedSchedule);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional // readonly 삭제
     public List<ScheduleResponse> getTeamSchedules(Long teamId) {
         // 팀 소속 확인 없음 - 모든 팀 일정 조회 가능!
         Long currentEmployeeId = SecurityUtil.getCurrentEmployeeId();
