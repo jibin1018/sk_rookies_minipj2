@@ -1,0 +1,18 @@
+# Flask Web Framework
+Flask==3.0.0
+flask-cors==4.0.0
+
+# HTTP Requests
+requests==2.31.0
+
+# Claude AI API
+anthropic==0.8.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# SSH Connection (for infrastructure scanning)
+paramiko==3.4.0
+
+# Utilities
+Werkzeug==3.0.1
