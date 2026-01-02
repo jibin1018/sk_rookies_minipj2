@@ -37,11 +37,21 @@ const ApprovalPage = () => {
   const [employees, setEmployees] = useState([])
 
   const [formData, setFormData] = useState({
-    documentType: "휴가신청서",
+    type: "VACATION", // documentType → type, Enum 값으로 변경
     title: "",
     content: "",
     approverIds: [],
   })
+
+  // 문서 종류 매핑
+  const documentTypeMap = {
+    VACATION: "휴가",
+    BUSINESS_TRIP: "출장",
+    EXPENSE: "지출결의",
+    OVERTIME: "연장근무",
+    PURCHASE: "구매요청",
+    OTHER: "기타",
+  }
 
   useEffect(() => {
     fetchMyApprovals()
@@ -80,7 +90,6 @@ const ApprovalPage = () => {
 
   const fetchEmployees = async () => {
     try {
-      // getAllEmployees() → getApprovers()로 변경
       const response = await employeeService.getApprovers()
       if (response.success) {
         const otherEmployees = response.data.filter((emp) => emp.id !== user?.id)
@@ -107,7 +116,7 @@ const ApprovalPage = () => {
         alert("결재가 상신되었습니다")
         setDialogOpen(false)
         setFormData({
-          documentType: "휴가신청서",
+          type: "VACATION",
           title: "",
           content: "",
           approverIds: [],
@@ -137,7 +146,9 @@ const ApprovalPage = () => {
   }
 
   const handleProcess = async (approvalId, action) => {
-    const comment = window.prompt(action === "APPROVE" ? "승인 의견을 입력하세요 (선택사항)" : "반려 사유를 입력하세요")
+    const comment = window.prompt(
+      action === "APPROVE" ? "승인 의견을 입력하세요 (선택사항)" : "반려 사유를 입력하세요"
+    )
 
     if (action === "REJECT" && !comment) {
       alert("반려 사유를 입력해야 합니다")
@@ -293,7 +304,7 @@ const ApprovalPage = () => {
                   >
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start", mb: 2 }}>
                       <Chip
-                        label={approval.documentType}
+                        label={documentTypeMap[approval.type] || approval.type}
                         size="small"
                         sx={{
                           height: "24px",
@@ -359,7 +370,7 @@ const ApprovalPage = () => {
                   >
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start", mb: 2 }}>
                       <Chip
-                        label={approval.documentType}
+                        label={documentTypeMap[approval.type] || approval.type}
                         size="small"
                         sx={{
                           height: "24px",
@@ -397,22 +408,23 @@ const ApprovalPage = () => {
         )}
       </Box>
 
-      {/* Dialogs remain similar with minor styling updates */}
+      {/* 결재 상신 Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>결재 상신</DialogTitle>
         <DialogContent>
           <FormControl fullWidth sx={{ mt: 2, mb: 2 }}>
             <InputLabel>문서 종류</InputLabel>
             <Select
-              value={formData.documentType}
+              value={formData.type}
               label="문서 종류"
-              onChange={(e) => setFormData({ ...formData, documentType: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
             >
-              <MenuItem value="휴가신청서">휴가신청서</MenuItem>
-              <MenuItem value="지출결의서">지출결의서</MenuItem>
-              <MenuItem value="구매요청서">구매요청서</MenuItem>
-              <MenuItem value="업무보고서">업무보고서</MenuItem>
-              <MenuItem value="기안서">기안서</MenuItem>
+              <MenuItem value="VACATION">휴가신청서</MenuItem>
+              <MenuItem value="BUSINESS_TRIP">출장신청서</MenuItem>
+              <MenuItem value="EXPENSE">지출결의서</MenuItem>
+              <MenuItem value="OVERTIME">연장근무신청서</MenuItem>
+              <MenuItem value="PURCHASE">구매요청서</MenuItem>
+              <MenuItem value="OTHER">기타</MenuItem>
             </Select>
           </FormControl>
 
@@ -443,7 +455,9 @@ const ApprovalPage = () => {
               value={formData.approverIds}
               label="결재자 선택 (순서대로)"
               onChange={(e) => setFormData({ ...formData, approverIds: e.target.value })}
-              renderValue={(selected) => selected.map((id) => employees.find((emp) => emp.id === id)?.name).join(" → ")}
+              renderValue={(selected) =>
+                selected.map((id) => employees.find((emp) => emp.id === id)?.name).join(" → ")
+              }
             >
               {employees.map((emp) => (
                 <MenuItem key={emp.id} value={emp.id}>
@@ -471,7 +485,7 @@ const ApprovalPage = () => {
                 {selectedApproval.title}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.9375rem", mt: 0.5 }}>
-                문서 종류: {selectedApproval.documentType}
+                문서 종류: {documentTypeMap[selectedApproval.type] || selectedApproval.type}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.9375rem" }}>
                 요청자: {selectedApproval.requesterName}
@@ -493,7 +507,7 @@ const ApprovalPage = () => {
               결재선
             </Typography>
             <Stepper activeStep={selectedApproval.currentStep - 1} orientation="vertical">
-              {selectedApproval.approvalLines.map((line) => (
+              {selectedApproval.approvalLines.map((line, index) => (
                 <Step key={line.id}>
                   <StepLabel
                     StepIconProps={{
@@ -509,7 +523,7 @@ const ApprovalPage = () => {
                   >
                     <Box>
                       <Typography variant="body2" sx={{ fontSize: "1rem", fontWeight: 500 }}>
-                        {line.approverName} ({line.stepOrder}차 결재자)
+                        {line.approverName} ({index + 1}차 결재자)
                       </Typography>
                       <Chip
                         label={getStatusLabel(line.status)}
@@ -533,9 +547,7 @@ const ApprovalPage = () => {
             </Stepper>
           </DialogContent>
           <DialogActions sx={{ p: 2.5 }}>
-            {selectedApproval.approvalLines.some(
-              (line) => line.approverId === user.id && line.status === "PENDING",
-            ) && (
+            {selectedApproval.approvalLines.some((line) => line.approverId === user.id && line.status === "PENDING") && (
               <>
                 <Button
                   startIcon={<Close />}
