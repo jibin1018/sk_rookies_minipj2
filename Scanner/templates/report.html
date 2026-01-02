@@ -533,9 +533,9 @@
             
             <!-- 액션 버튼 -->
             <div class="actions">
-                <a href="/download/{{ scan_id }}" class="btn btn-primary">
-                    📄 보고서 다운로드
-                </a>
+                <button id="downloadReportBtn" class="btn btn-primary" onclick="generateAndDownloadReport()">
+                    📄 보고서 다운로드 (AI 분석 포함)
+                </button>
                 <a href="/" class="btn btn-secondary">
                     🔄 새로운 진단
                 </a>
@@ -546,6 +546,41 @@
     <script>
         const scanId = "{{ scan_id }}";
         let allResults = [];
+        
+        async function generateAndDownloadReport() {
+            const btn = document.getElementById('downloadReportBtn');
+            const originalText = btn.textContent;
+            
+            try {
+                btn.disabled = true;
+                btn.textContent = '🤖 AI 분석 및 보고서 생성 중...';
+                
+                // 1. 보고서 생성 요청
+                const response = await fetch(`/api/report/generate/${scanId}`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '보고서 생성 실패');
+                }
+                
+                const data = await response.json();
+                
+                // 2. 파일 다운로드 (iframe 방식이 아닌 직접 이동 방식 사용)
+                window.location.href = data.report_url;
+                
+                // 3. 페이지 새로고침하여 분석 결과 화면에 표시 (선택사항)
+                // loadResults(); 
+                
+            } catch (error) {
+                console.error('보고서 생성 오류:', error);
+                alert('보고서 생성 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
         
         // 마크다운을 HTML로 변환 (간단한 버전)
         function markdownToHtml(markdown) {
