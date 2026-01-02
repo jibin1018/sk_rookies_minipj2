@@ -1,11 +1,15 @@
-// src/services/employeeService.js
-
 import api from './api';
-import CryptoJS from 'crypto-js';
 
 const employeeService = {
+  // 관리자 전용 - 전체 사원 조회
   getAllEmployees: async () => {
     const response = await api.get('/employees');
+    return response.data;
+  },
+
+  // 모든 사용자 - 결재자 선택용
+  getApprovers: async () => {
+    const response = await api.get('/employees/approvers');
     return response.data;
   },
 
@@ -15,15 +19,7 @@ const employeeService = {
   },
 
   createEmployee: async (employeeData) => {
-    // 항상 SHA-256 해시
-    const hashedPassword = CryptoJS.SHA256(employeeData.password).toString();
-
-    const requestData = {
-      ...employeeData,
-      password: hashedPassword,
-    };
-
-    const response = await api.post('/employees', requestData);
+    const response = await api.post('/employees', employeeData);
     return response.data;
   },
 

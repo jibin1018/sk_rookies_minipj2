@@ -29,7 +29,7 @@ public interface TeamScheduleRepository extends JpaRepository<TeamSchedule, Long
             @Param("end") LocalDateTime end
     );
 
-    // ✅ Dashboard용 (이미 있음)
+    // ✅ Dashboard용
     @Query("""
         SELECT COUNT(s)
         FROM TeamSchedule s
@@ -38,6 +38,21 @@ public interface TeamScheduleRepository extends JpaRepository<TeamSchedule, Long
           AND s.endDate >= :start
     """)
     long countWeeklySchedules(
+            @Param("teamId") Long teamId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    // ✅ Dashboard용 - 이번 주 일정 리스트
+    @Query("""
+        SELECT s
+        FROM TeamSchedule s
+        WHERE s.team.id = :teamId
+          AND s.startDate <= :end
+          AND s.endDate >= :start
+        ORDER BY s.startDate ASC
+    """)
+    List<TeamSchedule> findWeeklySchedules(
             @Param("teamId") Long teamId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end

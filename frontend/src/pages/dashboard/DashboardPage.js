@@ -1,7 +1,19 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Container, Grid, Paper, Typography, Box, Card, CardContent } from "@mui/material"
+import {
+  Container,
+  Grid,
+  Paper,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+} from "@mui/material"
 import { Article, Schedule, Description, Feedback, TrendingUp } from "@mui/icons-material"
 import { useAuth } from "../../contexts/AuthContext"
 import api from "../../services/api"
@@ -18,6 +30,7 @@ const DashboardPage = () => {
   const fetchDashboard = async () => {
     try {
       const res = await api.get("/dashboard/summary")
+      console.log("대시보드 데이터:", res.data.data)
       setSummary(res.data.data)
     } catch (err) {
       console.error("대시보드 데이터 조회 실패", err)
@@ -30,7 +43,7 @@ const DashboardPage = () => {
     {
       title: "사내 게시판",
       value: summary?.boardCount ?? 0,
-      subtitle: "새 글",
+      subtitle: "전체 글",
       icon: <Article fontSize="large" />,
       color: "#3b82f6",
       bgColor: "#eff6ff",
@@ -54,7 +67,7 @@ const DashboardPage = () => {
     {
       title: "건의사항",
       value: summary?.suggestionCount ?? 0,
-      subtitle: "진행중",
+      subtitle: "전체 건의",
       icon: <Feedback fontSize="large" />,
       color: "#8b5cf6",
       bgColor: "#faf5ff",
@@ -63,7 +76,7 @@ const DashboardPage = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 1 }}>
-      {/* ===== 상단 환영 영역 ===== */}
+      {/* 상단 환영 영역 */}
       <Paper
         sx={{
           p: 4,
@@ -87,7 +100,7 @@ const DashboardPage = () => {
         </Box>
       </Paper>
 
-      {/* ===== 통계 카드 ===== */}
+      {/* 통계 카드 */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {stats.map((stat, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
@@ -131,6 +144,7 @@ const DashboardPage = () => {
         ))}
       </Grid>
 
+      {/* 최근 공지사항 & 이번 주 일정 */}
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3, height: "100%" }}>
@@ -140,18 +154,52 @@ const DashboardPage = () => {
                 최근 공지사항
               </Typography>
             </Box>
-            <Box
-              sx={{
-                p: 3,
-                backgroundColor: "#f9fafb",
-                borderRadius: 2,
-                textAlign: "center",
-              }}
-            >
-              <Typography variant="body2" color="text.secondary">
-                좌측 메뉴에서 사내 게시판을 확인하세요
-              </Typography>
-            </Box>
+            {!summary?.recentNotices || summary.recentNotices.length === 0 ? (
+              <Box
+                sx={{
+                  p: 3,
+                  backgroundColor: "#f9fafb",
+                  borderRadius: 2,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  공지사항이 없습니다
+                </Typography>
+              </Box>
+            ) : (
+              <List sx={{ p: 0 }}>
+                {summary.recentNotices.map((notice, index) => (
+                  <Box key={notice.id}>
+                    <ListItem
+                      sx={{
+                        px: 2,
+                        py: 1.5,
+                        cursor: "pointer",
+                        borderRadius: 1,
+                        "&:hover": {
+                          backgroundColor: "#f9fafb",
+                        },
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Typography variant="body1" sx={{ fontWeight: 500, mb: 0.5 }}>
+                            {notice.title}
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography variant="caption" color="text.secondary">
+                            {notice.authorName} · {notice.createdAt}
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                    {index < summary.recentNotices.length - 1 && <Divider />}
+                  </Box>
+                ))}
+              </List>
+            )}
           </Paper>
         </Grid>
 
@@ -163,18 +211,52 @@ const DashboardPage = () => {
                 이번 주 일정
               </Typography>
             </Box>
-            <Box
-              sx={{
-                p: 3,
-                backgroundColor: "#f9fafb",
-                borderRadius: 2,
-                textAlign: "center",
-              }}
-            >
-              <Typography variant="body2" color="text.secondary">
-                좌측 메뉴에서 팀 일정을 확인하세요
-              </Typography>
-            </Box>
+            {!summary?.weeklySchedules || summary.weeklySchedules.length === 0 ? (
+              <Box
+                sx={{
+                  p: 3,
+                  backgroundColor: "#f9fafb",
+                  borderRadius: 2,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  이번 주 일정이 없습니다
+                </Typography>
+              </Box>
+            ) : (
+              <List sx={{ p: 0 }}>
+                {summary.weeklySchedules.map((schedule, index) => (
+                  <Box key={schedule.id}>
+                    <ListItem
+                      sx={{
+                        px: 2,
+                        py: 1.5,
+                        cursor: "pointer",
+                        borderRadius: 1,
+                        "&:hover": {
+                          backgroundColor: "#f9fafb",
+                        },
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Typography variant="body1" sx={{ fontWeight: 500, mb: 0.5 }}>
+                            {schedule.title}
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography variant="caption" color="text.secondary">
+                            {schedule.date} {schedule.time}
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                    {index < summary.weeklySchedules.length - 1 && <Divider />}
+                  </Box>
+                ))}
+              </List>
+            )}
           </Paper>
         </Grid>
       </Grid>

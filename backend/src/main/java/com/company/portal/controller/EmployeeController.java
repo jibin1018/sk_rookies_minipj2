@@ -5,6 +5,7 @@ import com.company.portal.dto.request.EmployeeUpdateRequest;
 import com.company.portal.dto.response.ApiResponse;
 import com.company.portal.dto.response.EmployeeResponse;
 import com.company.portal.service.EmployeeService;
+import com.company.portal.service.common.EmployeeQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +22,22 @@ import java.util.List;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+    private final EmployeeQueryService employeeQueryService;
 
+    // 관리자 전용 - 전체 사원 관리
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<EmployeeResponse>>> getAllEmployees() {
         List<EmployeeResponse> employees = employeeService.getAllEmployees();
+        return ResponseEntity.ok(ApiResponse.success(employees));
+    }
+
+    // 모든 사용자 접근 가능 - 결재자 선택용
+    @GetMapping("/approvers")
+    public ResponseEntity<ApiResponse<List<EmployeeResponse>>> getApprovers() {
+        log.info("결재자 목록 조회 요청");
+        List<EmployeeResponse> employees = employeeQueryService.getAllEmployees();
+        log.info("결재자 목록 조회 완료: {} 명", employees.size());
         return ResponseEntity.ok(ApiResponse.success(employees));
     }
 

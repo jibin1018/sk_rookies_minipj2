@@ -80,13 +80,15 @@ const ApprovalPage = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await employeeService.getAllEmployees()
+      // getAllEmployees() → getApprovers()로 변경
+      const response = await employeeService.getApprovers()
       if (response.success) {
         const otherEmployees = response.data.filter((emp) => emp.id !== user?.id)
+        console.log("결재자 목록:", otherEmployees)
         setEmployees(otherEmployees)
       }
     } catch (error) {
-      console.error("사원 목록 조회 실패:", error)
+      console.error("결재자 목록 조회 실패:", error)
     }
   }
 

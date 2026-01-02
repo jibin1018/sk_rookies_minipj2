@@ -44,4 +44,6 @@ public class Suggestion {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+    private Boolean isAnonymous;
 }

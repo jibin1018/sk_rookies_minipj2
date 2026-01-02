@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CompanyBoardRepository extends JpaRepository<CompanyBoard, Long> {
 
@@ -17,6 +19,9 @@ public interface CompanyBoardRepository extends JpaRepository<CompanyBoard, Long
     Page<CompanyBoard> findByIsNoticeTrue(Pageable pageable);
 
     long countByIsNoticeTrue();
+
+    // 최근 공지사항 5개
+    List<CompanyBoard> findTop5ByIsNoticeTrueOrderByCreatedAtDesc();
 
     @Query("SELECT b FROM CompanyBoard b WHERE b.title LIKE %:keyword% OR b.content LIKE %:keyword%")
     Page<CompanyBoard> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
