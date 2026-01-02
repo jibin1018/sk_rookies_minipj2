@@ -283,6 +283,10 @@ npm start
 ## 👥 개발자
 
 - 박지빈 - SK Shieldus 루키즈 28기
+- 김동현 - SK Shieldus 루키즈 28기
+- 김한수 - SK Shieldus 루키즈 28기
+- 정의상 - SK Shieldus 루키즈 28기
+- 정현학 - SK Shieldus 루키즈 28기
 
 ---
 
