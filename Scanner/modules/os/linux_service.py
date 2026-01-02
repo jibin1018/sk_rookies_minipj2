@@ -3,7 +3,7 @@ KISA Linux 보안 가이드 - 불필요한 서비스 점검
 """
 import paramiko
 
-def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22):
+def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'Linux 불필요한 서비스 점검',
         'category': 'KISA Linux 보안',
@@ -19,7 +19,7 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, timeout=10)
+        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, key_filename=ssh_key_file, timeout=10)
         
         # 1. 실행 중인 서비스 확인
         details.append("[서비스-1] 실행 중인 서비스 확인")

@@ -650,21 +650,24 @@
             resultsList.innerHTML = '';
             
             results.forEach((result, index) => {
-                const div = document.createElement('div');
-                div.className = `result-item ${result.status.toLowerCase()}`;
-                div.dataset.severity = result.severity || 'MEDIUM';
-                div.dataset.status = result.status;
+                const status = result.status || 'UNKNOWN';
+                const severity = result.severity || 'MEDIUM';
                 
-                const statusEmoji = result.status === 'VULNERABLE' ? '❌' : 
-                                   result.status === 'SAFE' ? '✅' : '⚠️';
+                const div = document.createElement('div');
+                div.className = `result-item ${status.toLowerCase()}`;
+                div.dataset.severity = severity;
+                div.dataset.status = status;
+                
+                const statusEmoji = status === 'VULNERABLE' ? '❌' : 
+                                   status === 'SAFE' ? '✅' : '⚠️';
                 
                 let html = `
                     <div class="result-header">
                         <div class="result-title">${statusEmoji} ${result.name}</div>
                         <div class="badges">
-                            <span class="badge ${result.severity.toLowerCase()}">${result.severity}</span>
-                            <span class="badge ${result.status === 'VULNERABLE' ? 'vulnerable' : 'safe'}">
-                                ${result.status === 'VULNERABLE' ? '취약' : '안전'}
+                            <span class="badge ${severity.toLowerCase()}">${severity}</span>
+                            <span class="badge ${status === 'VULNERABLE' ? 'vulnerable' : 'safe'}">
+                                ${status === 'VULNERABLE' ? '취약' : '안전'}
                             </span>
                         </div>
                     </div>

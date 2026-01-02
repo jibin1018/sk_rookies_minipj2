@@ -1,0 +1,560 @@
+================================================================================
+보안 취약점 스캔 보고서
+================================================================================
+대상: http://3.39.161.64/
+날짜: 2026-01-02 10:35:26
+================================================================================
+
+요약
+--------------------------------------------------------------------------------
+전체 테스트: 18
+취약점 발견: 6
+안전: 12
+CRITICAL: 2
+HIGH: 2
+위험 점수: 34/100
+
+상세 결과
+================================================================================
+
+[SQL Injection (종합)]
+상태: SAFE
+심각도: CRITICAL
+권장사항: Prepared Statement/ORM 사용, 입력값 검증, 최소 권한 원칙
+
+상세:
+[SQLi-1] Error-based SQL Injection
+
+[SQLi-2] Authentication Bypass
+
+[SQLi-3] Union-based SQL Injection
+
+[SQLi-4] Boolean-based Blind SQLi
+  ✓ Boolean Blind SQLi 방어됨
+
+[SQLi-5] Time-based Blind SQLi
+
+[SQLi-6] ORDER BY 절 SQL Injection
+
+[SQLi-7] Second-order SQLi
+
+[SQLi-8] NoSQL Injection
+
+✓ 전반적으로 SQL Injection 방어가 잘 되어 있습니다
+
+--------------------------------------------------------------------------------
+
+[Cross-Site Scripting (XSS)]
+상태: VULNERABLE
+심각도: HIGH
+발견된 취약점:
+  - CSP 헤더 미설정
+권장사항: HTML 엔티티 인코딩, CSP 헤더, HttpOnly 쿠키, input sanitization
+
+상세:
+[XSS-1] Reflected XSS 테스트
+
+[XSS-2] Stored XSS 테스트
+
+[XSS-3] DOM-based XSS 테스트
+
+[XSS-4] CSP 헤더 확인
+  ✗ Content-Security-Policy 헤더 없음
+
+[XSS-5] HttpOnly 쿠키 확인
+
+[XSS-6] Mutation XSS 테스트
+
+[XSS-7] JavaScript URL Scheme
+
+[XSS-8] X-XSS-Protection 헤더
+  • X-XSS-Protection 헤더 없음 (CSP 권장)
+
+--------------------------------------------------------------------------------
+
+[Path Traversal (경로 순회)]
+상태: SAFE
+심각도: HIGH
+권장사항: 파일 경로 검증, 화이트리스트, chroot jail, 절대 경로 사용 금지
+
+상세:
+[경로순회-1] 파일 다운로드 경로 순회
+
+[경로순회-2] LFI (Local File Inclusion)
+
+[경로순회-3] RFI (Remote File Inclusion)
+  ⚠ RFI 가능성: http://example.com/shell.txt
+  ⚠ RFI 가능성: https://pastebin.com/raw/malicious
+  ⚠ RFI 가능성: ftp://attacker.com/shell.php
+
+[경로순회-4] 민감 파일 직접 접근
+
+[경로순회-5] 디렉터리 리스팅
+
+[경로순회-6] 로그 파일 접근
+
+✓ 경로 순회 방어가 잘 되어 있습니다
+
+--------------------------------------------------------------------------------
+
+[File Upload (파일 업로드)]
+상태: SAFE
+심각도: CRITICAL
+권장사항: 파일 확장자 검증(화이트리스트), 실행 권한 제거, 파일명 난수화, 저장 경로 분리
+
+상세:
+[파일업로드-1] 위험한 확장자 업로드 테스트
+  ✓ PHP Web Shell 차단됨 (403)
+  ✓ JSP Web Shell 차단됨 (403)
+  ✓ ASP Web Shell 차단됨 (403)
+  ✓ Executable File 차단됨 (403)
+  ✓ HTML File (XSS) 차단됨 (403)
+  ✓ PHP Web Shell 차단됨 (403)
+  ✓ JSP Web Shell 차단됨 (403)
+  ✓ ASP Web Shell 차단됨 (403)
+  ✓ Executable File 차단됨 (403)
+  ✓ HTML File (XSS) 차단됨 (403)
+  ✓ PHP Web Shell 차단됨 (403)
+  ✓ JSP Web Shell 차단됨 (403)
+  ✓ ASP Web Shell 차단됨 (403)
+  ✓ Executable File 차단됨 (403)
+  ✓ HTML File (XSS) 차단됨 (403)
+
+[파일업로드-2] 우회 기법 테스트
+
+✓ 파일 업로드 취약점이 발견되지 않았습니다
+
+--------------------------------------------------------------------------------
+
+[Command Injection (명령어 삽입)]
+상태: SAFE
+심각도: CRITICAL
+권장사항: 사용자 입력으로 시스템 명령 실행 금지, 화이트리스트, 안전한 API 사용
+
+상세:
+[명령삽입-1] 파일 처리 명령어 삽입
+
+[명령삽입-2] 파일 변환 명령어 삽입
+
+[명령삽입-3] 네트워크 진단 명령어 삽입
+
+[명령삽입-4] 로그 조회 명령어 삽입
+
+[명령삽입-5] SSTI (Template Injection)
+
+[명령삽입-6] Expression Language Injection
+
+[명령삽입-7] Blind Command Injection
+  • Blind Command Injection은 Out-of-band 테스트 필요
+
+✓ Command Injection 방어가 잘 되어 있습니다
+
+--------------------------------------------------------------------------------
+
+[XXE (XML External Entity)]
+상태: SAFE
+심각도: HIGH
+권장사항: XML 파서 외부 엔티티 비활성화, JSON 사용 권장, DTD 처리 금지
+
+상세:
+[XXE-1] XML 파싱 XXE 테스트
+
+[XXE-2] SOAP XXE 테스트
+
+[XXE-3] DOCTYPE 처리 확인
+  ✓ DOCTYPE 처리 차단
+
+[XXE-4] XML Bomb (DoS)
+
+[XXE-5] XInclude 공격
+  ✓ XInclude 차단
+
+[XXE-6] SVG 파일 XXE
+
+[XXE-7] Office 문서 XXE
+  • Office 문서 XXE는 수동 테스트 필요
+
+[XXE-8] XML 파서 에러 분석
+
+✓ XXE 방어가 잘 되어 있습니다
+
+--------------------------------------------------------------------------------
+
+[Insecure Deserialization (역직렬화)]
+상태: SAFE
+심각도: CRITICAL
+권장사항: 신뢰할 수 없는 데이터 역직렬화 금지, JSON 사용, 화이트리스트 기반 검증
+
+상세:
+[역직렬화-1] Java 역직렬화 테스트
+  ✓ Java 역직렬화 취약점 없음
+
+[역직렬화-2] Python Pickle 테스트
+  ✓ Pickle 취약점 없음
+
+[역직렬화-3] PHP 역직렬화 테스트
+  ✓ PHP 역직렬화 취약점 없음
+
+[역직렬화-4] Node.js 역직렬화
+  ✓ Node.js 역직렬화 안전
+
+[역직렬화-5] 세션 조작 테스트
+  ✓ 세션 무결성 검증 존재
+
+[역직렬화-6] .NET 역직렬화
+  ✓ .NET 역직렬화 안전
+
+--------------------------------------------------------------------------------
+
+[Input Validation Bypass (입력값 우회)]
+상태: SAFE
+심각도: MEDIUM
+권장사항: 서버측 입력 검증 강화, 타입 체크, 길이 제한, 화이트리스트 방식
+
+상세:
+[입력우회-1] 타입 혼동 공격
+  ✓ 타입 검증 적절
+
+[입력우회-2] 파라미터 오염 (HPP)
+
+[입력우회-3] 특수문자 우회
+
+[입력우회-4] 길이 제한 우회
+
+[입력우회-5] Null Byte 삽입
+
+[입력우회-6] CRLF Injection
+
+[입력우회-7] 정수 오버플로우
+
+[입력우회-8] 음수 값 우회
+
+[입력우회-9] Format String
+
+--------------------------------------------------------------------------------
+
+[Broken Access Control (접근 제어)]
+상태: VULNERABLE
+심각도: CRITICAL
+발견된 취약점:
+  - 관리자 페이지 무인증 접근: /admin
+  - 관리자 페이지 무인증 접근: /administrator
+권장사항: 모든 요청에 대해 서버 측 권한 검증, 최소 권한 원칙 적용
+
+상세:
+[접근제어-1] IDOR 테스트
+
+[접근제어-2] 파일 접근 제어
+
+[접근제어-3] 관리자 페이지 접근
+  ✗ /admin - 인증 없이 접근
+  ✗ /administrator - 인증 없이 접근
+
+--------------------------------------------------------------------------------
+
+[Cryptographic Failures (암호화 실패)]
+상태: VULNERABLE
+심각도: CRITICAL
+발견된 취약점:
+  - HTTP 사용 (암호화되지 않은 통신)
+  - 서버 정보 노출: nginx/1.29.4
+  - HSTS 헤더 없음
+  - Content-Type Sniffing 방지 헤더 없음
+  - Clickjacking 방지 헤더 없음
+권장사항: HTTPS 사용, 강력한 해시 함수, 민감 데이터 암호화
+
+상세:
+[암호화-1] HTTPS 사용 확인
+  ✗ HTTP 프로토콜 사용 중
+
+[암호화-2] 서버 정보 노출
+  ✗ Server: nginx/1.29.4
+
+[암호화-3] 보안 헤더 확인
+  ✗ Strict-Transport-Security 미설정
+  ✗ X-Content-Type-Options 미설정
+  ✗ X-Frame-Options 미설정
+
+--------------------------------------------------------------------------------
+
+[Authentication Failures (인증 실패)]
+상태: SAFE
+심각도: HIGH
+권장사항: 강력한 비밀번호 정책, MFA, 세션 관리 강화
+
+상세:
+[인증-1] Brute Force 방어
+
+[인증-2] 약한 비밀번호 허용
+
+--------------------------------------------------------------------------------
+
+[Security Misconfiguration (보안 설정 오류)]
+상태: SAFE
+심각도: HIGH
+권장사항: 기본 설정 변경, 불필요한 기능 비활성화, 에러 메시지 최소화
+
+상세:
+[설정-1] 디렉터리 리스팅
+
+[설정-2] 에러 메시지 노출
+  ✓ 일반 에러 메시지
+
+[설정-3] 기본 계정 확인
+
+--------------------------------------------------------------------------------
+
+[SSRF (Server-Side Request Forgery)]
+상태: SAFE
+심각도: MEDIUM
+권장사항: URL 화이트리스트, Private IP 차단, DNS Rebinding 방어
+
+상세:
+[SSRF 테스트]
+  ✓ SSRF 취약점 없음
+
+--------------------------------------------------------------------------------
+
+[CORS/CSRF 취약점]
+상태: SAFE
+심각도: MEDIUM
+발견된 취약점:
+  - CSRF 토큰 없음
+권장사항: CORS 정책 강화, CSRF 토큰 사용
+
+상세:
+[CORS 설정]
+  ✓ CORS 헤더 없음
+
+[CSRF 보호]
+  ⚠ CSRF 토큰 미발견
+
+--------------------------------------------------------------------------------
+
+[A04: Insecure Design (안전하지 않은 설계)]
+상태: VULNERABLE
+심각도: HIGH
+발견된 취약점:
+  - 레이트 리미팅 없음 (30회 연속 요청 허용)
+  - 2FA 코드 무차별 대입 가능
+  - CAPTCHA 없음 (봇 공격 취약)
+권장사항: 비즈니스 로직 보안 강화, 레이트 리미팅, 안전한 토큰 설계, 트랜잭션 검증
+
+상세:
+[설계-1] 비밀번호 재설정 토큰 보안
+  ✓ 양호: 재설정 토큰 보안 적절
+
+[설계-2] 레이트 리미팅 확인
+  ✗ 취약: 30회 무제한 요청 가능 (0.5초)
+
+[설계-3] 비즈니스 로직 검증
+
+[설계-4] 세션 타임아웃 확인
+
+[설계-5] 계정 열거 취약점 확인
+
+[설계-6] 2단계 인증 설계 확인
+  ✗ 취약: OTP 시도 횟수 제한 없음
+
+[설계-7] 동시 세션 제한 확인
+
+[설계-8] CAPTCHA 확인
+  ⚠ CAPTCHA 미적용
+
+[설계-9] 트랜잭션 무결성
+  • Race Condition은 부하 테스트 도구 필요
+  • 권장: 데이터베이스 트랜잭션 격리 수준 확인
+
+[설계-10] 비밀번호 복구 보안
+
+--------------------------------------------------------------------------------
+
+[A06: Vulnerable and Outdated Components]
+상태: VULNERABLE
+심각도: MEDIUM
+발견된 취약점:
+  - 민감한 파일 노출: PHPUnit RCE (CVE-2017-9841)
+  - 민감한 파일 노출: Git 저장소 노출
+  - 민감한 파일 노출: Composer 설정 노출
+  - 민감한 파일 노출: npm 패키지 정보 노출
+  - 민감한 파일 노출: 환경 변수 파일 노출
+  - 민감한 파일 노출: IIS 설정 노출
+  - 민감한 파일 노출: ELMAH 에러 로그 노출
+  - 민감한 파일 노출: ASP.NET 추적 정보
+  - 민감한 파일 노출: Spring Boot Actuator
+  - 민감한 파일 노출: Spring Boot Health
+  - 민감한 파일 노출: Jolokia JMX
+  - 민감한 파일 노출: Security.txt
+  - WordPress 파일 노출
+권장사항: 정기적인 의존성 업데이트, 보안 스캔 도구(npm audit, OWASP Dependency-Check) 사용, CVE 모니터링
+
+상세:
+[컴포넌트-1] 서버 및 프레임워크 버전 정보 노출 확인
+  서버 정보: nginx/1.29.4
+  ⚠ 버전 정보 노출: 1.29.4
+
+[컴포넌트-2] 클라이언트 라이브러리 버전 확인
+
+[컴포넌트-3] 취약한 컴포넌트 경로 확인
+  ✗ 취약: /vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php 접근 가능
+  ✗ 취약: /.git/config 접근 가능
+  ✗ 취약: /composer.json 접근 가능
+  ✗ 취약: /package.json 접근 가능
+  ✗ 취약: /.env 접근 가능
+  ✗ 취약: /web.config 접근 가능
+  ✗ 취약: /elmah.axd 접근 가능
+  ✗ 취약: /trace.axd 접근 가능
+  ✗ 취약: /actuator/env 접근 가능
+  ✗ 취약: /actuator/health 접근 가능
+  ✗ 취약: /jolokia 접근 가능
+  ✗ 취약: /.well-known/security.txt 접근 가능
+
+[컴포넌트-4] 의존성 파일 분석
+  • package.json 파싱 실패
+
+[컴포넌트-5] CMS 버전 확인
+  ⚠ WordPress 사용 중 - 버전 확인 필요
+
+[컴포넌트-6] 프레임워크 정보 노출
+
+[컴포넌트-7] CDN 사용 확인
+
+--------------------------------------------------------------------------------
+
+[A08: Software and Data Integrity Failures]
+상태: VULNERABLE
+심각도: MEDIUM
+발견된 취약점:
+  - CI/CD 설정 노출: GitHub Actions
+  - CI/CD 설정 노출: GitLab CI
+  - CI/CD 설정 노출: Jenkins
+  - CI/CD 설정 노출: CircleCI
+  - CI/CD 설정 노출: Azure Pipelines
+  - CI/CD 설정 노출: Travis CI
+  - CI/CD 설정 노출: Bitbucket Pipelines
+  - CI/CD 설정 노출: Drone CI
+  - 업데이트 무결성 검증 부재
+  - 다운로드 파일 체크섬 미제공
+  - 의존성 잠금 파일 노출: npm
+  - 의존성 잠금 파일 노출: Yarn
+  - 의존성 잠금 파일 노출: Composer
+  - 의존성 잠금 파일 노출: Bundler
+  - 의존성 잠금 파일 노출: Pipenv
+  - 의존성 잠금 파일 노출: Poetry
+  - 의존성 잠금 파일 노출: pnpm
+  - 컨테이너 설정 노출: /Dockerfile
+  - 컨테이너 설정 노출: /docker-compose.yml
+  - 컨테이너 설정 노출: /docker-compose.yaml
+  - 컨테이너 설정 노출: /.dockerignore
+  - 컨테이너 설정 노출: /kubernetes.yml
+  - 컨테이너 설정 노출: /k8s.yaml
+  - 컨테이너 설정 노출: /.helm
+  - 소스맵 노출: /static/js/main.fbea8616.js.map
+  - Git 저장소 노출
+권장사항: SRI 태그 사용, 디지털 서명 검증, 무결성 검사 구현, 안전한 역직렬화
+
+상세:
+[무결성-1] Subresource Integrity (SRI) 확인
+  • 외부 CDN 리소스 없음
+
+[무결성-2] 안전하지 않은 역직렬화 확인
+  ✓ 양호: 역직렬화 에러 없음
+
+[무결성-3] CI/CD 설정 파일 노출 확인
+  ✗ 취약: /.github/workflows 접근 가능
+  ✗ 취약: /.gitlab-ci.yml 접근 가능
+  ✗ 취약: /Jenkinsfile 접근 가능
+  ✗ 취약: /.circleci/config.yml 접근 가능
+  ✗ 취약: /azure-pipelines.yml 접근 가능
+  ✗ 취약: /.travis.yml 접근 가능
+  ✗ 취약: /bitbucket-pipelines.yml 접근 가능
+  ✗ 취약: /.drone.yml 접근 가능
+
+[무결성-4] 자동 업데이트 보안 확인
+  ⚠ 주의: /updates/check - 서명/체크섬 없음
+
+[무결성-5] 다운로드 가능한 파일 무결성
+  ⚠ 주의: /downloads - 파일 무결성 검증 수단 없음
+
+[무결성-6] 의존성 잠금 파일 확인
+  ⚠ 정보 노출: /package-lock.json
+  ⚠ 정보 노출: /yarn.lock
+  ⚠ 정보 노출: /composer.lock
+  ⚠ 정보 노출: /Gemfile.lock
+  ⚠ 정보 노출: /Pipfile.lock
+  ⚠ 정보 노출: /poetry.lock
+  ⚠ 정보 노출: /pnpm-lock.yaml
+
+[무결성-7] 쿠키/토큰 서명 확인
+
+[무결성-8] 컨테이너 설정 파일 노출
+  ⚠ /Dockerfile 접근 가능
+  ⚠ /docker-compose.yml 접근 가능
+  ⚠ /docker-compose.yaml 접근 가능
+  ⚠ /.dockerignore 접근 가능
+  ⚠ /kubernetes.yml 접근 가능
+  ⚠ /k8s.yaml 접근 가능
+  ⚠ /.helm 접근 가능
+
+[무결성-9] 소스맵 파일 노출
+  ⚠ /static/js/main.fbea8616.js.map 접근 가능 (소스 코드 유출)
+
+[무결성-10] Git 저장소 노출
+  ✗ 취약: /.git/HEAD 접근 가능
+
+--------------------------------------------------------------------------------
+
+[A09: Security Logging and Monitoring Failures]
+상태: SAFE
+심각도: LOW
+발견된 취약점:
+  - 로그인 실패 로깅 부재 가능성
+  - 요청 추적 ID 없음
+권장사항: 보안 이벤트 로깅, 실시간 알림, 로그 보호 및 백업, 모니터링 대시보드
+
+상세:
+[로깅-1] 로그인 실패 로깅 확인
+  ⚠ 주의: 연속 실패 시 응답 시간 변화 없음
+     평균: 0.02초, 편차: 0.00초
+     (로깅/검증 없이 즉시 응답 가능성)
+
+[로깅-2] 에러 메시지 노출 확인
+  ✓ 양호: 일반적인 에러 메시지만 노출
+
+[로깅-3] 로그 파일 노출 확인
+  ✓ 양호: 로그 파일 노출 없음
+
+[로깅-4] 보안 관련 응답 헤더 확인
+  ⚠ 주의: Request-ID 헤더 없음
+     (로그 추적 및 디버깅 어려움)
+  ⚠ 주의: Rate Limit 헤더 없음
+
+[로깅-5] 감사 로그 기능 추정
+  ✓ 양호: 감사 로그 엔드포인트 존재 (/api/audit-logs)
+
+[로깅-6] 의심스러운 활동 탐지
+  ⚠ 주의: 스캐닝 패턴 탐지 안 됨
+     (IDS/IPS 없음 가능성)
+
+[로깅-7] 로그 보존 정책
+  • 로그 보존 정책은 수동 확인 필요
+
+[로깅-8] 민감 정보 로깅 확인
+  ✓ 양호: 민감 정보 마스킹됨
+
+[로깅-9] 보안 이벤트 로깅 범위
+  • 다음 이벤트 로깅 권장:
+    - 로그인 실패 (인증)
+    - 권한 상승 시도 (인가)
+    - SQL Injection 시도 (공격 탐지)
+    - 비정상 트래픽 (이상 탐지)
+
+[로깅-10] 로그 무결성 보호
+  • 로그 무결성 보호는 다음 사항 확인 필요:
+    - Write-once 저장소 사용
+    - 로그 서명/해시
+    - 중앙 집중식 로깅 (SIEM)
+    - 로그 백업 및 아카이빙
+
+--------------------------------------------------------------------------------
+

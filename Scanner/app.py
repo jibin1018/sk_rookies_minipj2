@@ -299,6 +299,9 @@ def api_start_infra_scan():
         # 포트 번호 제거 (예: :8080)
         if ':' in ssh_host:
             ssh_host = ssh_host.split(':')[0]
+        # 경로 제거 (예: 1.2.3.4/api -> 1.2.3.4)
+        if '/' in ssh_host:
+            ssh_host = ssh_host.split('/')[0]
 
         ssh_user = data.get('ssh_user', '').strip()
         ssh_pass = data.get('ssh_pass', '').strip()
@@ -369,6 +372,9 @@ def api_start_infra_scan_pem():
         # 포트 번호 제거 (예: :8080)
         if ':' in ssh_host:
             ssh_host = ssh_host.split(':')[0]
+        # 경로 제거 (예: 1.2.3.4/api -> 1.2.3.4)
+        if '/' in ssh_host:
+            ssh_host = ssh_host.split('/')[0]
 
         ssh_user = request.form.get('ssh_user', '').strip()
         ssh_port = int(request.form.get('ssh_port', 22))

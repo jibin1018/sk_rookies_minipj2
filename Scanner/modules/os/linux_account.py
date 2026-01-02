@@ -20,7 +20,7 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, timeout=10)
+        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, key_filename=ssh_key_file, timeout=10)
         
         # 1. root 원격 접속 제한 확인
         details.append("[계정-1] root 원격 접속 제한 확인")

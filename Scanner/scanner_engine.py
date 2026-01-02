@@ -230,7 +230,8 @@ class InfraScanner:
                         self.ssh_host,
                         self.ssh_user,
                         self.ssh_pass,
-                        self.ssh_port
+                        self.ssh_port,
+                        self.ssh_key_file
                     )
                     results.append(result)
                     
@@ -241,6 +242,7 @@ class InfraScanner:
                     results.append({
                         'name': test_name,
                         'status': 'ERROR',
+                        'severity': 'ERROR',
                         'error': str(e),
                         'details': f'테스트 실행 중 오류: {str(e)}'
                     })
