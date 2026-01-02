@@ -29,6 +29,20 @@ class VulnerabilityScanner:
         ('vulnerable_components', 'Vulnerable Components', 'MEDIUM'),
         ('integrity_failures', 'Integrity Failures', 'MEDIUM'),
         ('logging_failures', 'Logging Failures', 'LOW'),
+        # 새로 추가된 취약점 스캐너
+        ('security_headers', 'Security Headers', 'MEDIUM'),
+        ('information_disclosure', 'Information Disclosure', 'MEDIUM'),
+        ('idor', 'IDOR', 'CRITICAL'),
+        ('jwt_vulnerabilities', 'JWT Vulnerabilities', 'CRITICAL'),
+        ('rate_limiting', 'Rate Limiting', 'HIGH'),
+        ('file_upload_bypass', 'File Upload Bypass', 'CRITICAL'),
+        ('business_logic', 'Business Logic', 'HIGH'),
+        ('mass_assignment', 'Mass Assignment', 'HIGH'),
+        ('open_redirect', 'Open Redirect', 'MEDIUM'),
+        ('http_method_abuse', 'HTTP Method Abuse', 'MEDIUM'),
+        ('host_header_injection', 'Host Header Injection', 'MEDIUM'),
+        ('http_parameter_pollution', 'HTTP Parameter Pollution', 'MEDIUM'),
+        ('graphql_security', 'GraphQL Security', 'MEDIUM'),
     ]
     
     def __init__(self, target_url, scan_status=None, scan_id=None, scan_types=['all']):
@@ -84,59 +98,85 @@ class VulnerabilityScanner:
         return module_name in scan_types
     
     def generate_report(self, results, output_dir='reports'):
-        """보고서 생성 (TXT, JSON)"""
+        """보고서 생성 (Markdown)"""
         os.makedirs(output_dir, exist_ok=True)
-        
+
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f'scan_report_{timestamp}'
-        
-        # TXT 보고서
-        txt_path = os.path.join(output_dir, f'{filename}.txt')
-        
-        with open(txt_path, 'w', encoding='utf-8') as f:
-            f.write("=" * 80 + "\n")
-            f.write("보안 취약점 스캔 보고서\n")
-            f.write("=" * 80 + "\n")
-            f.write(f"대상: {self.target_url}\n")
-            f.write(f"날짜: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write("=" * 80 + "\n\n")
-            
+
+        # Markdown 보고서
+        md_path = os.path.abspath(os.path.join(output_dir, f'{filename}.md'))
+
+        with open(md_path, 'w', encoding='utf-8') as f:
+            # 제목
+            f.write("# 🔒 보안 취약점 스캔 보고서\n\n")
+            f.write(f"**대상**: `{self.target_url}`  \n")
+            f.write(f"**날짜**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+            f.write("---\n\n")
+
             # 요약
             summary = self._calculate_summary(results)
-            f.write("요약\n")
-            f.write("-" * 80 + "\n")
-            f.write(f"전체 테스트: {summary['total']}\n")
-            f.write(f"취약점 발견: {summary['vulnerable']}\n")
-            f.write(f"안전: {summary['safe']}\n")
-            f.write(f"CRITICAL: {summary['critical']}\n")
-            f.write(f"HIGH: {summary['high']}\n")
-            f.write(f"위험 점수: {summary['risk_score']}/100\n")
-            f.write("\n")
-            
+            f.write("## 📊 요약\n\n")
+            f.write("| 항목 | 개수 |\n")
+            f.write("|------|------|\n")
+            f.write(f"| 전체 테스트 | {summary['total']} |\n")
+            f.write(f"| 취약점 발견 | **{summary['vulnerable']}** |\n")
+            f.write(f"| 안전 | {summary['safe']} |\n")
+            f.write(f"| 🔴 CRITICAL | {summary['critical']} |\n")
+            f.write(f"| 🟠 HIGH | {summary['high']} |\n")
+            f.write(f"| 🟡 MEDIUM | {summary['medium']} |\n")
+            f.write(f"| 🟢 LOW | {summary['low']} |\n")
+            f.write(f"| **위험 점수** | **{summary['risk_score']}/100** |\n\n")
+
+            # 심각도별 아이콘 매핑
+            severity_icons = {
+                'CRITICAL': '🔴',
+                'HIGH': '🟠',
+                'MEDIUM': '🟡',
+                'LOW': '🟢',
+                'UNKNOWN': '⚪'
+            }
+
+            # 상태별 아이콘 매핑
+            status_icons = {
+                'VULNERABLE': '❌',
+                'SAFE': '✅',
+                'ERROR': '⚠️'
+            }
+
             # 상세 결과
-            f.write("상세 결과\n")
-            f.write("=" * 80 + "\n\n")
-            
-            for result in results:
-                f.write(f"[{result['name']}]\n")
-                f.write(f"상태: {result['status']}\n")
-                f.write(f"심각도: {result.get('severity', 'UNKNOWN')}\n")
-                
+            f.write("---\n\n")
+            f.write("## 📋 상세 결과\n\n")
+
+            for idx, result in enumerate(results, 1):
+                severity = result.get('severity', 'UNKNOWN')
+                status = result.get('status', 'UNKNOWN')
+
+                severity_icon = severity_icons.get(severity, '⚪')
+                status_icon = status_icons.get(status, '❓')
+
+                f.write(f"### {idx}. {status_icon} {result['name']}\n\n")
+                f.write(f"- **상태**: {status_icon} `{status}`\n")
+                f.write(f"- **심각도**: {severity_icon} `{severity}`\n")
+
                 if result.get('vulnerabilities'):
-                    f.write(f"발견된 취약점:\n")
+                    f.write(f"\n**발견된 취약점**:\n\n")
                     for vuln in result['vulnerabilities']:
-                        f.write(f"  - {vuln}\n")
-                
+                        f.write(f"- {vuln}\n")
+                    f.write("\n")
+
                 if result.get('recommendation'):
-                    f.write(f"권장사항: {result['recommendation']}\n")
-                
+                    f.write(f"**권장사항**: {result['recommendation']}\n\n")
+
                 if result.get('details'):
-                    f.write(f"\n상세:\n{result['details']}\n")
-                
-                f.write("\n" + "-" * 80 + "\n\n")
-        
-        print(f"보고서 생성 완료: {txt_path}")
-        return txt_path
+                    f.write(f"<details>\n<summary>상세 정보 보기</summary>\n\n")
+                    f.write(f"```\n{result['details']}\n```\n\n")
+                    f.write(f"</details>\n\n")
+
+                f.write("---\n\n")
+
+        print(f"보고서 생성 완료: {md_path}")
+        return md_path
     
     def _calculate_summary(self, results):
         """요약 통계 계산"""
@@ -250,59 +290,86 @@ class InfraScanner:
         return results
 
     def generate_report(self, results, output_dir='reports'):
-        """보고서 생성 (TXT)"""
+        """보고서 생성 (Markdown)"""
         os.makedirs(output_dir, exist_ok=True)
-        
+
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f'infra_scan_report_{timestamp}'
-        
-        # TXT 보고서
-        txt_path = os.path.join(output_dir, f'{filename}.txt')
-        
-        with open(txt_path, 'w', encoding='utf-8') as f:
-            f.write("=" * 80 + "\n")
-            f.write("인프라 보안 진단 보고서\n")
-            f.write("=" * 80 + "\n")
-            f.write(f"대상: {self.ssh_host}\n")
-            f.write(f"날짜: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write("=" * 80 + "\n\n")
-            
+
+        # Markdown 보고서
+        md_path = os.path.abspath(os.path.join(output_dir, f'{filename}.md'))
+
+        with open(md_path, 'w', encoding='utf-8') as f:
+            # 제목
+            f.write("# 🖥️ 인프라 보안 진단 보고서\n\n")
+            f.write(f"**대상**: `{self.ssh_host}`  \n")
+            f.write(f"**날짜**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+            f.write("---\n\n")
+
             # 요약
             summary = self._calculate_summary(results)
-            f.write("요약\n")
-            f.write("-" * 80 + "\n")
-            f.write(f"전체 테스트: {summary['total']}\n")
-            f.write(f"취약점 발견: {summary['vulnerable']}\n")
-            f.write(f"양호: {summary['safe']}\n")
-            f.write(f"CRITICAL: {summary['critical']}\n")
-            f.write(f"HIGH: {summary['high']}\n")
-            f.write(f"위험 점수: {summary['risk_score']}/100\n")
-            f.write("\n")
-            
+            f.write("## 📊 요약\n\n")
+            f.write("| 항목 | 개수 |\n")
+            f.write("|------|------|\n")
+            f.write(f"| 전체 테스트 | {summary['total']} |\n")
+            f.write(f"| 취약점 발견 | **{summary['vulnerable']}** |\n")
+            f.write(f"| 양호 | {summary['safe']} |\n")
+            f.write(f"| 🔴 CRITICAL | {summary['critical']} |\n")
+            f.write(f"| 🟠 HIGH | {summary['high']} |\n")
+            f.write(f"| 🟡 MEDIUM | {summary['medium']} |\n")
+            f.write(f"| 🟢 LOW | {summary['low']} |\n")
+            f.write(f"| **위험 점수** | **{summary['risk_score']}/100** |\n\n")
+
+            # 심각도별 아이콘 매핑
+            severity_icons = {
+                'CRITICAL': '🔴',
+                'HIGH': '🟠',
+                'MEDIUM': '🟡',
+                'LOW': '🟢',
+                'ERROR': '⚠️',
+                'UNKNOWN': '⚪'
+            }
+
+            # 상태별 아이콘 매핑
+            status_icons = {
+                'VULNERABLE': '❌',
+                'SAFE': '✅',
+                'ERROR': '⚠️'
+            }
+
             # 상세 결과
-            f.write("상세 결과\n")
-            f.write("=" * 80 + "\n\n")
-            
-            for result in results:
-                f.write(f"[{result['name']}]\n")
-                f.write(f"상태: {result['status']}\n")
-                f.write(f"심각도: {result.get('severity', 'UNKNOWN')}\n")
-                
+            f.write("---\n\n")
+            f.write("## 📋 상세 결과\n\n")
+
+            for idx, result in enumerate(results, 1):
+                severity = result.get('severity', 'UNKNOWN')
+                status = result.get('status', 'UNKNOWN')
+
+                severity_icon = severity_icons.get(severity, '⚪')
+                status_icon = status_icons.get(status, '❓')
+
+                f.write(f"### {idx}. {status_icon} {result['name']}\n\n")
+                f.write(f"- **상태**: {status_icon} `{status}`\n")
+                f.write(f"- **심각도**: {severity_icon} `{severity}`\n")
+
                 if result.get('vulnerabilities'):
-                    f.write(f"발견된 취약점:\n")
+                    f.write(f"\n**발견된 취약점**:\n\n")
                     for vuln in result['vulnerabilities']:
-                        f.write(f"  - {vuln}\n")
-                
+                        f.write(f"- {vuln}\n")
+                    f.write("\n")
+
                 if result.get('recommendation'):
-                    f.write(f"권장사항: {result['recommendation']}\n")
-                
+                    f.write(f"**권장사항**: {result['recommendation']}\n\n")
+
                 if result.get('details'):
-                    f.write(f"\n상세:\n{result['details']}\n")
-                
-                f.write("\n" + "-" * 80 + "\n\n")
-        
-        print(f"보고서 생성 완료: {txt_path}")
-        return txt_path
+                    f.write(f"<details>\n<summary>상세 정보 보기</summary>\n\n")
+                    f.write(f"```\n{result['details']}\n```\n\n")
+                    f.write(f"</details>\n\n")
+
+                f.write("---\n\n")
+
+        print(f"보고서 생성 완료: {md_path}")
+        return md_path
     
     def _calculate_summary(self, results):
         """요약 통계 계산"""

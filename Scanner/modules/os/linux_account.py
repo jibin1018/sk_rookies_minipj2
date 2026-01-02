@@ -4,7 +4,7 @@ root 계정 원격 접속 제한, 불필요한 계정 제거, 패스워드 없�
 """
 import paramiko
 
-def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22):
+def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'U-01: Linux 계정 관리',
         'category': 'KISA Linux 보안',
