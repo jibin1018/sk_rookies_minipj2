@@ -306,8 +306,21 @@
                         required
                     />
                 </div>
+
+                <!-- 인증 방식 선택 -->
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label>인증 방식 *</label>
+                    <div style="display: flex; gap: 20px; margin-top: 5px;">
+                        <label style="font-weight: normal; display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="authMethod" value="password" checked onchange="toggleAuthMethod()"> 비밀번호
+                        </label>
+                        <label style="font-weight: normal; display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="authMethod" value="pem" onchange="toggleAuthMethod()"> PEM 키 파일
+                        </label>
+                    </div>
+                </div>
                 
-                <div class="input-group">
+                <div class="input-group" id="passwordGroup">
                     <label for="sshPass">SSH 비밀번호 *</label>
                     <input 
                         type="password" 
@@ -316,6 +329,17 @@
                         required
                     />
                     <p class="hint">⚠️ 비밀번호는 암호화되어 전송되며 저장되지 않습니다</p>
+                </div>
+
+                <div class="input-group" id="pemGroup" style="display: none;">
+                    <label for="pemFile">PEM 키 파일 *</label>
+                    <input 
+                        type="file" 
+                        id="pemFile" 
+                        accept=".pem,.key"
+                        style="padding: 10px; background: white; border: 1px solid #e0e0e0; border-radius: 8px; width: 100%;"
+                    />
+                    <p class="hint">⚠️ .pem 또는 .key 파일을 업로드하세요 (서버에 임시 저장 후 삭제됨)</p>
                 </div>
                 
                 <div class="input-group">
@@ -425,14 +449,34 @@
             }
         });
         
+        function toggleAuthMethod() {
+            const method = document.querySelector('input[name="authMethod"]:checked').value;
+            const passGroup = document.getElementById('passwordGroup');
+            const pemGroup = document.getElementById('pemGroup');
+            const sshPass = document.getElementById('sshPass');
+            const pemFile = document.getElementById('pemFile');
+            
+            if (method === 'password') {
+                passGroup.style.display = 'block';
+                pemGroup.style.display = 'none';
+                sshPass.setAttribute('required', 'required');
+                pemFile.removeAttribute('required');
+            } else {
+                passGroup.style.display = 'none';
+                pemGroup.style.display = 'block';
+                sshPass.removeAttribute('required');
+                pemFile.setAttribute('required', 'required');
+            }
+        }
+
         // 인프라 스캔 폼 제출
         document.getElementById('infraScanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const sshHost = document.getElementById('sshHost').value.trim();
             const sshUser = document.getElementById('sshUser').value.trim();
-            const sshPass = document.getElementById('sshPass').value.trim();
             const sshPort = parseInt(document.getElementById('sshPort').value);
+            const authMethod = document.querySelector('input[name="authMethod"]:checked').value;
             
             const scanBtn = document.getElementById('infraScanBtn');
             const errorMsg = document.getElementById('errorMsg');
@@ -444,17 +488,37 @@
             scanBtn.textContent = '진단 시작 중...';
             
             try {
-                const response = await fetch('/api/infra/scan/start', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ssh_host: sshHost,
-                        ssh_user: sshUser,
-                        ssh_pass: sshPass,
-                        ssh_port: sshPort,
-                        categories: ['all']
-                    })
-                });
+                let response;
+                
+                if (authMethod === 'password') {
+                    const sshPass = document.getElementById('sshPass').value.trim();
+                    response = await fetch('/api/infra/scan/start', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            ssh_host: sshHost,
+                            ssh_user: sshUser,
+                            ssh_pass: sshPass,
+                            ssh_port: sshPort,
+                            categories: ['all']
+                        })
+                    });
+                } else {
+                    const pemFile = document.getElementById('pemFile').files[0];
+                    if (!pemFile) throw new Error('PEM 파일을 선택해주세요.');
+                    
+                    const formData = new FormData();
+                    formData.append('ssh_host', sshHost);
+                    formData.append('ssh_user', sshUser);
+                    formData.append('ssh_port', sshPort);
+                    formData.append('pem_file', pemFile);
+                    formData.append('categories', JSON.stringify(['all']));
+                    
+                    response = await fetch('/api/infra/scan/start/pem', {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
                 
                 if (!response.ok) {
                     const error = await response.json();

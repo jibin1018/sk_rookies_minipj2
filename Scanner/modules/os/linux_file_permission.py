@@ -4,7 +4,7 @@ KISA Linux 보안 가이드 - U-44: 파일 및 디렉터리 권한 설정
 """
 import paramiko
 
-def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22):
+def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'U-44: Linux 파일 및 디렉터리 권한',
         'category': 'KISA Linux 보안',
@@ -20,7 +20,7 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, timeout=10)
+        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, key_filename=ssh_key_file, timeout=10)
         
         # 1. /etc/passwd 권한 확인
         details.append("[파일권한-1] /etc/passwd 권한 확인")

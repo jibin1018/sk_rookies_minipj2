@@ -48,11 +48,10 @@ def view_report(scan_id):
     """보고서 보기 페이지"""
     if scan_id not in scan_status:
         return "스캔을 찾을 수 없습니다", 404
-    
-    if scan_status[scan_id]['status'] != 'completed':
-        return "스캔이 완료되지 않았습니다", 400
-    
-    return render_template('report.html', 
+
+    # 검증 로직 제거: 진행 중('running') 상태라도 페이지에 접근 가능하도록 허용
+
+    return render_template('report.html',
                          scan_id=scan_id,
                          data=scan_status[scan_id])
 
@@ -184,7 +183,7 @@ def run_web_scan_background(scan_id, target_url, use_claude, scan_types):
         
         # 보고서 생성
         scan_status[scan_id]['current_test'] = '보고서 생성 중...'
-        report_path = scanner.generate_report()
+        report_path = scanner.generate_report(results)
         scan_status[scan_id]['report_path'] = report_path
         
         scan_status[scan_id]['current_test'] = '스캔 완료!'
@@ -260,7 +259,7 @@ def api_scan_results(scan_id):
     
     return jsonify({
         'scan_id': scan_id,
-        'target_url': data['target_url'],
+        'target_url': data.get('target_url') or data.get('target'),
         'type': data['type'],
         'status': data['status'],
         'started_at': data.get('started_at'),
@@ -292,6 +291,18 @@ def api_start_infra_scan():
         data = request.json
         
         ssh_host = data.get('ssh_host', '').strip()
+        # 프로토콜 제거 (http://, https://)
+        if ssh_host.startswith('http://'):
+            ssh_host = ssh_host[7:]
+        elif ssh_host.startswith('https://'):
+            ssh_host = ssh_host[8:]
+        # 포트 번호 제거 (예: :8080)
+        if ':' in ssh_host:
+            ssh_host = ssh_host.split(':')[0]
+        # 경로 제거 (예: 1.2.3.4/api -> 1.2.3.4)
+        if '/' in ssh_host:
+            ssh_host = ssh_host.split('/')[0]
+
         ssh_user = data.get('ssh_user', '').strip()
         ssh_pass = data.get('ssh_pass', '').strip()
         ssh_port = data.get('ssh_port', 22)
@@ -338,35 +349,163 @@ def api_start_infra_scan():
         logger.error(f"인프라 스캔 시작 오류: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/infra/scan/start/pem', methods=['POST'])
+def api_start_infra_scan_pem():
+    """
+    인프라 보안 스캔 시작 (.pem 키 파일 사용)
+
+    Form Data:
+    - ssh_host: EC2 공용 IP
+    - ssh_user: 사용자명 (ubuntu, ec2-user 등)
+    - ssh_port: SSH 포트 (기본 22)
+    - pem_file: .pem 키 파일
+    - categories: 스캔 카테고리 (JSON 문자열)
+    """
+    try:
+        # 폼 데이터 받기
+        ssh_host = request.form.get('ssh_host', '').strip()
+        # 프로토콜 제거 (http://, https://)
+        if ssh_host.startswith('http://'):
+            ssh_host = ssh_host[7:]
+        elif ssh_host.startswith('https://'):
+            ssh_host = ssh_host[8:]
+        # 포트 번호 제거 (예: :8080)
+        if ':' in ssh_host:
+            ssh_host = ssh_host.split(':')[0]
+        # 경로 제거 (예: 1.2.3.4/api -> 1.2.3.4)
+        if '/' in ssh_host:
+            ssh_host = ssh_host.split('/')[0]
+
+        ssh_user = request.form.get('ssh_user', '').strip()
+        ssh_port = int(request.form.get('ssh_port', 22))
+        categories = json.loads(request.form.get('categories', '["all"]'))
+
+        # 입력 검증
+        if not all([ssh_host, ssh_user]):
+            return jsonify({'error': 'SSH 호스트와 사용자명을 입력하세요'}), 400
+
+        # .pem 파일 확인
+        if 'pem_file' not in request.files:
+            return jsonify({'error': '.pem 키 파일을 업로드하세요'}), 400
+
+        pem_file = request.files['pem_file']
+        if pem_file.filename == '':
+            return jsonify({'error': '.pem 키 파일을 선택하세요'}), 400
+
+        # .pem 파일 임시 저장
+        os.makedirs('temp', exist_ok=True)
+        temp_pem_path = os.path.join('temp', f'{datetime.now().strftime("%Y%m%d_%H%M%S")}_{pem_file.filename}')
+        pem_file.save(temp_pem_path)
+
+        # 파일 권한 설정 (600)
+        os.chmod(temp_pem_path, 0o600)
+
+        # 스캔 ID 생성
+        scan_id = datetime.now().strftime("%Y%m%d_%H%M%S_infra")
+
+        # 스캔 상태 초기화
+        scan_status[scan_id] = {
+            'scan_id': scan_id,
+            'type': 'infrastructure',
+            'status': 'running',
+            'progress': 0,
+            'current_test': '인프라 스캔 초기화 중...',
+            'results': [],
+            'target': ssh_host,
+            'categories': categories,
+            'pem_file': temp_pem_path,
+            'started_at': datetime.now().isoformat(),
+            'completed_at': None
+        }
+
+        # 백그라운드 스캔
+        thread = threading.Thread(
+            target=run_infra_scan_background_pem,
+            args=(scan_id, ssh_host, ssh_user, ssh_port, temp_pem_path, categories)
+        )
+        thread.daemon = True
+        thread.start()
+
+        logger.info(f"인프라 스캔 시작 (PEM 키): {scan_id} - {ssh_host}")
+
+        return jsonify({
+            'success': True,
+            'scan_id': scan_id,
+            'message': '인프라 스캔이 시작되었습니다'
+        })
+
+    except Exception as e:
+        logger.error(f"인프라 스캔 시작 오류 (PEM): {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 def run_infra_scan_background(scan_id, ssh_host, ssh_user, ssh_pass, ssh_port, categories):
-    """백그라운드 인프라 스캔 실행"""
+    """백그라운드 인프라 스캔 실행 (비밀번호 방식)"""
     try:
         logger.info(f"[{scan_id}] 인프라 스캔 실행 중...")
-        
+
         scanner = InfraScanner(
             ssh_host, ssh_user, ssh_pass, ssh_port,
-            scan_status, scan_id
+            scan_status=scan_status, scan_id=scan_id
         )
-        
+
         results = scanner.scan_infrastructure(categories)
-        
+
         scan_status[scan_id]['status'] = 'completed'
         scan_status[scan_id]['progress'] = 100
         scan_status[scan_id]['results'] = results
         scan_status[scan_id]['current_test'] = '스캔 완료!'
         scan_status[scan_id]['completed_at'] = datetime.now().isoformat()
-        
+
         # 보고서 생성
-        report_path = scanner.generate_report()
+        report_path = scanner.generate_report(results)
         scan_status[scan_id]['report_path'] = report_path
-        
+
         logger.info(f"[{scan_id}] 인프라 스캔 완료")
-        
+
     except Exception as e:
         logger.error(f"[{scan_id}] 인프라 스캔 오류: {str(e)}")
         scan_status[scan_id]['status'] = 'error'
         scan_status[scan_id]['error'] = str(e)
         scan_status[scan_id]['completed_at'] = datetime.now().isoformat()
+
+def run_infra_scan_background_pem(scan_id, ssh_host, ssh_user, ssh_port, pem_file_path, categories):
+    """백그라운드 인프라 스캔 실행 (.pem 키 파일 방식)"""
+    try:
+        logger.info(f"[{scan_id}] 인프라 스캔 실행 중 (PEM 키)...")
+
+        scanner = InfraScanner(
+            ssh_host, ssh_user, ssh_pass=None, ssh_port=ssh_port,
+            ssh_key_file=pem_file_path, scan_status=scan_status, scan_id=scan_id
+        )
+
+        results = scanner.scan_infrastructure(categories)
+
+        scan_status[scan_id]['status'] = 'completed'
+        scan_status[scan_id]['progress'] = 100
+        scan_status[scan_id]['results'] = results
+        scan_status[scan_id]['current_test'] = '스캔 완료!'
+        scan_status[scan_id]['completed_at'] = datetime.now().isoformat()
+
+        # 보고서 생성
+        report_path = scanner.generate_report(results)
+        scan_status[scan_id]['report_path'] = report_path
+
+        logger.info(f"[{scan_id}] 인프라 스캔 완료 (PEM)")
+
+    except Exception as e:
+        logger.error(f"[{scan_id}] 인프라 스캔 오류 (PEM): {str(e)}")
+        scan_status[scan_id]['status'] = 'error'
+        scan_status[scan_id]['error'] = str(e)
+        scan_status[scan_id]['completed_at'] = datetime.now().isoformat()
+
+    finally:
+        # 사용 후 .pem 파일 삭제 (보안)
+        try:
+            if os.path.exists(pem_file_path):
+                os.remove(pem_file_path)
+                logger.info(f"[{scan_id}] .pem 파일 삭제 완료: {pem_file_path}")
+        except Exception as e:
+            logger.error(f"[{scan_id}] .pem 파일 삭제 실패: {str(e)}")
 
 # ============================================================================
 # 단일 테스트 API
@@ -615,19 +754,23 @@ def internal_error(error):
 # ============================================================================
 
 if __name__ == '__main__':
-    # 보고서 디렉토리 생성
+    # 보고서 및 임시 디렉토리 생성
     os.makedirs('reports', exist_ok=True)
-    
+    os.makedirs('temp', exist_ok=True)
+
+    # 환경변수에서 포트 읽기 (기본값 5000)
+    port = int(os.getenv('PORT', '5000'))
+
     print("\n" + "="*80)
     print("통합 보안 취약점 스캐너 API 서버")
     print("="*80)
-    print(f"웹 UI:       http://localhost:5000")
-    print(f"API 문서:    http://localhost:5000/api/docs")
-    print(f"헬스 체크:   http://localhost:5000/health")
+    print(f"웹 UI:       http://localhost:{port}")
+    print(f"API 문서:    http://localhost:{port}/api/docs")
+    print(f"헬스 체크:   http://localhost:{port}/health")
     print(f"Claude AI:   {'사용 가능' if claude_analyzer.is_available() else '비활성화 (.env 파일 확인)'}")
     print("="*80)
     print(f"웹 취약점:   {len(VulnerabilityScanner.WEB_TESTS)}개 테스트")
     print(f"인프라 진단: OS, Web Server, Database")
     print("="*80 + "\n")
-    
-    app.run(debug=True, host='0.0.0.0', port=5000, threaded=True)
+
+    app.run(debug=True, host='0.0.0.0', port=port, threaded=True)

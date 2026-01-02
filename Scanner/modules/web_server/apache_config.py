@@ -3,7 +3,7 @@ KISA 웹 서버 보안 가이드 - Apache 보안 설정
 """
 import paramiko
 
-def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22):
+def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'W-01~W-10: Apache 웹서버 보안 설정',
         'category': 'KISA 웹서버 보안',
@@ -19,7 +19,7 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, timeout=10)
+        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, key_filename=ssh_key_file, timeout=10)
         
         # Apache 설치 확인
         stdin, stdout, stderr = ssh.exec_command("which apache2 httpd 2>/dev/null | head -1")
