@@ -77,6 +77,25 @@ def summarize_scan(scan_id, data):
             'total': len(results),
             'vulnerable': sum(1 for r in results if r.get('status') == 'VULNERABLE')
         }
+    
+    # 보고서 파일 존재 여부 확인
+    has_report = False
+    report_dirs = ['reports', '../reports']  # Scanner 기준 + 루트 기준
+    report_filenames = [
+        f'scan_report_{scan_id}.md',
+        f'scan_report_{scan_id}.txt',
+        f'infra_scan_report_{scan_id}.md',
+        f'infra_scan_report_{scan_id}.txt',
+    ]
+    
+    for report_dir in report_dirs:
+        if has_report:
+            break
+        for filename in report_filenames:
+            file_path = os.path.join(report_dir, filename)
+            if os.path.exists(file_path):
+                has_report = True
+                break
         
     return {
         'scan_id': scan_id,
@@ -85,7 +104,8 @@ def summarize_scan(scan_id, data):
         'target': data.get('target_url') or data.get('target'),
         'started_at': data.get('started_at'),
         'completed_at': data.get('completed_at'),
-        'summary': summary
+        'summary': summary,
+        'has_report': has_report
     }
 
 # ============================================================================
@@ -330,7 +350,9 @@ def api_scan_results(scan_id):
         'completed_at': data.get('completed_at'),
         'summary': summary,
         'results': results,
-        'claude_analysis': data.get('claude_analysis')
+        'claude_analysis': data.get('claude_analysis'),
+        'metrics': data.get('metrics'),
+        'infra_profile': data.get('infra_profile')
     })
 
 @app.route('/api/report/generate/<scan_id>', methods=['POST'])
@@ -387,7 +409,12 @@ def get_raw_report(scan_id):
             elif os.path.exists(os.path.join('..', report_path)): report_path = os.path.abspath(os.path.join('..', report_path))
 
     if not report_path or not os.path.exists(report_path):
-        possible_names = [f"scan_report_{scan_id}.md", f"scan_report_{scan_id}.txt", f"infra_scan_report_{scan_id}.txt"]
+        possible_names = [
+            f"scan_report_{scan_id}.md", 
+            f"scan_report_{scan_id}.txt", 
+            f"infra_scan_report_{scan_id}.md",
+            f"infra_scan_report_{scan_id}.txt"
+        ]
         search_dirs = ['reports', '../reports', os.path.join(os.getcwd(), 'reports')]
         for directory in search_dirs:
             if not os.path.exists(directory): continue
@@ -841,16 +868,30 @@ def api_scans_history():
                         ctime = os.path.getctime(file_path)
                         dt_object = datetime.fromtimestamp(ctime)
                         
+                        # 보고서 파일에서 대상 정보 추출
+                        target_name = '점검 기록'
+                        try:
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                content = f.read(500)  # 처음 500자만 읽기
+                                # **대상**: `IP주소` 또는 **대상**: `URL` 패턴 찾기
+                                import re
+                                match = re.search(r'\*\*대상\*\*:\s*`([^`]+)`', content)
+                                if match:
+                                    target_name = match.group(1)
+                        except:
+                            pass
+                        
                         scans.append({
                             'scan_id': scan_id,
                             'type': 'infrastructure' if is_infra else 'web',
                             'status': 'completed',
-                            'target': '기존 점검 기록',
+                            'target': target_name,
                             'started_at': dt_object.isoformat(),
                             'completed_at': dt_object.isoformat(),
                             'summary': {'total': '?', 'vulnerable': '?'},
-                            'is_file_only': True, # 상세 데이터 없이 파일만 있음 표시
-                            'report_path': file_path
+                            'is_file_only': True,
+                            'report_path': file_path,
+                            'has_report': True
                         })
                         existing_ids.add(scan_id)
                         
@@ -891,8 +932,109 @@ def api_claude_analyze():
 
 @app.route('/api/docs')
 def api_docs():
-    """API 문서"""
-    return jsonify({'message': 'API 문서입니다 (내용 생략)'})
+    """API 문서 - 모든 엔드포인트 상세 정보"""
+    docs = {
+        "title": "Cyber Sentinel API Documentation",
+        "version": "2.0.0",
+        "description": "통합 보안 취약점 스캐너 API",
+        "base_url": request.host_url.rstrip('/'),
+        "endpoints": [
+            {
+                "path": "/api/scan/start",
+                "method": "POST",
+                "description": "웹 애플리케이션 보안 스캔 시작",
+                "request_body": {
+                    "target_url": {"type": "string", "required": True, "description": "스캔 대상 URL"},
+                    "use_claude": {"type": "boolean", "default": False, "description": "Claude AI 분석 활성화"},
+                    "use_infra_detection": {"type": "boolean", "default": True, "description": "인프라 자동 감지"},
+                    "scan_types": {"type": "array", "default": ["all"], "description": "스캔 유형 (all, injection, xss 등)"}
+                },
+                "response": {"scan_id": "string", "success": "boolean", "message": "string"}
+            },
+            {
+                "path": "/api/scan/status/<scan_id>",
+                "method": "GET",
+                "description": "스캔 진행 상태 조회",
+                "response": {
+                    "scan_id": "string",
+                    "status": "running|completed|error",
+                    "progress": "0-100",
+                    "current_test": "string"
+                }
+            },
+            {
+                "path": "/api/scan/results/<scan_id>",
+                "method": "GET",
+                "description": "스캔 결과 상세 조회",
+                "response": {
+                    "scan_id": "string",
+                    "target_url": "string",
+                    "summary": {"total": "int", "vulnerable": "int", "safe": "int"},
+                    "results": "array",
+                    "metrics": {
+                        "scan_duration": "float",
+                        "scripts_executed": "int",
+                        "scripts_skipped": "int",
+                        "avg_response_time": "float"
+                    },
+                    "claude_analysis": "object|null"
+                }
+            },
+            {
+                "path": "/api/infra/scan/start",
+                "method": "POST",
+                "description": "인프라 보안 스캔 시작",
+                "request_body": {
+                    "ssh_host": {"type": "string", "required": True},
+                    "ssh_port": {"type": "integer", "default": 22},
+                    "ssh_username": {"type": "string", "required": True},
+                    "ssh_password": {"type": "string", "required": False},
+                    "ssh_key_file": {"type": "string", "required": False}
+                }
+            },
+            {
+                "path": "/api/report/generate/<scan_id>",
+                "method": "POST",
+                "description": "보고서 파일 생성"
+            },
+            {
+                "path": "/api/report/raw/<scan_id>",
+                "method": "GET",
+                "description": "보고서 원본 텍스트 조회"
+            },
+            {
+                "path": "/api/scans/history",
+                "method": "GET",
+                "description": "스캔 히스토리 목록 조회",
+                "response": {"scans": "array", "total": "int"}
+            },
+            {
+                "path": "/api/claude/analyze",
+                "method": "POST",
+                "description": "Claude AI 분석 요청",
+                "request_body": {
+                    "target_url": {"type": "string", "required": True},
+                    "results": {"type": "array", "required": True}
+                }
+            },
+            {
+                "path": "/api/scripts/list",
+                "method": "GET",
+                "description": "사용 가능한 스크립트 목록"
+            },
+            {
+                "path": "/health",
+                "method": "GET",
+                "description": "서버 상태 확인"
+            }
+        ],
+        "error_codes": {
+            "400": "잘못된 요청",
+            "404": "리소스 없음",
+            "500": "서버 오류"
+        }
+    }
+    return jsonify(docs)
 
 @app.route('/health')
 def health_check():

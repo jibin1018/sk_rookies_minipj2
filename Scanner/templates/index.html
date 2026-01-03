@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,31 +15,35 @@
             --bg-secondary: #ffffff;
             --bg-card: rgba(255, 255, 255, 0.95);
             --bg-input: #f8fafc;
-            
+
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
             --primary-glow: rgba(37, 99, 235, 0.15);
             --secondary: #64748b;
-            
+
             --success: #059669;
             --warning: #d97706;
             --danger: #dc2626;
             --critical: #b91c1c;
             --info: #0891b2;
-            
+
             --text-main: #0f172a;
             --text-muted: #64748b;
             --text-dim: #94a3b8;
-            
+
             --border: #e2e8f0;
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            
+
             --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -49,19 +54,52 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-main); }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
 
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .text-primary { color: var(--primary) !important; }
-        .text-success { color: var(--success) !important; }
-        .text-danger { color: var(--danger) !important; }
-        .text-warning { color: var(--warning) !important; }
-        .text-muted { color: var(--text-muted) !important; }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .text-success {
+            color: var(--success) !important;
+        }
+
+        .text-danger {
+            color: var(--danger) !important;
+        }
+
+        .text-warning {
+            color: var(--warning) !important;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
 
         .glass-card {
             background: var(--bg-card);
@@ -106,7 +144,11 @@
             line-height: 1.5;
         }
 
-        .tabs-container { display: flex; justify-content: center; margin-bottom: 2rem; }
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
 
         .tabs {
             background: #e2e8f0;
@@ -130,13 +172,30 @@
             gap: 8px;
         }
 
-        .tab:hover { color: var(--text-main); background: rgba(255,255,255,0.5); }
-        .tab.active { background: var(--bg-secondary); color: var(--primary); box-shadow: var(--shadow-sm); }
+        .tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.5);
+        }
 
-        .tab-content { display: none; animation: fadeUp 0.4s var(--ease-out); }
-        .tab-content.active { display: block; }
+        .tab.active {
+            background: var(--bg-secondary);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
 
-        .input-group { margin-bottom: 1.5rem; position: relative; }
+        .tab-content {
+            display: none;
+            animation: fadeUp 0.4s var(--ease-out);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
 
         .input-label {
             display: block;
@@ -164,7 +223,11 @@
             background: var(--bg-secondary);
         }
 
-        .input-hint { margin-top: 6px; font-size: 0.8rem; color: var(--text-muted); }
+        .input-hint {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
 
         .checkbox-wrapper {
             display: flex;
@@ -178,8 +241,18 @@
             transition: all 0.2s;
         }
 
-        .checkbox-wrapper:hover { border-color: var(--primary); background: #eff6ff; }
-        .checkbox-wrapper input { accent-color: var(--primary); width: 18px; height: 18px; margin-right: 12px; margin-top: 3px; }
+        .checkbox-wrapper:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .checkbox-wrapper input {
+            accent-color: var(--primary);
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            margin-top: 3px;
+        }
 
         .btn-primary {
             width: 100%;
@@ -199,8 +272,19 @@
             gap: 8px;
         }
 
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.4); }
-        .btn-primary:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; box-shadow: none; transform: none; }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
 
         .btn-outline {
             padding: 8px 16px;
@@ -217,8 +301,16 @@
             font-weight: 500;
         }
 
-        .btn-outline:hover { border-color: #cbd5e1; background: #f8fafc; }
-        .btn-outline.active { background: #eff6ff; border-color: var(--primary); color: var(--primary); }
+        .btn-outline:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .btn-outline.active {
+            background: #eff6ff;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
 
         /* History List */
         .history-item {
@@ -231,11 +323,24 @@
             transition: all 0.2s;
         }
 
-        .history-item:hover { background: #f8fafc; }
-        .history-item:last-child { border-bottom: none; }
+        .history-item:hover {
+            background: #f8fafc;
+        }
 
-        .history-info h4 { font-size: 0.95rem; color: var(--text-main); margin-bottom: 4px; }
-        .history-info p { font-size: 0.8rem; color: var(--text-muted); }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-info h4 {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .history-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
 
         .badge {
             padding: 4px 10px;
@@ -246,9 +351,21 @@
             letter-spacing: 0.05em;
         }
 
-        .badge.web { background: #dbeafe; color: #1d4ed8; }
-        .badge.infra { background: #f3e8ff; color: #7c3aed; }
-        .badge.vuln { background: #fee2e2; color: #b91c1c; margin-left: 8px; }
+        .badge.web {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge.infra {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .badge.vuln {
+            background: #fee2e2;
+            color: #b91c1c;
+            margin-left: 8px;
+        }
 
         /* Terminal */
         .terminal-window {
@@ -260,16 +377,54 @@
             margin: 20px 0;
         }
 
-        .terminal-header { display: flex; gap: 6px; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
-        .dot.red { background: #ef4444; }
-        .dot.yellow { background: #f59e0b; }
-        .dot.green { background: #22c55e; }
+        .terminal-header {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
 
-        .terminal-content { color: #4ade80; font-size: 0.9rem; height: 150px; overflow-y: auto; line-height: 1.6; }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
 
-        .progress-bar-bg { height: 6px; background: #334155; border-radius: 3px; overflow: hidden; margin-top: 15px; }
-        .progress-bar-fill { height: 100%; background: #3b82f6; width: 0%; transition: width 0.3s linear; }
+        .dot.red {
+            background: #ef4444;
+        }
+
+        .dot.yellow {
+            background: #f59e0b;
+        }
+
+        .dot.green {
+            background: #22c55e;
+        }
+
+        .terminal-content {
+            color: #4ade80;
+            font-size: 0.9rem;
+            height: 150px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .progress-bar-bg {
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 0.3s linear;
+        }
 
         /* Modal */
         .modal {
@@ -279,7 +434,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             padding: 40px;
             overflow-y: auto;
@@ -294,7 +449,14 @@
             position: relative;
         }
 
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
 
         .report-viewer {
             background: #f8fafc;
@@ -305,37 +467,148 @@
             overflow-y: auto;
         }
 
-        .report-viewer h1, .report-viewer h2, .report-viewer h3 { margin-top: 16px; margin-bottom: 8px; color: var(--text-main); }
-        .report-viewer h1 { border-bottom: 2px solid var(--border); padding-bottom: 8px; }
-        .report-viewer ul, .report-viewer ol { margin-left: 20px; margin-bottom: 12px; }
-        .report-viewer p { margin-bottom: 12px; }
-        .report-viewer code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
-        .report-viewer pre { background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px; overflow-x: auto; margin-bottom: 12px; }
-        .report-viewer table { border-collapse: collapse; width: 100%; margin-bottom: 12px; }
-        .report-viewer th, .report-viewer td { border: 1px solid var(--border); padding: 10px; text-align: left; }
-        .report-viewer th { background: #f1f5f9; }
+        .report-viewer h1,
+        .report-viewer h2,
+        .report-viewer h3 {
+            margin-top: 16px;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .report-viewer h1 {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .report-viewer ul,
+        .report-viewer ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .report-viewer p {
+            margin-bottom: 12px;
+        }
+
+        .report-viewer code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+        }
+
+        .report-viewer pre {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .report-viewer table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .report-viewer th,
+        .report-viewer td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        .report-viewer th {
+            background: #f1f5f9;
+        }
 
         /* Features */
-        .features { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
-        .feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .feature-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
-        .feature-item i { font-size: 1.5rem; color: var(--primary); margin-bottom: 8px; }
-        .feature-item strong { display: block; font-size: 0.9rem; color: var(--text-main); }
-        .feature-item span { font-size: 0.8rem; color: var(--text-muted); }
+        .features {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .feature-item {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .feature-item i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .feature-item strong {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .feature-item span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
 
         /* Animations */
-        @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .feature-grid { grid-template-columns: repeat(2, 1fr); }
-            .container { padding: 20px 15px; }
-            .logo-icon { font-size: 2rem; }
-            .main-header h1 { font-size: 1.8rem; }
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+
+            .logo-icon {
+                font-size: 2rem;
+            }
+
+            .main-header h1 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -352,9 +625,11 @@
             <!-- Tabs -->
             <div class="tabs-container">
                 <div class="tabs">
-                    <button class="tab active" onclick="switchTab('web')"><i class="fa-solid fa-globe"></i> Web App</button>
+                    <button class="tab active" onclick="switchTab('web')"><i class="fa-solid fa-globe"></i> Web
+                        App</button>
                     <button class="tab" onclick="switchTab('infra')"><i class="fa-solid fa-server"></i> Infra</button>
-                    <button class="tab" onclick="switchTab('history')"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
+                    <button class="tab" onclick="switchTab('history')"><i class="fa-solid fa-clock-rotate-left"></i>
+                        History</button>
                 </div>
             </div>
 
@@ -363,7 +638,8 @@
                 <form id="webScanForm">
                     <div class="input-group">
                         <label class="input-label">Target URL</label>
-                        <input type="text" id="targetUrl" class="modern-input font-mono" placeholder="https://example.com" required>
+                        <input type="text" id="targetUrl" class="modern-input font-mono"
+                            placeholder="https://example.com" required>
                         <p class="input-hint">진단할 웹 애플리케이션의 URL을 입력하세요</p>
                     </div>
 
@@ -371,8 +647,24 @@
                         <label class="checkbox-wrapper">
                             <input type="checkbox" id="useClaude">
                             <div>
-                                <span style="display:block; font-weight:600; font-size: 0.95rem; color: var(--text-main);">Enable Claude AI Deep Analysis</span>
-                                <span style="font-size:0.8rem; color:var(--text-muted);">상세한 보안 분석 및 코드 패치 권장사항 제공</span>
+                                <span
+                                    style="display:block; font-weight:600; font-size: 0.95rem; color: var(--text-main);">Enable
+                                    Claude AI Deep Analysis</span>
+                                <span style="font-size:0.8rem; color:var(--text-muted);">상세한 보안 분석 및 코드 패치 권장사항
+                                    제공</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="useInfraDetection" checked>
+                            <div>
+                                <span
+                                    style="display:block; font-weight:600; font-size: 0.95rem; color: var(--text-main);">Enable
+                                    Smart Infra Detection</span>
+                                <span style="font-size:0.8rem; color:var(--text-muted);">인프라 자동 감지로 관련 스크립트만 실행 (성능
+                                    향상)</span>
                             </div>
                         </label>
                     </div>
@@ -383,17 +675,20 @@
                 </form>
             </div>
 
+
             <!-- Infra Scan Tab -->
             <div id="tab-infra" class="tab-content">
                 <form id="infraScanForm">
                     <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 15px;">
                         <div class="input-group">
                             <label class="input-label">Host IP / Domain</label>
-                            <input type="text" id="sshHost" class="modern-input font-mono" placeholder="192.168.1.100" required>
+                            <input type="text" id="sshHost" class="modern-input font-mono" placeholder="192.168.1.100"
+                                required>
                         </div>
                         <div class="input-group">
                             <label class="input-label">SSH Port</label>
-                            <input type="number" id="sshPort" class="modern-input font-mono" value="22" min="1" max="65535">
+                            <input type="number" id="sshPort" class="modern-input font-mono" value="22" min="1"
+                                max="65535">
                         </div>
                     </div>
 
@@ -405,7 +700,8 @@
                     <div class="input-group">
                         <label class="input-label">Authentication</label>
                         <div style="display:flex; gap:10px; margin-top:5px;">
-                            <button type="button" class="btn-outline active" onclick="toggleAuthMethod('password')">Password</button>
+                            <button type="button" class="btn-outline active"
+                                onclick="toggleAuthMethod('password')">Password</button>
                             <button type="button" class="btn-outline" onclick="toggleAuthMethod('pem')">PEM Key</button>
                         </div>
                     </div>
@@ -454,7 +750,9 @@
             </div>
 
             <!-- Error Message -->
-            <div id="errorMsg" style="display: none; background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 15px; border-radius: 10px; margin-top: 20px;"></div>
+            <div id="errorMsg"
+                style="display: none; background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 15px; border-radius: 10px; margin-top: 20px;">
+            </div>
 
             <!-- Features -->
             <div class="features">
@@ -504,7 +802,7 @@
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
+
             event.currentTarget.classList.add('active');
             document.getElementById(`tab-${tabName}`).classList.add('active');
 
@@ -538,19 +836,22 @@
         // Load Scan History
         async function loadHistory() {
             const listContainer = document.getElementById('historyList');
-            
+
             try {
                 const response = await fetch('/api/scans/history');
                 const data = await response.json();
-                
-                if (data.scans && data.scans.length > 0) {
+
+                // Filter: only show scans that have report files
+                const scansWithReports = data.scans ? data.scans.filter(scan => scan.has_report === true) : [];
+
+                if (scansWithReports.length > 0) {
                     listContainer.innerHTML = '';
-                    data.scans.forEach(scan => {
+                    scansWithReports.forEach(scan => {
                         const date = new Date(scan.started_at).toLocaleString('ko-KR');
-                        const typeBadge = scan.type === 'web' 
-                            ? '<span class="badge web">WEB</span>' 
+                        const typeBadge = scan.type === 'web'
+                            ? '<span class="badge web">WEB</span>'
                             : '<span class="badge infra">INFRA</span>';
-                        
+
                         let vulnBadge = '';
                         if (scan.summary && scan.summary.vulnerable > 0) {
                             vulnBadge = `<span class="badge vuln">${scan.summary.vulnerable} Issues</span>`;
@@ -569,7 +870,7 @@
                         listContainer.appendChild(div);
                     });
                 } else {
-                    listContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-dim);"><i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px;"></i><p>No scan history found.</p></div>';
+                    listContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-dim);"><i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px;"></i><p>No reports found.</p></div>';
                 }
             } catch (error) {
                 listContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--danger);">Failed to load history.</div>';
@@ -588,7 +889,7 @@
             title.textContent = `Report: ${targetName || 'Unknown'}`;
             subtitle.textContent = `ID: ${scanId}`;
             downloadBtn.onclick = () => window.location.href = `/download/${scanId}`;
-            
+
             modal.style.display = 'block';
 
             try {
@@ -613,7 +914,7 @@
             document.getElementById('reportModal').style.display = 'none';
         }
 
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('reportModal');
             if (event.target == modal) closeModal();
         }
@@ -621,16 +922,17 @@
         // Web Scan Form
         document.getElementById('webScanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const targetUrl = document.getElementById('targetUrl').value.trim();
             const useClaude = document.getElementById('useClaude').checked;
+            const useInfraDetection = document.getElementById('useInfraDetection').checked;
             const scanBtn = document.getElementById('webScanBtn');
             const errorMsg = document.getElementById('errorMsg');
-            
+
             errorMsg.style.display = 'none';
             scanBtn.disabled = true;
             scanBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting Scan...';
-            
+
             try {
                 const response = await fetch('/api/scan/start', {
                     method: 'POST',
@@ -638,18 +940,20 @@
                     body: JSON.stringify({
                         target_url: targetUrl,
                         use_claude: useClaude,
+                        use_infra_detection: useInfraDetection,
                         scan_types: ['all']
                     })
                 });
-                
+
+
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.error || 'Scan failed to start');
                 }
-                
+
                 const data = await response.json();
                 window.location.href = `/report/${data.scan_id}`;
-                
+
             } catch (error) {
                 errorMsg.textContent = error.message;
                 errorMsg.style.display = 'block';
@@ -661,22 +965,22 @@
         // Infra Scan Form
         document.getElementById('infraScanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const sshHost = document.getElementById('sshHost').value.trim();
             const sshUser = document.getElementById('sshUser').value.trim();
             const sshPort = parseInt(document.getElementById('sshPort').value);
             const authMethod = document.querySelector('#tab-infra .btn-outline.active').textContent.trim().toLowerCase();
-            
+
             const scanBtn = document.getElementById('infraScanBtn');
             const errorMsg = document.getElementById('errorMsg');
-            
+
             errorMsg.style.display = 'none';
             scanBtn.disabled = true;
             scanBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting Scan...';
-            
+
             try {
                 let response;
-                
+
                 if (authMethod === 'password') {
                     const sshPass = document.getElementById('sshPass').value.trim();
                     response = await fetch('/api/infra/scan/start', {
@@ -693,28 +997,28 @@
                 } else {
                     const pemFile = document.getElementById('pemFile').files[0];
                     if (!pemFile) throw new Error('Please select a PEM file.');
-                    
+
                     const formData = new FormData();
                     formData.append('ssh_host', sshHost);
                     formData.append('ssh_user', sshUser);
                     formData.append('ssh_port', sshPort);
                     formData.append('pem_file', pemFile);
                     formData.append('categories', JSON.stringify(['all']));
-                    
+
                     response = await fetch('/api/infra/scan/start/pem', {
                         method: 'POST',
                         body: formData
                     });
                 }
-                
+
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.error || 'Scan failed to start');
                 }
-                
+
                 const data = await response.json();
                 window.location.href = `/report/${data.scan_id}`;
-                
+
             } catch (error) {
                 errorMsg.textContent = error.message;
                 errorMsg.style.display = 'block';
@@ -724,4 +1028,5 @@
         });
     </script>
 </body>
+
 </html>

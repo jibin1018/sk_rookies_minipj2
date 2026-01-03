@@ -64,9 +64,19 @@ class VulnerabilityScanner:
         self.metrics = {
             'start_time': None,
             'end_time': None,
-            'executed': 0,
-            'skipped': 0,
-            'total_duration': 0,
+            'scripts_executed': 0,
+            'scripts_skipped': 0,
+            'scripts_failed': 0,
+            'scan_duration': 0,
+            'total_requests': 0,
+            'avg_response_time': 0,
+            'response_times': [],  # 개별 응답 시간 저장
+            'error_rate': 0,
+            'vulnerabilities_found': 0,
+            'critical_count': 0,
+            'high_count': 0,
+            'medium_count': 0,
+            'low_count': 0,
         }
         self._allowed_scripts = None
 
@@ -104,7 +114,7 @@ class VulnerabilityScanner:
             if self.use_infra_detection and self._allowed_scripts:
                 if module_path not in self._allowed_scripts:
                     print(f"[⏭] {test_name} 스킵 (인프라 불일치)")
-                    self.metrics['skipped'] += 1
+                    self.metrics['scripts_skipped'] += 1
                     continue
 
             # 진행률 업데이트
@@ -118,16 +128,36 @@ class VulnerabilityScanner:
                 # 동적으로 모듈 import
                 module = importlib.import_module(module_path)
                 
-                # scan 함수 실행
+                # scan 함수 실행 (응답 시간 측정)
+                script_start = time.time()
                 result = module.scan(self.target_url)
-                results.append(result)
-                self.metrics['executed'] += 1
+                script_duration = time.time() - script_start
                 
-                print(f"[✓] {test_name} 완료")
+                # 메트릭 수집
+                self.metrics['response_times'].append(script_duration)
+                self.metrics['total_requests'] += 1
+                results.append(result)
+                self.metrics['scripts_executed'] += 1
+                
+                # 취약점 카운트
+                if result.get('status') == 'VULNERABLE':
+                    self.metrics['vulnerabilities_found'] += 1
+                    sev = result.get('severity', 'MEDIUM').upper()
+                    if sev == 'CRITICAL':
+                        self.metrics['critical_count'] += 1
+                    elif sev == 'HIGH':
+                        self.metrics['high_count'] += 1
+                    elif sev == 'MEDIUM':
+                        self.metrics['medium_count'] += 1
+                    else:
+                        self.metrics['low_count'] += 1
+                
+                print(f"[✓] {test_name} 완료 ({script_duration:.2f}s)")
                 
             except Exception as e:
                 print(f"[✗] {test_name} 실패: {str(e)}")
-                self.metrics['executed'] += 1
+                self.metrics['scripts_failed'] += 1
+                self.metrics['scripts_executed'] += 1
                 results.append({
                     'name': test_name,
                     'status': 'ERROR',
@@ -137,12 +167,25 @@ class VulnerabilityScanner:
                 })
         
         self.metrics['end_time'] = time.time()
-        self.metrics['total_duration'] = self.metrics['end_time'] - self.metrics['start_time']
+        self.metrics['scan_duration'] = self.metrics['end_time'] - self.metrics['start_time']
+        
+        # 평균 응답 시간 계산
+        if self.metrics['response_times']:
+            self.metrics['avg_response_time'] = sum(self.metrics['response_times']) / len(self.metrics['response_times'])
+        
+        # 에러율 계산
+        total_executed = self.metrics['scripts_executed']
+        if total_executed > 0:
+            self.metrics['error_rate'] = (self.metrics['scripts_failed'] / total_executed) * 100
+        
+        # response_times 리스트 제거 (JSON 직렬화용)
+        del self.metrics['response_times']
         
         # 성능 메트릭 출력
-        print(f"\n[📊] 스캔 완료 - 실행: {self.metrics['executed']}, "
-              f"스킵: {self.metrics['skipped']}, "
-              f"소요시간: {self.metrics['total_duration']:.2f}초")
+        print(f"\n[📊] 스캔 완료")
+        print(f"    실행: {self.metrics['scripts_executed']} | 스킵: {self.metrics['scripts_skipped']} | 실패: {self.metrics['scripts_failed']}")
+        print(f"    취약점: {self.metrics['vulnerabilities_found']} (C:{self.metrics['critical_count']} H:{self.metrics['high_count']} M:{self.metrics['medium_count']} L:{self.metrics['low_count']})")
+        print(f"    소요시간: {self.metrics['scan_duration']:.2f}s | 평균응답: {self.metrics['avg_response_time']:.3f}s")
         
         return results
     
@@ -332,9 +375,9 @@ class InfraScanner:
         self.metrics = {
             'start_time': None,
             'end_time': None,
-            'executed': 0,
-            'skipped': 0,
-            'total_duration': 0,
+            'scripts_executed': 0,
+            'scripts_skipped': 0,
+            'scan_duration': 0,
         }
     
     def discover_services(self):
@@ -434,12 +477,12 @@ class InfraScanner:
                             self.ssh_key_file
                         )
                         results.append(result)
-                        self.metrics['executed'] += 1
+                        self.metrics['scripts_executed'] += 1
                         print(f"[✓] {test_name} 완료")
                         
                     except Exception as e:
                         print(f"[✗] {test_name} 실패: {str(e)}")
-                        self.metrics['executed'] += 1
+                        self.metrics['scripts_executed'] += 1
                         results.append({
                             'name': test_name,
                             'status': 'ERROR',
@@ -449,10 +492,10 @@ class InfraScanner:
                         })
         
         self.metrics['end_time'] = time.time()
-        self.metrics['total_duration'] = self.metrics['end_time'] - self.metrics['start_time']
+        self.metrics['scan_duration'] = self.metrics['end_time'] - self.metrics['start_time']
         
-        print(f"\n[📊] 인프라 스캔 완료 - 실행: {self.metrics['executed']}, "
-              f"소요시간: {self.metrics['total_duration']:.2f}초")
+        print(f"\n[📊] 인프라 스캔 완료 - 실행: {self.metrics['scripts_executed']}, "
+              f"소요시간: {self.metrics['scan_duration']:.2f}초")
         
         return results
 

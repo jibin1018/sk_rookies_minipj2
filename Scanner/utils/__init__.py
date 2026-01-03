@@ -16,6 +16,7 @@ from .encoders import (
     hex_encode, unicode_encode, base64_encode, base64_decode,
     mixed_case, generate_encoded_variants, waf_bypass_variants
 )
+from .script_registry import ScriptRegistry, get_scripts_for_target, CATEGORY_REQUIREMENTS
 
 __all__ = [
     # HTTP Client
@@ -34,4 +35,7 @@ __all__ = [
     'html_encode', 'html_decode', 'html_entity_encode',
     'hex_encode', 'unicode_encode', 'base64_encode', 'base64_decode',
     'mixed_case', 'generate_encoded_variants', 'waf_bypass_variants',
+    
+    # Script Registry
+    'ScriptRegistry', 'get_scripts_for_target', 'CATEGORY_REQUIREMENTS',
 ]

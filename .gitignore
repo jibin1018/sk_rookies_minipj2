@@ -4,6 +4,10 @@ venv/
 .venv/
 Scanner/venv/
 
+# History (Local Only)
+hist/
+.git/*
+
 # Python
 **/__pycache__/
 *.pyc

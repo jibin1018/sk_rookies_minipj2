@@ -5,6 +5,7 @@ Discovery 패키지
 """
 from .port_scanner import PortScanner, scan_host, COMMON_PORTS
 from .service_detector import ServiceDetector, detect_services
+from .infra_detector import InfraDetector, detect_infra
 
 __all__ = [
     'PortScanner',
@@ -12,4 +13,6 @@ __all__ = [
     'COMMON_PORTS',
     'ServiceDetector', 
     'detect_services',
+    'InfraDetector',
+    'detect_infra',
 ]
