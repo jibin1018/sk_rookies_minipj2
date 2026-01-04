@@ -668,9 +668,10 @@
             <div id="tab-infra" class="tab-content">
                 <form id="infraScanForm">
                     <div class="input-group">
-                        <label class="input-label">대상 서버 주소 (Target IP/Host)</label>
-                        <input type="text" id="sshHost" class="modern-input font-mono" placeholder="192.168.1.100"
-                            required>
+                        <label class="input-label">대상 서버 주소 (Target IPs)</label>
+                        <textarea id="sshHost" class="modern-input font-mono" rows="3"
+                            placeholder="192.168.1.100&#10;192.168.1.101&#10;(줄바꿈으로 구분하여 여러 서버 입력 가능)"
+                            required></textarea>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -799,46 +800,100 @@
         }
 
         // Load Scan History
-        async function loadHistory() {
+        // Load Scan History (Live Dashboard)
+        let historyPollTimer = null;
+
+        async function loadHistory(isAutoRefresh = false) {
             const listContainer = document.getElementById('historyList');
+            if (!isAutoRefresh) {
+                // Initial load indication
+                // listContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">진단 이력을 불러오는 중...</p>';
+            }
 
             try {
                 const response = await fetch('/api/scans/history');
                 const data = await response.json();
+                let hasRunningScans = false;
 
-                // Filter: only show scans that have report files
-                const scansWithReports = data.scans ? data.scans.filter(scan => scan.has_report === true) : [];
+                // Sort by date desc
+                const scans = data.scans ? data.scans.sort((a, b) => new Date(b.started_at) - new Date(a.started_at)) : [];
 
-                if (scansWithReports.length > 0) {
+                if (scans.length > 0) {
                     listContainer.innerHTML = '';
-                    scansWithReports.forEach(scan => {
+                    scans.forEach(scan => {
                         const date = new Date(scan.started_at).toLocaleString('ko-KR');
                         const typeBadge = scan.type === 'web'
                             ? '<span class="badge web">WEB</span>'
                             : '<span class="badge infra">INFRA</span>';
 
-                        let vulnBadge = '';
-                        if (scan.summary && scan.summary.vulnerable > 0) {
-                            vulnBadge = `<span class="badge vuln">${scan.summary.vulnerable} Issues</span>`;
+                        let statusHtml = '';
+                        let clickAction = '';
+                        let cursorStyle = 'cursor: pointer;';
+
+                        if (scan.status === 'running') {
+                            hasRunningScans = true;
+                            // Running Progress Bar
+                            const progress = scan.progress || 0;
+                            statusHtml = `
+                                <div style="margin-top:5px;">
+                                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--primary); margin-bottom:2px;">
+                                        <span><i class="fa-solid fa-spinner fa-spin"></i> 진단 진행 중... ${progress}%</span>
+                                        <span>${scan.current_test || ''}</span>
+                                    </div>
+                                    <div style="width:100%; height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden;">
+                                        <div style="width:${progress}%; height:100%; background:var(--primary-gradient); transition:width 0.5s;"></div>
+                                    </div>
+                                </div>
+                            `;
+                            clickAction = `onclick="alert('진단이 진행 중입니다. 잠시만 기다려주세요.')"`;
+                            // Or allow viewing partial results? usually wait.
+                        } else if (scan.has_report) {
+                            // Completed with report
+                            let vulnBadge = '';
+                            if (scan.summary && scan.summary.vulnerable > 0) {
+                                vulnBadge = `<span class="badge vuln" style="margin-left:5px;">⚠️ ${scan.summary.vulnerable} 취약점</span>`;
+                            } else if (scan.status === 'completed') {
+                                vulnBadge = `<span class="badge safe" style="margin-left:5px; background:var(--success); color:white;">✅ 안전</span>`;
+                            }
+                            statusHtml = `<p style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">${date} • 완료됨</p>`;
+                            clickAction = `onclick="viewReportContent('${scan.scan_id}', '${scan.target}')"`;
+
+                            // Combine badges
+                            statusHtml += `<div style="margin-top:5px;">${typeBadge}${vulnBadge}</div>`;
+                        } else {
+                            // Error or other
+                            statusHtml = `<p style="font-size:0.85rem; color:var(--danger); margin-top:2px;">${date} • ${scan.status}</p>`;
+                            statusHtml += `<div style="margin-top:5px;">${typeBadge} <span class="badge" style="background:var(--danger); color:white;">오류</span></div>`;
+                            cursorStyle = 'cursor: default;';
                         }
 
                         const div = document.createElement('div');
                         div.className = 'history-item';
-                        div.onclick = () => viewReportContent(scan.scan_id, scan.target);
+                        div.style = `display: block; ${cursorStyle}`;
+                        // Remove onclick from parent if running, handle internal
                         div.innerHTML = `
-                            <div class="history-info">
-                                <h4>${scan.target || 'Unknown Target'}</h4>
-                                <p>${date} • ${scan.status === 'completed' ? 'Completed' : scan.status}</p>
+                            <div ${clickAction} style="width:100%; height:100%;">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                    <h4 style="margin:0; font-size:1rem; color:var(--text-main);">${scan.target || 'Unknown Target'}</h4>
+                                </div>
+                                ${statusHtml}
                             </div>
-                            <div>${typeBadge}${vulnBadge}</div>
                         `;
                         listContainer.appendChild(div);
                     });
+
+                    // Auto Refresh Logic
+                    if (historyPollTimer) clearTimeout(historyPollTimer);
+                    if (hasRunningScans && document.getElementById('tab-history').classList.contains('active')) {
+                        historyPollTimer = setTimeout(() => loadHistory(true), 1500); // 1.5s refresh
+                    }
+
                 } else {
-                    listContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-dim);"><i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px;"></i><p>No reports found.</p></div>';
+                    listContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-dim);"><i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px;"></i><p>진단 이력이 없습니다.</p></div>';
                 }
             } catch (error) {
-                listContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--danger);">Failed to load history.</div>';
+                if (!isAutoRefresh) listContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--danger);">이력을 불러올 수 없습니다.</div>';
+                console.error(error);
             }
         }
 
@@ -997,58 +1052,82 @@
         }
 
         // Infra Scan Form
+        // Infra Scan Form
         document.getElementById('infraScanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const sshHost = document.getElementById('sshHost').value.trim();
+            const sshHostInput = document.getElementById('sshHost').value.trim();
             const sshUser = document.getElementById('sshUser').value.trim();
             const sshPort = parseInt(document.getElementById('sshPort').value);
             const authMethod = document.querySelector('#tab-infra .tab.active').textContent.includes('Password') ? 'password' : 'key';
+
+            // Split hosts by newline or comma
+            const hosts = sshHostInput.split(/[\n,]+/).map(h => h.trim()).filter(h => h.length > 0);
+
+            if (hosts.length === 0) {
+                alert('대상 서버 주소를 입력해주세요.');
+                return;
+            }
 
             const scanBtn = document.getElementById('infraScanBtn');
             scanBtn.disabled = true;
             scanBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 진단 시작 중...';
 
             try {
-                let response;
+                const results = [];
 
-                if (authMethod === 'password') {
-                    const sshPass = document.getElementById('sshPass').value.trim();
-                    response = await fetch('/api/infra/scan/start', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            ssh_host: sshHost,
-                            ssh_user: sshUser,
-                            ssh_pass: sshPass,
-                            ssh_port: sshPort,
-                            categories: ['all']
-                        })
-                    });
+                // Process scans sequentially (or parallel using Promise.all)
+                for (const host of hosts) {
+                    let response;
+
+                    if (authMethod === 'password') {
+                        const sshPass = document.getElementById('sshPass').value.trim();
+                        response = await fetch('/api/infra/scan/start', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                ssh_host: host,
+                                ssh_user: sshUser,
+                                ssh_pass: sshPass,
+                                ssh_port: sshPort,
+                                categories: ['all']
+                            })
+                        });
+                    } else {
+                        const pemFile = document.getElementById('pemFile').files[0];
+                        if (!pemFile) throw new Error('PEM 파일을 선택해주세요.');
+
+                        const formData = new FormData();
+                        formData.append('ssh_host', host);
+                        formData.append('ssh_user', sshUser);
+                        formData.append('ssh_port', sshPort);
+                        formData.append('pem_file', pemFile);
+                        formData.append('categories', JSON.stringify(['all']));
+
+                        response = await fetch('/api/infra/scan/start/pem', {
+                            method: 'POST',
+                            body: formData
+                        });
+                    }
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        console.error(`Failed to scan ${host}:`, error);
+                        // Don't throw, just continue to next host, maybe alert?
+                    } else {
+                        const data = await response.json();
+                        results.push(data);
+                    }
+                }
+
+                if (results.length === 1) {
+                    window.location.href = `/report/${results[0].scan_id}`;
+                } else if (results.length > 1) {
+                    alert(`${results.length}개의 서버에 대한 인프라 진단이 시작되었습니다.\n진단 이력 탭에서 진행 상황을 확인하세요.`);
+                    switchTab('history');
                 } else {
-                    const pemFile = document.getElementById('pemFile').files[0];
-                    if (!pemFile) throw new Error('PEM 파일을 선택해주세요.');
-
-                    const formData = new FormData();
-                    formData.append('ssh_host', sshHost);
-                    formData.append('ssh_user', sshUser);
-                    formData.append('ssh_port', sshPort);
-                    formData.append('pem_file', pemFile);
-                    formData.append('categories', JSON.stringify(['all']));
-
-                    response = await fetch('/api/infra/scan/start/pem', {
-                        method: 'POST',
-                        body: formData
-                    });
+                    throw new Error("모든 진단 요청이 실패했습니다.");
                 }
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Scan failed to start');
-                }
-
-                const data = await response.json();
-                window.location.href = `/report/${data.scan_id}`;
 
             } catch (error) {
                 console.error(error);

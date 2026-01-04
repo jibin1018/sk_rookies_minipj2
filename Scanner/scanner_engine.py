@@ -361,13 +361,16 @@ class InfraScanner:
     
     INFRA_TESTS = {
         'os': [
+            ('linux_basic_info', 'Linux 시스템 기본 정보'),
             ('linux_account', 'Linux 계정 관리'),
             ('linux_password', 'Linux 패스워드 정책'),
             ('linux_file_permission', 'Linux 파일 권한'),
-            ('linux_service', 'Linux 서비스'),
+            ('linux_process_audit', 'Linux 프로세스 감사'),
+            ('linux_open_ports', 'Linux 네트워크/포트 점검'),
+            ('linux_service', 'Linux 서비스 관리'),
             ('linux_log', 'Linux 로그 관리'),
-            ('linux_firewall', 'Linux 방화벽'),
-            ('linux_ssh', 'Linux SSH 보안'),
+            ('linux_firewall', 'Linux 방화벽 설정'),
+            ('linux_ssh', 'Linux SSH 보안 설정'),
         ],
         'web_server': [
             ('apache_config', 'Apache 설정'),
