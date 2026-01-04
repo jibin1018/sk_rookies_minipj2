@@ -54,12 +54,17 @@ class VulnerabilityScanner:
     ]
     
     def __init__(self, target_url, scan_status=None, scan_id=None, scan_types=['all'], 
-                 use_infra_detection=False):
+                 use_infra_detection=False, auth_cookies=None, auth_headers=None):
         self.target_url = target_url
         self.scan_status = scan_status
         self.scan_id = scan_id
         self.scan_types = scan_types
         self.use_infra_detection = use_infra_detection
+        
+        # 인증 쿠키/헤더 저장
+        self.auth_cookies = auth_cookies if auth_cookies else {}
+        self.auth_headers = auth_headers if auth_headers else {}
+        
         self.infra_profile = None
         self.metrics = {
             'start_time': None,
@@ -81,34 +86,45 @@ class VulnerabilityScanner:
         self._allowed_scripts = None
 
     def scan_all(self):
-        """모든 웹 취약점 스캔 실행"""
+        """모든 웹 취약점 스캔 실행 (병렬 처리 + 크롤링)"""
         results = []
         self.metrics['start_time'] = time.time()
         
-        # 인프라 탐지 (옵션 활성화 시)
+        # 1. 인프라 탐지 및 크롤링
+        print("[*] 스캔 준비 중...")
+        
+        # 크롤러 실행 (동적 URL 수집)
+        try:
+            from web_crawler import WebCrawler
+            print(f"[*] 크롤링 시작: {self.target_url}")
+            # 인증 정보 전달
+            crawler = WebCrawler(self.target_url, cookies=self.auth_cookies, headers=self.auth_headers)
+            crawler.crawl(max_pages=20)
+            visited_urls = crawler.get_visited_urls()
+            api_endpoints = crawler.get_api_endpoints()
+            print(f"[✓] 크롤링 완료: {len(visited_urls)} 페이지, {len(api_endpoints)} API 엔드포인트")
+        except Exception as e:
+            print(f"[!] 크롤러 실행 오류: {e}")
+            visited_urls = [self.target_url]
+            api_endpoints = []
+
+        # 인프라 탐지
         if self.use_infra_detection:
             print("[*] 인프라 탐지 시작...")
             detector = InfraDetector()
             self.infra_profile = detector.detect(self.target_url)
             self._allowed_scripts = get_scripts_for_infra(self.infra_profile)
             
-            print(f"[✓] 인프라 탐지 완료:")
-            print(f"    - 웹 서버: {self.infra_profile.get('web_server') or 'Unknown'}")
-            print(f"    - 언어: {self.infra_profile.get('language') or 'Unknown'}")
-            print(f"    - 프레임워크: {self.infra_profile.get('framework') or 'Unknown'}")
-            print(f"    - 실행할 스크립트 수: {len(self._allowed_scripts)}")
+            print(f"[✓] 인프라 탐지 완료: {self.infra_profile.get('web_server', 'Unknown')}")
         
-        # 실행할 테스트 필터링
-        tests_to_run = [t for t in self.WEB_TESTS if self.should_run_test(t[0], self.scan_types)]
-        total_tests = len(tests_to_run)
-        completed = 0
-
+        # 2. 실행할 테스트 작업 큐 생성
+        tasks = []
         for module_name, test_name, severity in self.WEB_TESTS:
-            module_path = f'modules.web.{module_name}'
-            
             # scan_types 필터링
             if not self.should_run_test(module_name, self.scan_types):
                 continue
+            
+            module_path = f'modules.web.{module_name}'
             
             # 인프라 기반 필터링
             if self.use_infra_detection and self._allowed_scripts:
@@ -116,78 +132,99 @@ class VulnerabilityScanner:
                     print(f"[⏭] {test_name} 스킵 (인프라 불일치)")
                     self.metrics['scripts_skipped'] += 1
                     continue
-
-            # 진행률 업데이트
-            if self.scan_status and self.scan_id:
-                completed += 1
-                progress = int((completed / total_tests) * 100)
-                self.scan_status[self.scan_id]['progress'] = progress
-                self.scan_status[self.scan_id]['current_test'] = f'{test_name} 진단 중...'
             
-            try:
-                # 동적으로 모듈 import
-                module = importlib.import_module(module_path)
+            tasks.append((module_path, test_name, severity))
+
+        # 3. 병렬 실행 (ThreadPoolExecutor)
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        
+        print(f"[*] 병렬 스캔 시작 ({len(tasks)}개 테스트, 10 워커)")
+        total_tests = len(tasks)
+        completed = 0
+        
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_test = {
+                executor.submit(self._run_single_test, task, visited_urls, api_endpoints): task 
+                for task in tasks
+            }
+            
+            for future in as_completed(future_to_test):
+                module_path, test_name, severity = future_to_test[future]
+                completed += 1
                 
-                # scan 함수 실행 (응답 시간 측정)
-                script_start = time.time()
-                result = module.scan(self.target_url)
-                script_duration = time.time() - script_start
-                
-                # 메트릭 수집
-                self.metrics['response_times'].append(script_duration)
-                self.metrics['total_requests'] += 1
-                results.append(result)
-                self.metrics['scripts_executed'] += 1
-                
-                # 취약점 카운트
-                if result.get('status') == 'VULNERABLE':
-                    self.metrics['vulnerabilities_found'] += 1
-                    sev = result.get('severity', 'MEDIUM').upper()
-                    if sev == 'CRITICAL':
-                        self.metrics['critical_count'] += 1
-                    elif sev == 'HIGH':
-                        self.metrics['high_count'] += 1
-                    elif sev == 'MEDIUM':
-                        self.metrics['medium_count'] += 1
-                    else:
-                        self.metrics['low_count'] += 1
-                
-                print(f"[✓] {test_name} 완료 ({script_duration:.2f}s)")
-                
-            except Exception as e:
-                print(f"[✗] {test_name} 실패: {str(e)}")
-                self.metrics['scripts_failed'] += 1
-                self.metrics['scripts_executed'] += 1
-                results.append({
-                    'name': test_name,
-                    'status': 'ERROR',
-                    'severity': severity,
-                    'error': str(e),
-                    'details': f'테스트 실행 중 오류 발생: {str(e)}'
-                })
+                # 진행률 및 결과 실시간 업데이트
+                if self.scan_status and self.scan_id:
+                     progress = int((completed / total_tests) * 100)
+                     self.scan_status[self.scan_id]['progress'] = progress
+                     self.scan_status[self.scan_id]['current_test'] = f'{test_name} 완료 ({completed}/{total_tests})'
+                     # 중요: 실시간 결과 반영 (복사본 전달)
+                     self.scan_status[self.scan_id]['results'] = list(results)
+
+                try:
+                    result = future.result()
+                    if result:
+                        results.append(result)
+                        self.metrics['scripts_executed'] += 1
+                        
+                        # 메트릭 카운트
+                        if result.get('status') == 'VULNERABLE':
+                            self.metrics['vulnerabilities_found'] += 1
+                            sev = result.get('severity', 'MEDIUM').upper()
+                            if sev == 'CRITICAL': self.metrics['critical_count'] += 1
+                            elif sev == 'HIGH': self.metrics['high_count'] += 1
+                            elif sev == 'MEDIUM': self.metrics['medium_count'] += 1
+                            else: self.metrics['low_count'] += 1
+                            
+                        print(f"[✓] {test_name} 완료 ({result.get('duration', 0):.2f}s)")
+                except Exception as e:
+                    print(f"[✗] {test_name} 실패: {e}")
+                    self.metrics['scripts_failed'] += 1
         
         self.metrics['end_time'] = time.time()
         self.metrics['scan_duration'] = self.metrics['end_time'] - self.metrics['start_time']
         
-        # 평균 응답 시간 계산
+        # 평균 응답 시간 등 마무리 메트릭
         if self.metrics['response_times']:
             self.metrics['avg_response_time'] = sum(self.metrics['response_times']) / len(self.metrics['response_times'])
         
-        # 에러율 계산
-        total_executed = self.metrics['scripts_executed']
-        if total_executed > 0:
-            self.metrics['error_rate'] = (self.metrics['scripts_failed'] / total_executed) * 100
-        
-        # response_times 리스트 제거 (JSON 직렬화용)
-        del self.metrics['response_times']
-        
-        # 성능 메트릭 출력
-        print(f"\n[📊] 스캔 완료")
-        print(f"    실행: {self.metrics['scripts_executed']} | 스킵: {self.metrics['scripts_skipped']} | 실패: {self.metrics['scripts_failed']}")
-        print(f"    취약점: {self.metrics['vulnerabilities_found']} (C:{self.metrics['critical_count']} H:{self.metrics['high_count']} M:{self.metrics['medium_count']} L:{self.metrics['low_count']})")
-        print(f"    소요시간: {self.metrics['scan_duration']:.2f}s | 평균응답: {self.metrics['avg_response_time']:.3f}s")
-        
+        # response_times 리스트 제거
+        if 'response_times' in self.metrics:
+            del self.metrics['response_times']
+            
         return results
+
+    def _run_single_test(self, task, visited_urls, api_endpoints):
+        """단일 테스트 실행 (스레드 내부)"""
+        module_path, test_name, severity = task
+        try:
+            module = importlib.import_module(module_path)
+            
+            start_time = time.time()
+            
+            # 모듈에 URL 리스트 전달을 지원하는지 확인 (Duck typing)
+            if hasattr(module, 'scan_advanced'):
+                 result = module.scan_advanced(self.target_url, visited_urls, api_endpoints)
+            else:
+                 # 기존 방식 호환
+                 result = module.scan(self.target_url)
+            
+            duration = time.time() - start_time
+            
+            # 메트릭용 응답 시간 기록 (스레드 안전성 주의 - 여기선 단순 append)
+            self.metrics['response_times'].append(duration)
+            
+            result['duration'] = duration
+            return result
+            
+        except Exception as e:
+            # 실패 시 에러 결과 반환
+            return {
+                'name': test_name,
+                'status': 'ERROR',
+                'severity': severity,
+                'error': str(e),
+                'details': f'실행 오류: {str(e)}'
+            }
     
     def should_run_test(self, module_name, scan_types):
         """특정 테스트를 실행해야 하는지 확인"""

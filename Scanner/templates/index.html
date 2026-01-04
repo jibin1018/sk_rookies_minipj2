@@ -4,39 +4,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Sentinel - Enterprise Security Scanner</title>
+    <title>Cyber Sentinel - 통합 보안 진단 플랫폼</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Pretendard Font (Korean Optimization) -->
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
         :root {
-            --bg-main: #f1f5f9;
-            --bg-secondary: #ffffff;
-            --bg-card: rgba(255, 255, 255, 0.95);
-            --bg-input: #f8fafc;
+            /* Theme Colors: Trustworthy Blue & Clean White */
+            --bg-main: #f8fafc;
+            /* Cool Light Gray */
+            --bg-card: #ffffff;
+            /* Pure White */
+            --bg-input: #f1f5f9;
+            /* Slate 100 */
 
             --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --primary-glow: rgba(37, 99, 235, 0.15);
+            /* Royal Blue */
+            --primary-dark: #1e40af;
+            /* Deep Blue */
+            --primary-light: #60a5fa;
+            /* Light Blue */
+            --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            /* Navy to Blue */
+
             --secondary: #64748b;
+            /* Slate 500 */
 
-            --success: #059669;
-            --warning: #d97706;
-            --danger: #dc2626;
-            --critical: #b91c1c;
-            --info: #0891b2;
+            --success: #10b981;
+            /* Emerald */
+            --warning: #f59e0b;
+            /* Amber */
+            --danger: #ef4444;
+            /* Red */
 
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --text-dim: #94a3b8;
+            --text-main: #1e293b;
+            /* Slate 800 */
+            --text-sub: #475569;
+            /* Slate 600 */
+            --text-muted: #94a3b8;
+            /* Slate 400 */
 
             --border: #e2e8f0;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            /* Slate 200 */
 
-            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-glow: 0 0 15px rgba(37, 99, 235, 0.15);
         }
 
         * {
@@ -46,53 +63,12 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
             line-height: 1.6;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-main);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .text-primary {
-            color: var(--primary) !important;
-        }
-
-        .text-success {
-            color: var(--success) !important;
-        }
-
-        .text-danger {
-            color: var(--danger) !important;
-        }
-
-        .text-warning {
-            color: var(--warning) !important;
-        }
-
-        .text-muted {
-            color: var(--text-muted) !important;
         }
 
         .container {
@@ -101,218 +77,333 @@
             padding: 40px 20px;
         }
 
-        .glass-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-        }
-
+        /* Header Styles */
         .main-header {
             text-align: center;
-            margin-bottom: 3rem;
-            animation: fadeDown 0.8s var(--ease-out);
+            margin-bottom: 3.5rem;
+            position: relative;
         }
 
         .logo-area {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 0.5rem;
+            gap: 15px;
+            margin-bottom: 0.8rem;
         }
 
         .logo-icon {
-            font-size: 2.5rem;
-            color: var(--primary);
+            font-size: 2.8rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 4px 6px rgba(37, 99, 235, 0.2));
         }
 
         .main-header h1 {
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             font-weight: 800;
-            letter-spacing: -0.03em;
+            letter-spacing: -0.02em;
             color: var(--text-main);
         }
 
         .subtitle {
-            color: var(--text-muted);
-            font-size: 1rem;
+            color: var(--text-sub);
+            font-size: 1.1rem;
+            font-weight: 500;
             max-width: 600px;
             margin: 0 auto;
-            line-height: 1.5;
         }
 
-        .tabs-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
-
-        .tabs {
-            background: #e2e8f0;
-            padding: 4px;
-            border-radius: 12px;
-            display: inline-flex;
-        }
-
-        .tab {
-            padding: 10px 24px;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tab:hover {
-            color: var(--text-main);
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        .tab.active {
-            background: var(--bg-secondary);
-            color: var(--primary);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .tab-content {
-            display: none;
-            animation: fadeUp 0.4s var(--ease-out);
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
+        /* Card Styles */
+        .glass-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
+            padding: 40px;
             position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary-gradient);
+        }
+
+        /* Input Styles */
+        .input-group {
+            margin-bottom: 1.8rem;
         }
 
         .input-label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-            font-weight: 600;
+            margin-bottom: 0.6rem;
+            font-size: 0.95rem;
+            font-weight: 700;
             color: var(--text-main);
+            letter-spacing: -0.01em;
         }
 
         .modern-input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 16px 20px;
             background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--text-main);
             font-size: 1rem;
-            transition: all 0.2s;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .modern-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-            background: var(--bg-secondary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background: white;
+        }
+
+        .modern-input.font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
         }
 
         .input-hint {
-            margin-top: 6px;
-            font-size: 0.8rem;
+            margin-top: 8px;
+            font-size: 0.85rem;
             color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
+        /* Checkbox & Options */
         .checkbox-wrapper {
             display: flex;
             align-items: flex-start;
             cursor: pointer;
-            user-select: none;
-            padding: 15px;
-            background: #f8fafc;
+            padding: 20px;
+            background: white;
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
             transition: all 0.2s;
+            margin-bottom: 12px;
         }
 
         .checkbox-wrapper:hover {
-            border-color: var(--primary);
-            background: #eff6ff;
+            border-color: var(--primary-light);
+            background: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
 
         .checkbox-wrapper input {
             accent-color: var(--primary);
-            width: 18px;
-            height: 18px;
-            margin-right: 12px;
-            margin-top: 3px;
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            margin-top: 2px;
         }
 
+        .checkbox-content strong {
+            display: block;
+            font-size: 1rem;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .checkbox-content span {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            line-height: 1.4;
+            display: block;
+        }
+
+        /* Buttons */
         .btn-primary {
             width: 100%;
-            padding: 16px;
-            background: var(--primary);
+            padding: 18px;
+            background: var(--primary-gradient);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(37, 99, 235, 0.3);
+            filter: brightness(110%);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-muted);
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .btn-outline {
+            padding: 12px 24px;
+            background: white;
+            color: var(--text-sub);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
         }
 
-        .btn-primary:hover {
-            background: var(--primary-hover);
+        .btn-outline:hover {
+            background: var(--bg-input);
+            color: var(--text-main);
+            border-color: var(--text-muted);
             transform: translateY(-1px);
-            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.4);
         }
 
-        .btn-primary:disabled {
-            background: #cbd5e1;
-            color: #64748b;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2.5rem;
         }
 
-        .btn-outline {
-            padding: 8px 16px;
+        .tabs {
+            background: var(--bg-input);
+            padding: 6px;
+            border-radius: 16px;
+            display: inline-flex;
+            gap: 5px;
+            border: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 12px 28px;
+            border: none;
+            background: transparent;
+            color: var(--text-sub);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Footer / Features */
+        .features {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
             background: white;
             border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-light);
+        }
+
+        .feature-item i {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-item strong {
+            display: block;
+            margin-bottom: 4px;
             color: var(--text-main);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
         }
 
-        .btn-outline:hover {
-            border-color: #cbd5e1;
-            background: #f8fafc;
+        .feature-item span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
-        .btn-outline.active {
-            background: #eff6ff;
-            border-color: var(--primary);
-            color: var(--primary);
+        /* CLI Dashboard Container (Embedded) */
+        /* This keeps the dark terminal look inside the light UI for contrast */
+        .terminal-loading {
+            display: none;
+            margin-top: 30px;
         }
 
-        /* History List */
+        .terminal-loading.active {
+            display: block;
+        }
+
+        /* History */
         .history-item {
             display: flex;
             justify-content: space-between;
@@ -320,110 +411,41 @@
             padding: 16px;
             border-bottom: 1px solid var(--border);
             cursor: pointer;
-            transition: all 0.2s;
         }
 
         .history-item:hover {
-            background: #f8fafc;
-        }
-
-        .history-item:last-child {
-            border-bottom: none;
-        }
-
-        .history-info h4 {
-            font-size: 0.95rem;
-            color: var(--text-main);
-            margin-bottom: 4px;
-        }
-
-        .history-info p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
+            background: var(--bg-input);
         }
 
         .badge {
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
         .badge.web {
             background: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .badge.infra {
-            background: #f3e8ff;
-            color: #7c3aed;
+            color: #1e40af;
         }
 
         .badge.vuln {
             background: #fee2e2;
-            color: #b91c1c;
-            margin-left: 8px;
+            color: #991b1b;
         }
 
-        /* Terminal */
-        .terminal-window {
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            font-family: 'JetBrains Mono', monospace;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .terminal-header {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 10px;
-        }
-
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        .dot.red {
-            background: #ef4444;
-        }
-
-        .dot.yellow {
-            background: #f59e0b;
-        }
-
-        .dot.green {
-            background: #22c55e;
-        }
-
-        .terminal-content {
-            color: #4ade80;
-            font-size: 0.9rem;
-            height: 150px;
-            overflow-y: auto;
-            line-height: 1.6;
-        }
-
-        .progress-bar-bg {
-            height: 6px;
-            background: #334155;
-            border-radius: 3px;
-            overflow: hidden;
+        /* Auth Inputs */
+        .auth-inputs {
             margin-top: 15px;
+            padding: 20px;
+            background: var(--bg-input);
+            border-radius: 12px;
+            border: 1px solid var(--border);
         }
 
-        .progress-bar-fill {
-            height: 100%;
-            background: #3b82f6;
-            width: 0%;
-            transition: width 0.3s linear;
+        .auth-inputs textarea {
+            min-height: 80px;
+            resize: vertical;
         }
 
         /* Modal */
@@ -435,136 +457,24 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            z-index: 2000;
             padding: 40px;
             overflow-y: auto;
+            backdrop-filter: blur(5px);
         }
 
         .modal-content {
             background: white;
             border-radius: 16px;
             max-width: 900px;
-            margin: 0 auto;
+            margin: 20px auto;
             padding: 30px;
             position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalSlide 0.3s ease-out;
         }
 
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
-
-        .report-viewer {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .report-viewer h1,
-        .report-viewer h2,
-        .report-viewer h3 {
-            margin-top: 16px;
-            margin-bottom: 8px;
-            color: var(--text-main);
-        }
-
-        .report-viewer h1 {
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 8px;
-        }
-
-        .report-viewer ul,
-        .report-viewer ol {
-            margin-left: 20px;
-            margin-bottom: 12px;
-        }
-
-        .report-viewer p {
-            margin-bottom: 12px;
-        }
-
-        .report-viewer code {
-            background: #e2e8f0;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85em;
-        }
-
-        .report-viewer pre {
-            background: #f1f5f9;
-            color: #334155;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin-bottom: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .report-viewer table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 12px;
-        }
-
-        .report-viewer th,
-        .report-viewer td {
-            border: 1px solid var(--border);
-            padding: 10px;
-            text-align: left;
-        }
-
-        .report-viewer th {
-            background: #f1f5f9;
-        }
-
-        /* Features */
-        .features {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        .feature-item {
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .feature-item i {
-            font-size: 1.5rem;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .feature-item strong {
-            display: block;
-            font-size: 0.9rem;
-            color: var(--text-main);
-        }
-
-        .feature-item span {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        /* Animations */
-        @keyframes fadeDown {
+        @keyframes modalSlide {
             from {
                 opacity: 0;
                 transform: translateY(-20px);
@@ -576,35 +486,91 @@
             }
         }
 
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .feature-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .close-modal:hover {
+            color: var(--danger);
+        }
 
-            .container {
-                padding: 20px 15px;
-            }
+        .report-viewer {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            max-height: 60vh;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
 
-            .logo-icon {
-                font-size: 2rem;
-            }
+        .report-viewer h1,
+        .report-viewer h2,
+        .report-viewer h3 {
+            color: var(--text-main);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: 700;
+        }
 
-            .main-header h1 {
-                font-size: 1.8rem;
-            }
+        .report-viewer h1 {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5em;
+        }
+
+        .report-viewer code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .report-viewer pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        .report-viewer pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        .report-viewer table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+        }
+
+        .report-viewer th,
+        .report-viewer td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        .report-viewer th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .report-viewer blockquote {
+            border-left: 4px solid var(--primary);
+            margin: 1em 0;
+            padding-left: 1em;
+            color: var(--text-sub);
         }
     </style>
 </head>
@@ -617,19 +583,25 @@
                 <i class="fa-solid fa-shield-halved logo-icon"></i>
                 <h1>Cyber Sentinel</h1>
             </div>
-            <p class="subtitle">Enterprise Grade Security & Infrastructure Analysis<br>OWASP Top 10 & KISA 가이드 기반</p>
+            <p class="subtitle">엔터프라이즈급 보안 취약점 진단 및 인프라 분석 플랫폼<br>OWASP Top 10 & KISA 보안 가이드 기반 진단</p>
         </header>
 
+        <!-- Report Modal -->
+
         <!-- Main Card -->
-        <div class="glass-card" style="padding: 30px;">
+        <div class="glass-card">
             <!-- Tabs -->
             <div class="tabs-container">
                 <div class="tabs">
-                    <button class="tab active" onclick="switchTab('web')"><i class="fa-solid fa-globe"></i> Web
-                        App</button>
-                    <button class="tab" onclick="switchTab('infra')"><i class="fa-solid fa-server"></i> Infra</button>
-                    <button class="tab" onclick="switchTab('history')"><i class="fa-solid fa-clock-rotate-left"></i>
-                        History</button>
+                    <button class="tab active" onclick="switchTab('web')">
+                        <i class="fa-solid fa-globe"></i> 웹 진단 (Web)
+                    </button>
+                    <button class="tab" onclick="switchTab('infra')">
+                        <i class="fa-solid fa-server"></i> 인프라 진단 (Infra)
+                    </button>
+                    <button class="tab" onclick="switchTab('history')">
+                        <i class="fa-solid fa-clock-rotate-left"></i> 진단 이력 (History)
+                    </button>
                 </div>
             </div>
 
@@ -637,87 +609,112 @@
             <div id="tab-web" class="tab-content active">
                 <form id="webScanForm">
                     <div class="input-group">
-                        <label class="input-label">Target URL</label>
+                        <label class="input-label">진단 대상 URL (Target URL)</label>
                         <input type="text" id="targetUrl" class="modern-input font-mono"
                             placeholder="https://example.com" required>
-                        <p class="input-hint">진단할 웹 애플리케이션의 URL을 입력하세요</p>
+                        <p class="input-hint"><i class="fa-solid fa-circle-info"></i> http:// 또는 https:// 를 포함한 전체 URL을
+                            입력해주세요.</p>
                     </div>
 
                     <div class="input-group">
                         <label class="checkbox-wrapper">
                             <input type="checkbox" id="useClaude">
-                            <div>
-                                <span
-                                    style="display:block; font-weight:600; font-size: 0.95rem; color: var(--text-main);">Enable
-                                    Claude AI Deep Analysis</span>
-                                <span style="font-size:0.8rem; color:var(--text-muted);">상세한 보안 분석 및 코드 패치 권장사항
-                                    제공</span>
+                            <div class="checkbox-content">
+                                <strong>Claude AI 심층 분석 활성화</strong>
+                                <span>LLM을 활용하여 발견된 취약점에 대한 상세 분석 리포트와 시큐어 코딩 가이드를 제공합니다.</span>
                             </div>
                         </label>
-                    </div>
 
-                    <div class="input-group">
                         <label class="checkbox-wrapper">
                             <input type="checkbox" id="useInfraDetection" checked>
-                            <div>
-                                <span
-                                    style="display:block; font-weight:600; font-size: 0.95rem; color: var(--text-main);">Enable
-                                    Smart Infra Detection</span>
-                                <span style="font-size:0.8rem; color:var(--text-muted);">인프라 자동 감지로 관련 스크립트만 실행 (성능
-                                    향상)</span>
+                            <div class="checkbox-content">
+                                <strong>스마트 인프라 탐지 (Smart Detect)</strong>
+                                <span>대상 서버의 기술 스택(OS, Web Server 등)을 자동으로 식별하여 최적화된 스크립트만 실행합니다.</span>
                             </div>
                         </label>
+
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="useAuth" onchange="toggleAuthInputs()">
+                            <div class="checkbox-content">
+                                <strong>인증 스캔 활성화 (Authenticated Scan)</strong>
+                                <span>로그인이 필요한 페이지 점검을 위해 인증 토큰이나 쿠키 정보를 입력합니다.</span>
+                            </div>
+                        </label>
+
+                        <!-- Auth Inputs -->
+                        <div id="authInputs" class="auth-inputs" style="display: none;">
+                            <div class="input-group">
+                                <label class="input-label">Authorization Token (Bearer)</label>
+                                <textarea id="authToken" class="modern-input font-mono"
+                                    placeholder="eyJh... (Bearer 토큰 입력)" rows="2"></textarea>
+                                <p class="input-hint">JWT 등 인증 토큰을 입력하세요. 'Bearer ' 접두어는 자동 추가됩니다.</p>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Session Cookies</label>
+                                <textarea id="authCookies" class="modern-input font-mono"
+                                    placeholder='{"sessionid": "xyz123", "PHPSESSID": "..."}' rows="2"></textarea>
+                                <p class="input-hint">JSON 형식으로 쿠키 키-값을 입력하세요.</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn-primary" id="webScanBtn">
-                        <i class="fa-solid fa-radar"></i> Initiate Security Scan
+                    <button type="submit" class="btn-primary" id="startScanBtn">
+                        <i class="fa-solid fa-rocket"></i> 보안 진단 시작
                     </button>
                 </form>
             </div>
 
-
             <!-- Infra Scan Tab -->
             <div id="tab-infra" class="tab-content">
                 <form id="infraScanForm">
-                    <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+                    <div class="input-group">
+                        <label class="input-label">대상 서버 주소 (Target IP/Host)</label>
+                        <input type="text" id="sshHost" class="modern-input font-mono" placeholder="192.168.1.100"
+                            required>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="input-group">
-                            <label class="input-label">Host IP / Domain</label>
-                            <input type="text" id="sshHost" class="modern-input font-mono" placeholder="192.168.1.100"
-                                required>
+                            <label class="input-label">SSH 사용자 (User)</label>
+                            <input type="text" id="sshUser" class="modern-input font-mono" placeholder="root" required>
                         </div>
                         <div class="input-group">
-                            <label class="input-label">SSH Port</label>
-                            <input type="number" id="sshPort" class="modern-input font-mono" value="22" min="1"
-                                max="65535">
+                            <label class="input-label">SSH 포트 (Port)</label>
+                            <input type="number" id="sshPort" class="modern-input font-mono" value="22" required>
                         </div>
                     </div>
 
                     <div class="input-group">
-                        <label class="input-label">SSH Username</label>
-                        <input type="text" id="sshUser" class="modern-input font-mono" placeholder="admin" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">Authentication</label>
-                        <div style="display:flex; gap:10px; margin-top:5px;">
-                            <button type="button" class="btn-outline active"
-                                onclick="toggleAuthMethod('password')">Password</button>
-                            <button type="button" class="btn-outline" onclick="toggleAuthMethod('pem')">PEM Key</button>
+                        <label class="input-label">인증 방식 (Authentication Method)</label>
+                        <div class="tabs-container" style="justify-content: flex-start; margin-bottom: 1rem;">
+                            <div class="tabs" style="width: 100%;">
+                                <button type="button" class="tab active" style="flex:1; justify-content:center;"
+                                    onclick="toggleAuthMethod('password')">
+                                    <i class="fa-solid fa-key"></i> 비밀번호 (Password)
+                                </button>
+                                <button type="button" class="tab" style="flex:1; justify-content:center;"
+                                    onclick="toggleAuthMethod('key')">
+                                    <i class="fa-solid fa-file-shield"></i> 키 파일 (PEM Key)
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="input-group" id="passwordGroup">
-                        <label class="input-label">SSH Password</label>
-                        <input type="password" id="sshPass" class="modern-input" placeholder="••••••••" required>
+                    <div id="passGroup" class="input-group">
+                        <label class="input-label">SSH 비밀번호</label>
+                        <input type="password" id="sshPass" class="modern-input font-mono" placeholder="Password">
                     </div>
 
-                    <div class="input-group" id="pemGroup" style="display: none;">
-                        <label class="input-label">PEM Key File</label>
-                        <input type="file" id="pemFile" class="modern-input" accept=".pem,.key" style="padding: 12px;">
+                    <div id="pemGroup" class="input-group" style="display: none;">
+                        <label class="input-label">PEM 키 파일 업로드</label>
+                        <div class="modern-input" style="padding: 10px; display: flex; align-items: center;">
+                            <input type="file" id="pemFile" accept=".pem,.key" style="width: 100%;">
+                        </div>
+                        <p class="input-hint">서버 접속을 위한 프라이빗 키 파일을 선택해주세요.</p>
                     </div>
 
                     <button type="submit" class="btn-primary" id="infraScanBtn">
-                        <i class="fa-solid fa-network-wired"></i> Start Infra Scan
+                        <i class="fa-solid fa-network-wired"></i> 인프라 진단 시작
                     </button>
                 </form>
             </div>
@@ -725,57 +722,41 @@
             <!-- History Tab -->
             <div id="tab-history" class="tab-content">
                 <div id="historyList">
-                    <div style="text-align:center; padding: 40px; color: var(--text-dim);">
-                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 10px;"></i>
-                        <p>Loading scan history...</p>
-                    </div>
+                    <p style="text-align:center; color:var(--text-muted); padding:20px;">진단 이력을 불러오는 중...</p>
                 </div>
             </div>
 
-            <!-- Loading State -->
-            <div id="loadingState" style="display: none; text-align: center; padding: 20px;">
-                <div class="terminal-window">
-                    <div class="terminal-header">
-                        <div class="dot red"></div>
-                        <div class="dot yellow"></div>
-                        <div class="dot green"></div>
-                    </div>
-                    <div class="terminal-content" id="terminal-logs">
-                        > Initializing Cyber Sentinel Core...<br>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" id="progress-fill"></div>
-                    </div>
+            <!-- Loading State (CLI Style) -->
+            <div id="loadingState" class="terminal-loading">
+                <!-- Just a placeholder, main logic is in report.html, but this provides instant feedback -->
+                <div style="text-align:center; padding:20px;">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem; color:var(--primary);"></i>
+                    <p style="margin-top:15px; font-weight:600; color:var(--text-main);">진단 엔진을 초기화하고 있습니다...</p>
                 </div>
             </div>
 
-            <!-- Error Message -->
-            <div id="errorMsg"
-                style="display: none; background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 15px; border-radius: 10px; margin-top: 20px;">
-            </div>
-
-            <!-- Features -->
+            <!-- Features Footer -->
             <div class="features">
                 <div class="feature-grid">
                     <div class="feature-item">
-                        <i class="fa-solid fa-shield-virus"></i>
-                        <strong>54+ Scripts</strong>
-                        <span>Web Vulnerability</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fa-solid fa-list-check"></i>
-                        <strong>OWASP Top 10</strong>
-                        <span>2025 Standard</span>
+                        <i class="fa-solid fa-laptop-code"></i>
+                        <strong>웹 취약점 진단</strong>
+                        <span>OWASP Top 10 기반 점검</span>
                     </div>
                     <div class="feature-item">
                         <i class="fa-solid fa-server"></i>
-                        <strong>Infra Scan</strong>
-                        <span>KISA Guide</span>
+                        <strong>인프라 분석</strong>
+                        <span>서버 구성/설정 취약점 탐지</span>
                     </div>
                     <div class="feature-item">
-                        <i class="fa-solid fa-robot"></i>
-                        <strong>AI Analysis</strong>
-                        <span>Claude Sonnet 4</span>
+                        <i class="fa-solid fa-brain"></i>
+                        <strong>AI 심층 분석</strong>
+                        <span>Claude 기반 대응 방안 제시</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fa-solid fa-file-invoice"></i>
+                        <strong>상세 리포트</strong>
+                        <span>전문가급 진단 보고서 생성</span>
                     </div>
                 </div>
             </div>
@@ -786,51 +767,35 @@
     <div id="reportModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle" style="margin-bottom: 5px;">Report</h2>
-            <p id="modalSubtitle" style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;"></p>
+            <h2 id="modalTitle" style="margin-top:0; color:var(--text-main);">Report</h2>
+            <p id="modalSubtitle" style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;"></p>
             <div id="reportViewer" class="report-viewer"></div>
-            <div style="margin-top: 20px; text-align: right;">
-                <button id="modalDownloadBtn" class="btn-primary" style="width: auto; padding: 12px 24px;">
-                    <i class="fa-solid fa-download"></i> Download Report
+            <div style="margin-top: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="modalDownloadBtn" class="btn-primary" style="width: auto;">
+                    <i class="fa-solid fa-download"></i> 다운로드
                 </button>
+                <button onclick="closeModal()" class="btn-outline">닫기</button>
             </div>
         </div>
     </div>
 
+    <!-- Script -->
     <script>
         // Tab Switching
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-            event.currentTarget.classList.add('active');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-
-            if (tabName === 'history') loadHistory();
-        }
-
-        // Auth Method Toggle
-        function toggleAuthMethod(method) {
-            const passGroup = document.getElementById('passwordGroup');
-            const pemGroup = document.getElementById('pemGroup');
-            const sshPass = document.getElementById('sshPass');
-            const pemFile = document.getElementById('pemFile');
-            const buttons = document.querySelectorAll('#tab-infra .btn-outline');
-
-            buttons.forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            if (method === 'password') {
-                passGroup.style.display = 'block';
-                pemGroup.style.display = 'none';
-                sshPass.setAttribute('required', 'required');
-                pemFile.removeAttribute('required');
-            } else {
-                passGroup.style.display = 'none';
-                pemGroup.style.display = 'block';
-                sshPass.removeAttribute('required');
-                pemFile.setAttribute('required', 'required');
+            // Find button with correct onclick handler or index
+            const tabs = document.querySelectorAll('.tab');
+            if (tabName === 'web') tabs[0].classList.add('active');
+            if (tabName === 'infra') tabs[1].classList.add('active');
+            if (tabName === 'history') {
+                tabs[2].classList.add('active');
+                loadHistory();
             }
+
+            document.getElementById(`tab-${tabName}`).classList.add('active');
         }
 
         // Load Scan History
@@ -919,6 +884,12 @@
             if (event.target == modal) closeModal();
         }
 
+        // Auth Checkbox Toggle
+        document.getElementById('useAuth').addEventListener('change', (e) => {
+            const authInputs = document.getElementById('authInputs');
+            authInputs.style.display = e.target.checked ? 'block' : 'none';
+        });
+
         // Web Scan Form
         document.getElementById('webScanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -926,12 +897,48 @@
             const targetUrl = document.getElementById('targetUrl').value.trim();
             const useClaude = document.getElementById('useClaude').checked;
             const useInfraDetection = document.getElementById('useInfraDetection').checked;
-            const scanBtn = document.getElementById('webScanBtn');
-            const errorMsg = document.getElementById('errorMsg');
+            const useAuth = document.getElementById('useAuth').checked;
 
-            errorMsg.style.display = 'none';
+            let cookies = {};
+            let headers = {};
+
+            if (useAuth) {
+                try {
+                    // 1. Cookies (Optional)
+                    const cookieStr = document.getElementById('authCookies').value.trim();
+                    if (cookieStr) {
+                        try {
+                            cookies = JSON.parse(cookieStr);
+                        } catch {
+                            const parts = cookieStr.split('=');
+                            if (parts.length === 2) {
+                                cookies[parts[0].trim()] = parts[1].trim();
+                            }
+                        }
+                    }
+
+                    // 2. Token (Simplified)
+                    const tokenStr = document.getElementById('authToken').value.trim();
+                    if (tokenStr) {
+                        // 사용자가 이미 "Bearer "를 넣었는지 확인 후 처리
+                        const finalToken = tokenStr.toLowerCase().startsWith('bearer ') ? tokenStr : `Bearer ${tokenStr}`;
+                        headers['Authorization'] = finalToken;
+                    }
+
+                } catch (err) {
+                    alert('인증 정보 처리 중 오류가 발생했습니다.');
+                    console.error(err);
+                    return;
+                }
+            }
+
+            const scanBtn = document.getElementById('startScanBtn');
+            // Error message element might not exist in new HTML, handle gracefully or create it
+            // const errorMsg = document.getElementById('errorMsg'); 
+
+            // errorMsg.style.display = 'none'; // Removing this if element doesn't exist
             scanBtn.disabled = true;
-            scanBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting Scan...';
+            scanBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 진단 시작 중...';
 
             try {
                 const response = await fetch('/api/scan/start', {
@@ -941,7 +948,9 @@
                         target_url: targetUrl,
                         use_claude: useClaude,
                         use_infra_detection: useInfraDetection,
-                        scan_types: ['all']
+                        scan_types: ['all'],
+                        cookies: cookies,
+                        headers: headers
                     })
                 });
 
@@ -955,12 +964,37 @@
                 window.location.href = `/report/${data.scan_id}`;
 
             } catch (error) {
-                errorMsg.textContent = error.message;
-                errorMsg.style.display = 'block';
+                console.error(error);
+                alert('진단 시작 중 오류가 발생했습니다: ' + error.message);
                 scanBtn.disabled = false;
-                scanBtn.innerHTML = '<i class="fa-solid fa-radar"></i> Initiate Security Scan';
+                scanBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> 보안 진단 시작';
             }
         });
+
+        // Toggle Auth Method for Infra Scan
+        function toggleAuthMethod(method) {
+            const passGroup = document.getElementById('passGroup');
+            const pemGroup = document.getElementById('pemGroup');
+            const sshPass = document.getElementById('sshPass');
+            const pemFile = document.getElementById('pemFile');
+            const tabs = document.querySelectorAll('#tab-infra .tab');
+
+            if (method === 'password') {
+                passGroup.style.display = 'block';
+                pemGroup.style.display = 'none';
+                sshPass.setAttribute('required', 'required');
+                pemFile.removeAttribute('required');
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+            } else {
+                passGroup.style.display = 'none';
+                pemGroup.style.display = 'block';
+                sshPass.removeAttribute('required');
+                pemFile.setAttribute('required', 'required');
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
+            }
+        }
 
         // Infra Scan Form
         document.getElementById('infraScanForm').addEventListener('submit', async (e) => {
@@ -969,14 +1003,11 @@
             const sshHost = document.getElementById('sshHost').value.trim();
             const sshUser = document.getElementById('sshUser').value.trim();
             const sshPort = parseInt(document.getElementById('sshPort').value);
-            const authMethod = document.querySelector('#tab-infra .btn-outline.active').textContent.trim().toLowerCase();
+            const authMethod = document.querySelector('#tab-infra .tab.active').textContent.includes('Password') ? 'password' : 'key';
 
             const scanBtn = document.getElementById('infraScanBtn');
-            const errorMsg = document.getElementById('errorMsg');
-
-            errorMsg.style.display = 'none';
             scanBtn.disabled = true;
-            scanBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting Scan...';
+            scanBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 진단 시작 중...';
 
             try {
                 let response;
@@ -996,7 +1027,7 @@
                     });
                 } else {
                     const pemFile = document.getElementById('pemFile').files[0];
-                    if (!pemFile) throw new Error('Please select a PEM file.');
+                    if (!pemFile) throw new Error('PEM 파일을 선택해주세요.');
 
                     const formData = new FormData();
                     formData.append('ssh_host', sshHost);
@@ -1020,10 +1051,10 @@
                 window.location.href = `/report/${data.scan_id}`;
 
             } catch (error) {
-                errorMsg.textContent = error.message;
-                errorMsg.style.display = 'block';
+                console.error(error);
+                alert('진단 시작 중 오류가 발생했습니다: ' + error.message);
                 scanBtn.disabled = false;
-                scanBtn.innerHTML = '<i class="fa-solid fa-network-wired"></i> Start Infra Scan';
+                scanBtn.innerHTML = '<i class="fa-solid fa-network-wired"></i> 인프라 진단 시작';
             }
         });
     </script>

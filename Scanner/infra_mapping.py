@@ -5,76 +5,70 @@
 인프라 탐지 결과에 따라 해당 스크립트만 선별 실행됩니다.
 """
 
-# 웹 서버별 실행 스크립트 매핑
+# KISA 취약점 분석·평가 가이드 기준 분류
+
+# 웹 서버별 실행 스크립트 매핑 (W-01 ~ W-20)
 WEB_SERVER_MAPPING = {
     'nginx': [
-        'modules.web_server.nginx_config',
-        'modules.was.nginx_config',
+        'modules.web_server.nginx_config',  # W-06, W-07 등 포함
     ],
     'apache': [
-        'modules.web_server.apache_config',
-        'modules.was.apache_config',
+        'modules.web_server.apache_config', # W-01 ~ W-05
     ],
     'iis': [
         'modules.was.iis_config',
     ],
 }
 
-# 데이터베이스별 실행 스크립트 매핑
+# 데이터베이스별 실행 스크립트 매핑 (DB-01 ~ DB-10)
 DATABASE_MAPPING = {
-    'mysql': ['modules.db.mysql_config'],
-    'postgresql': ['modules.db.postgresql_config'],
+    'mysql': ['modules.db.mysql_config'],         # DB-01 ~ DB-04
+    'postgresql': ['modules.db.postgresql_config'], # DB-11 ~
     'mongodb': ['modules.db.mongodb_config'],
     'mssql': ['modules.db.mssql_config'],
     'oracle': ['modules.db.oracle_config'],
     'redis': ['modules.db.redis_config'],
 }
 
-# WAS별 실행 스크립트 매핑
+# WAS별 실행 스크립트 매핑 (WAS-01 ~ WAS-10)
 WAS_MAPPING = {
-    'tomcat': ['modules.was.tomcat_config'],
+    'tomcat': ['modules.was.tomcat_config'],  # WAS-01 ~ WAS-05
     'wildfly': [],
     'weblogic': [],
     'websphere': [],
 }
 
-# OS별 실행 스크립트 매핑
+# OS별 실행 스크립트 매핑 (U-01 ~ U-72)
 OS_MAPPING = {
     'linux': [
-        'modules.os.linux_account',
-        'modules.os.linux_password',
-        'modules.os.linux_file_permission',
-        'modules.os.linux_service',
-        'modules.os.linux_log',
+        'modules.os.linux_account',          # U-01 ~ U-04
+        'modules.os.linux_password',         # U-05 ~ U-18
+        'modules.os.linux_file_permission',  # U-19 ~ U-25
+        'modules.os.linux_service',          # U-26 ~ U-30
+        'modules.os.linux_log',              # U-40 ~
         'modules.os.linux_firewall',
         'modules.os.linux_ssh',
     ],
     'windows': [],
 }
 
-# 프레임워크별 실행 스크립트 매핑 (신규)
+# 프레임워크별 실행 스크립트 매핑
 FRAMEWORK_MAPPING = {
-    'spring': [
-        'modules.framework.spring_actuator',
-    ],
-    'django': [
-        'modules.framework.django_settings',
-    ],
-    'flask': [
-        'modules.framework.flask_debug',
-    ],
+    'spring': ['modules.framework.spring_actuator'],
+    'django': ['modules.framework.django_settings'],
+    'flask': ['modules.framework.flask_debug'],
     'laravel': [],
     'express': [],
 }
 
-# 클라우드/컨테이너별 실행 스크립트 매핑 (신규)
+# 클라우드/컨테이너별 실행 스크립트 매핑
 CLOUD_MAPPING = {
     'docker': ['modules.cloud.docker_config'],
     'aws': ['modules.cloud.aws_s3'],
     'kubernetes': [],
 }
 
-# 공통 웹 취약점 스크립트 (항상 실행)
+# 공통 웹 취약점 스크립트 (OWASP Top 10)
 COMMON_WEB_SCRIPTS = [
     'modules.web.sqli',
     'modules.web.xss',

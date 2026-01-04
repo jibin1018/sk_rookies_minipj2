@@ -5,7 +5,7 @@ venv/
 Scanner/venv/
 
 # History (Local Only)
-hist/
+# hist/
 .git/*
 
 # Python

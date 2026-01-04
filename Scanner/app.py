@@ -198,6 +198,10 @@ def api_start_scan():
         scan_types = data.get('scan_types', ['all'])
         use_infra_detection = data.get('use_infra_detection', False)
         
+        # 인증 정보 추출 (쿠키/헤더)
+        auth_cookies = data.get('cookies', {})
+        auth_headers = data.get('headers', {})
+        
         if not target_url:
             return jsonify({'error': '대상 URL을 입력하세요'}), 400
         
@@ -226,7 +230,7 @@ def api_start_scan():
         
         thread = threading.Thread(
             target=run_web_scan_background, 
-            args=(scan_id, target_url, use_claude, scan_types, use_infra_detection)
+            args=(scan_id, target_url, use_claude, scan_types, use_infra_detection, auth_cookies, auth_headers)
         )
         thread.daemon = True
         thread.start()
@@ -243,7 +247,7 @@ def api_start_scan():
         logger.error(f"스캔 시작 오류: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-def run_web_scan_background(scan_id, target_url, use_claude, scan_types, use_infra_detection=False):
+def run_web_scan_background(scan_id, target_url, use_claude, scan_types, use_infra_detection=False, auth_cookies=None, auth_headers=None):
     """백그라운드 웹 스캔 실행"""
     try:
         logger.info(f"[{scan_id}] 스캔 실행 중... (인프라 탐지: {use_infra_detection})")
@@ -253,7 +257,9 @@ def run_web_scan_background(scan_id, target_url, use_claude, scan_types, use_inf
             scan_status, 
             scan_id,
             scan_types=scan_types,
-            use_infra_detection=use_infra_detection
+            use_infra_detection=use_infra_detection,
+            auth_cookies=auth_cookies,
+            auth_headers=auth_headers
         )
         results = scanner.scan_all()
         
