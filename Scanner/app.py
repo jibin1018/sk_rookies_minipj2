@@ -1042,6 +1042,7 @@ def api_docs():
     }
     return jsonify(docs)
 
+@app.route('/api/health')
 @app.route('/health')
 def health_check():
     """헬스 체크"""
@@ -1064,7 +1065,7 @@ if __name__ == '__main__':
     os.makedirs('reports', exist_ok=True)
     os.makedirs('temp', exist_ok=True)
     
-    port = int(os.getenv('PORT', '5000'))
+    port = int(os.getenv('PORT', '5003'))
     
     print("\n" + "="*80)
     print(f"통합 보안 취약점 스캐너 API 서버 (Port: {port})")

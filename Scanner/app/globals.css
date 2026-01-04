@@ -1,0 +1,367 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated to bright, professional security scanner theme */
+  --background: oklch(0.99 0.003 264);
+  --foreground: oklch(0.15 0.01 264);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.01 264);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.01 264);
+  --primary: oklch(0.55 0.22 264);
+  --primary-foreground: oklch(0.99 0.003 264);
+  --secondary: oklch(0.96 0.01 264);
+  --secondary-foreground: oklch(0.15 0.01 264);
+  --muted: oklch(0.96 0.01 264);
+  --muted-foreground: oklch(0.5 0.02 264);
+  --accent: oklch(0.65 0.2 160);
+  --accent-foreground: oklch(0.99 0.003 264);
+  --destructive: oklch(0.6 0.25 27);
+  --destructive-foreground: oklch(0.99 0.003 264);
+  --border: oklch(0.92 0.01 264);
+  --input: oklch(0.95 0.01 264);
+  --ring: oklch(0.55 0.22 264);
+  --chart-1: oklch(0.55 0.22 264);
+  --chart-2: oklch(0.65 0.2 160);
+  --chart-3: oklch(0.7 0.15 50);
+  --chart-4: oklch(0.5 0.2 300);
+  --chart-5: oklch(0.6 0.18 200);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.99 0.003 264);
+  --sidebar-foreground: oklch(0.15 0.01 264);
+  --sidebar-primary: oklch(0.55 0.22 264);
+  --sidebar-primary-foreground: oklch(0.99 0.003 264);
+  --sidebar-accent: oklch(0.96 0.01 264);
+  --sidebar-accent-foreground: oklch(0.15 0.01 264);
+  --sidebar-border: oklch(0.92 0.01 264);
+  --sidebar-ring: oklch(0.55 0.22 264);
+}
+
+.dark {
+  --background: oklch(0.12 0.015 264);
+  --foreground: oklch(0.96 0.005 264);
+  --card: oklch(0.15 0.015 264);
+  --card-foreground: oklch(0.96 0.005 264);
+  --popover: oklch(0.15 0.015 264);
+  --popover-foreground: oklch(0.96 0.005 264);
+  --primary: oklch(0.65 0.22 264);
+  --primary-foreground: oklch(0.12 0.015 264);
+  --secondary: oklch(0.2 0.015 264);
+  --secondary-foreground: oklch(0.96 0.005 264);
+  --muted: oklch(0.2 0.015 264);
+  --muted-foreground: oklch(0.6 0.01 264);
+  --accent: oklch(0.7 0.2 160);
+  --accent-foreground: oklch(0.12 0.015 264);
+  --destructive: oklch(0.5 0.25 27);
+  --destructive-foreground: oklch(0.96 0.005 264);
+  --border: oklch(0.22 0.015 264);
+  --input: oklch(0.2 0.015 264);
+  --ring: oklch(0.6 0.2 264);
+  --chart-1: oklch(0.65 0.22 264);
+  --chart-2: oklch(0.7 0.2 160);
+  --chart-3: oklch(0.75 0.15 50);
+  --chart-4: oklch(0.6 0.2 300);
+  --chart-5: oklch(0.65 0.18 200);
+  --sidebar: oklch(0.15 0.015 264);
+  --sidebar-foreground: oklch(0.96 0.005 264);
+  --sidebar-primary: oklch(0.65 0.22 264);
+  --sidebar-primary-foreground: oklch(0.12 0.015 264);
+  --sidebar-accent: oklch(0.2 0.015 264);
+  --sidebar-accent-foreground: oklch(0.96 0.005 264);
+  --sidebar-border: oklch(0.22 0.015 264);
+  --sidebar-ring: oklch(0.6 0.2 264);
+}
+
+@theme inline {
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* 마크다운 리포트 커스텀 스타일 - Enhanced Version */
+@layer components {
+
+  /* Base prose container */
+  .prose {
+    @apply text-slate-700 leading-relaxed;
+  }
+
+  /* Enhanced Headings with better hierarchy */
+  .prose h1 {
+    @apply text-4xl font-black text-slate-900 mb-8 pb-4 border-b-4 border-blue-500 flex items-center gap-3 tracking-tight;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .prose h2 {
+    @apply text-3xl font-bold text-slate-800 mt-10 mb-5 pb-3 border-b-2 border-slate-300 tracking-tight;
+    position: relative;
+  }
+
+  .prose h2::before {
+    content: "";
+    @apply absolute left-0 bottom-0 w-20 h-1 bg-blue-600;
+  }
+
+  .prose h3 {
+    @apply text-2xl font-bold text-slate-800 mt-8 mb-4 pb-2 border-l-4 border-blue-500 pl-4;
+  }
+
+  .prose h4 {
+    @apply text-xl font-semibold text-slate-700 mt-6 mb-3 flex items-center gap-2;
+  }
+
+  .prose h5 {
+    @apply text-lg font-semibold text-slate-700 mt-4 mb-2;
+  }
+
+  .prose h6 {
+    @apply text-base font-semibold text-slate-600 mt-3 mb-2;
+  }
+
+  /* Paragraphs */
+  .prose p {
+    @apply text-slate-700 leading-relaxed mb-5 text-[15px];
+  }
+
+  /* Text emphasis */
+  .prose strong {
+    @apply font-bold text-slate-900 px-1 bg-yellow-50 rounded;
+  }
+
+  .prose em {
+    @apply italic text-slate-600;
+  }
+
+  /* Lists with better spacing */
+  .prose ul {
+    @apply list-none space-y-2 mb-6 ml-0;
+  }
+
+  .prose ul li {
+    @apply relative pl-6 text-slate-700 leading-relaxed;
+  }
+
+  .prose ul li::before {
+    content: "▸";
+    @apply absolute left-0 text-blue-600 font-bold;
+  }
+
+  .prose ol {
+    @apply list-decimal list-inside space-y-2 mb-6 ml-4;
+  }
+
+  .prose ol li {
+    @apply text-slate-700 leading-relaxed;
+  }
+
+  /* Nested lists */
+  .prose ul ul,
+  .prose ol ul,
+  .prose ul ol,
+  .prose ol ol {
+    @apply mt-2 mb-2;
+  }
+
+  /* Code blocks - Enhanced with syntax highlighting feel */
+  .prose code {
+    @apply bg-slate-900 text-emerald-400 px-2 py-0.5 rounded-md text-sm font-mono border border-slate-700 shadow-sm;
+  }
+
+  .prose pre {
+    @apply bg-gradient-to-br from-slate-900 to-slate-800 text-slate-100 p-6 rounded-xl overflow-x-auto mb-6 shadow-2xl border border-slate-700 relative;
+  }
+
+  .prose pre::before {
+    content: "";
+    @apply absolute top-3 left-3 w-3 h-3 rounded-full bg-red-500;
+  }
+
+  .prose pre::after {
+    content: "";
+    @apply absolute top-3 left-7 w-3 h-3 rounded-full bg-yellow-500;
+  }
+
+  .prose pre code {
+    @apply bg-transparent text-slate-100 p-0 border-0 shadow-none block text-sm leading-relaxed;
+  }
+
+  /* Inline code in pre block */
+  .prose pre code .hljs-keyword {
+    @apply text-purple-400;
+  }
+
+  .prose pre code .hljs-string {
+    @apply text-green-400;
+  }
+
+  .prose pre code .hljs-number {
+    @apply text-blue-400;
+  }
+
+  .prose pre code .hljs-comment {
+    @apply text-slate-500 italic;
+  }
+
+  /* Blockquotes - Premium card style */
+  .prose blockquote {
+    @apply border-l-4 border-blue-600 pl-6 pr-4 italic text-slate-700 my-6 bg-gradient-to-r from-blue-50 to-transparent py-4 rounded-r-lg shadow-sm;
+  }
+
+  .prose blockquote p {
+    @apply mb-2;
+  }
+
+  /* Links with hover effects */
+  .prose a {
+    @apply text-blue-600 hover:text-blue-800 underline decoration-2 decoration-blue-300 hover:decoration-blue-600 font-medium transition-all duration-200;
+  }
+
+  /* Tables - Modern card-like design */
+  .prose table {
+    @apply w-full border-collapse mb-8 text-sm shadow-lg rounded-xl overflow-hidden;
+  }
+
+  .prose thead {
+    @apply bg-gradient-to-r from-slate-800 to-slate-700 text-white;
+  }
+
+  .prose thead th {
+    @apply px-6 py-4 text-left font-bold text-sm uppercase tracking-wider border-b-2 border-slate-600;
+  }
+
+  .prose tbody {
+    @apply bg-white;
+  }
+
+  .prose tbody td {
+    @apply px-6 py-4 border-b border-slate-200 text-slate-700;
+  }
+
+  .prose tbody tr {
+    @apply transition-all duration-150;
+  }
+
+  .prose tbody tr:hover {
+    @apply bg-blue-50 shadow-sm;
+  }
+
+  .prose tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* Alternating row colors */
+  .prose tbody tr:nth-child(odd) {
+    @apply bg-slate-50;
+  }
+
+  .prose tbody tr:nth-child(even) {
+    @apply bg-white;
+  }
+
+  /* Horizontal rules */
+  .prose hr {
+    @apply border-0 border-t-2 border-slate-200 my-10;
+  }
+
+  /* Details/Summary - Collapsible sections */
+  .prose details {
+    @apply bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-xl p-5 mb-5 shadow-md hover:shadow-lg transition-all duration-200;
+  }
+
+  .prose summary {
+    @apply font-bold text-slate-900 cursor-pointer hover:text-blue-600 mb-0 flex items-center gap-2 transition-colors duration-200 select-none;
+  }
+
+  .prose details[open] summary {
+    @apply mb-5 pb-4 border-b-2 border-blue-200;
+  }
+
+  .prose summary::marker {
+    @apply text-blue-600;
+  }
+
+  .prose summary::-webkit-details-marker {
+    @apply text-blue-600;
+  }
+
+  /* Image styling */
+  .prose img {
+    @apply rounded-lg shadow-lg my-6 border border-slate-200;
+  }
+
+  /* Figure and figcaption */
+  .prose figure {
+    @apply my-8;
+  }
+
+  .prose figcaption {
+    @apply text-center text-sm text-slate-500 mt-2 italic;
+  }
+
+  /* Marks and highlights */
+  .prose mark {
+    @apply bg-yellow-200 text-slate-900 px-1 rounded;
+  }
+
+  /* Keyboard keys */
+  .prose kbd {
+    @apply bg-slate-800 text-white px-2 py-1 rounded text-xs font-mono border border-slate-600 shadow-sm;
+  }
+
+  /* Subscript and superscript */
+  .prose sub,
+  .prose sup {
+    @apply text-xs;
+  }
+}

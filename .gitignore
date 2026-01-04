@@ -26,6 +26,31 @@ Scanner/venv/
 logs/
 reports/
 
+# Scanner (Node.js/Next.js)
+Scanner/node_modules/
+Scanner/.next/
+Scanner/.turbo/
+Scanner/out/
+Scanner/dist/
+Scanner/.swc/
+
+# npm/yarn cache and logs
+Scanner/npm-debug.log*
+Scanner/yarn-debug.log*
+Scanner/yarn-error.log*
+Scanner/.pnpm-debug.log*
+Scanner/.yarn/
+Scanner/.npm/
+
+# Next.js build info
+Scanner/.next/cache/
+Scanner/.next/static/chunks/
+Scanner/.next/server/
+
+# TypeScript cache
+Scanner/*.tsbuildinfo
+Scanner/.tsbuildinfo
+
 # OS/IDE
 .DS_Store
 *.swp

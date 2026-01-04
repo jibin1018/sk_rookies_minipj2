@@ -19,7 +19,8 @@ echo "=================================================="
 kill_port 8080 # Backend
 kill_port 3000 # Frontend (Default)
 kill_port 3001 # Frontend (Alternative)
-kill_port 5003 # Scanner
+kill_port 3002 # Scanner Frontend
+kill_port 5003 # Scanner Backend
 
 echo "=================================================="
 echo "Starting Mini_PJT2 Services..."
@@ -39,10 +40,21 @@ cd frontend
 npm start &
 cd ..
 
-# 3. Scanner 실행
-echo "[Scanner] Starting Python Scanner (Port 5003)..."
+# 3. Scanner Backend 실행
+echo "[Scanner] Starting Python Scanner Backend (Port 5003)..."
 export PORT=5003
 python Scanner/app.py &
+
+# 4. Scanner Frontend 실행
+echo "[Scanner] Starting Next.js Scanner Frontend (Port 3002)..."
+cd Scanner
+if [ ! -d "node_modules" ]; then
+    echo "Installing dependencies for Scanner Frontend..."
+    npm install
+fi
+# Start Next.js on port 3002
+npm run dev -- -p 3002 &
+cd ..
 
 echo "=================================================="
 echo "All services are running."
