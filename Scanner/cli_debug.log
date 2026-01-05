@@ -81,3 +81,90 @@
 2026-01-05 15:08:28,279 - scanner_engine - INFO - 
 [📊] 인프라 스캔 완료 - 실행: 10, 소요시간: 14.66초
 2026-01-05 15:08:28,280 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/infra_scan_report_20260105_150828.md
+2026-01-05 16:03:59,325 - CLI_Scanner - ERROR - Failed to import scanner modules: dlopen(/Users/user/Documents/Mini_PJT2/Scanner/venv/lib/python3.14/site-packages/charset_normalizer/md.cpython-314-darwin.so, 0x0002): tried: '/Users/user/Documents/Mini_PJT2/Scanner/venv/lib/python3.14/site-packages/charset_normalizer/md.cpython-314-darwin.so' (code signature in <A6BCC18A-D077-3FCC-AFAC-145C8986C980> '/Users/user/Documents/Mini_PJT2/Scanner/venv/lib/python3.14/site-packages/charset_normalizer/md.cpython-314-darwin.so' not valid for use in process: library load disallowed by system policy), '/System/Volumes/Preboot/Cryptexes/OS/Users/user/Documents/Mini_PJT2/Scanner/venv/lib/python3.14/site-packages/charset_normalizer/md.cpython-314-darwin.so' (no such file), '/Users/user/Documents/Mini_PJT2/Scanner/venv/lib/python3.14/site-packages/charset_normalizer/md.cpython-314-darwin.so' (code signature in <A6BCC18A-D077-3FCC-AFAC-145C8986C980> '/Users/user/Documents/Mini_PJT2/Scanner/venv/lib/python3.14/site-packages/charset_normalizer/md.cpython-314-darwin.so' not valid for use in process: library load disallowed by system policy)
+2026-01-05 16:04:32,578 - CLI_Scanner - INFO - Starting Web Scan: 20260105070431_7josj on 3.39.161.64
+2026-01-05 16:04:32,580 - scanner_engine - INFO - [*] 스캔 준비 중...
+2026-01-05 16:04:32,640 - scanner_engine - INFO - [*] 크롤링 시작: 3.39.161.64
+2026-01-05 16:04:32,641 - web_crawler - ERROR - [Crawler] Error crawling 3.39.161.64: Invalid URL '3.39.161.64': No scheme supplied. Perhaps you meant https://3.39.161.64?
+2026-01-05 16:04:32,641 - scanner_engine - INFO - [✓] 크롤링 완료: 1 페이지, 0 API 엔드포인트
+2026-01-05 16:04:32,641 - scanner_engine - INFO - [*] 인프라 탐지 시작...
+2026-01-05 16:04:32,641 - scanner_engine - INFO - [✓] 인프라 탐지 완료: None
+2026-01-05 16:04:32,641 - scanner_engine - INFO - [⏭] File Upload 스킵 (인프라 불일치)
+2026-01-05 16:04:32,646 - scanner_engine - INFO - [*] 병렬 스캔 시작 (30개 테스트, 10 워커)
+2026-01-05 16:04:32,658 - scanner_engine - INFO - [✓] XXE 완료 (0.00s)
+2026-01-05 16:04:32,678 - scanner_engine - INFO - [✓] SQL Injection 완료 (0.00s)
+2026-01-05 16:04:32,683 - scanner_engine - INFO - [✓] Input Bypass 완료 (0.01s)
+2026-01-05 16:04:32,689 - scanner_engine - INFO - [✓] Access Control 완료 (0.00s)
+2026-01-05 16:04:32,696 - scanner_engine - INFO - [✓] Command Injection 완료 (0.03s)
+2026-01-05 16:04:32,708 - scanner_engine - INFO - [✓] Crypto Failures 완료 (0.00s)
+2026-01-05 16:04:32,715 - scanner_engine - INFO - [✓] Auth Failures 완료 (0.00s)
+2026-01-05 16:04:32,720 - scanner_engine - INFO - [✓] Security Misconfig 완료 (0.01s)
+2026-01-05 16:04:32,727 - scanner_engine - INFO - [✓] SSRF 완료 (0.01s)
+2026-01-05 16:04:32,735 - scanner_engine - INFO - [✓] CORS/CSRF 완료 (0.01s)
+2026-01-05 16:04:32,741 - scanner_engine - INFO - [✓] Insecure Design 완료 (0.01s)
+2026-01-05 16:04:32,750 - scanner_engine - INFO - [✓] Vulnerable Components 완료 (0.01s)
+2026-01-05 16:04:32,767 - scanner_engine - INFO - [✓] Integrity Failures 완료 (0.01s)
+2026-01-05 16:04:32,775 - scanner_engine - INFO - [✓] Security Headers 완료 (0.00s)
+2026-01-05 16:04:32,782 - scanner_engine - INFO - [✓] Logging Failures 완료 (0.02s)
+2026-01-05 16:04:32,789 - scanner_engine - INFO - [✓] Information Disclosure 완료 (0.01s)
+2026-01-05 16:04:32,793 - scanner_engine - INFO - [✓] Path Traversal 완료 (0.12s)
+2026-01-05 16:04:32,795 - scanner_engine - INFO - [✓] JWT Vulnerabilities 완료 (0.00s)
+2026-01-05 16:04:32,798 - scanner_engine - INFO - [✓] IDOR 완료 (0.01s)
+2026-01-05 16:04:32,801 - scanner_engine - INFO - [✓] Cross-Site Scripting 완료 (0.13s)
+2026-01-05 16:04:32,808 - scanner_engine - INFO - [✓] File Upload Bypass 완료 (0.00s)
+2026-01-05 16:04:32,817 - scanner_engine - INFO - [✓] Rate Limiting 완료 (0.01s)
+2026-01-05 16:04:32,820 - scanner_engine - INFO - [✓] Mass Assignment 완료 (0.00s)
+2026-01-05 16:04:32,822 - scanner_engine - INFO - [✓] Business Logic 완료 (0.02s)
+2026-01-05 16:04:32,822 - scanner_engine - INFO - [✓] Open Redirect 완료 (0.01s)
+2026-01-05 16:04:32,823 - scanner_engine - INFO - [✓] HTTP Method Abuse 완료 (0.01s)
+2026-01-05 16:04:32,824 - scanner_engine - INFO - [✓] Deserialization 완료 (0.00s)
+2026-01-05 16:04:32,825 - scanner_engine - INFO - [✓] GraphQL Security 완료 (0.00s)
+2026-01-05 16:04:32,825 - scanner_engine - INFO - [✓] HTTP Parameter Pollution 완료 (0.00s)
+2026-01-05 16:04:32,825 - scanner_engine - INFO - [✓] Host Header Injection 완료 (0.00s)
+2026-01-05 16:04:32,829 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/scan_report_20260105_160432.md
+2026-01-05 16:04:53,893 - CLI_Scanner - INFO - Starting Web Scan: 20260105070453_x6sgz on 3.39.161.64
+2026-01-05 16:04:53,894 - scanner_engine - INFO - [*] 스캔 준비 중...
+2026-01-05 16:04:53,942 - scanner_engine - INFO - [*] 크롤링 시작: 3.39.161.64
+2026-01-05 16:04:53,943 - web_crawler - ERROR - [Crawler] Error crawling 3.39.161.64: Invalid URL '3.39.161.64': No scheme supplied. Perhaps you meant https://3.39.161.64?
+2026-01-05 16:04:53,943 - scanner_engine - INFO - [✓] 크롤링 완료: 1 페이지, 0 API 엔드포인트
+2026-01-05 16:04:53,943 - scanner_engine - INFO - [*] 인프라 탐지 시작...
+2026-01-05 16:04:53,944 - scanner_engine - INFO - [✓] 인프라 탐지 완료: None
+2026-01-05 16:04:53,944 - scanner_engine - INFO - [⏭] File Upload 스킵 (인프라 불일치)
+2026-01-05 16:04:53,947 - scanner_engine - INFO - [*] 병렬 스캔 시작 (30개 테스트, 10 워커)
+2026-01-05 16:04:53,959 - scanner_engine - INFO - [✓] Auth Failures 완료 (0.00s)
+2026-01-05 16:04:53,963 - scanner_engine - INFO - [✓] XXE 완료 (0.00s)
+2026-01-05 16:04:53,970 - scanner_engine - INFO - [✓] Input Bypass 완료 (0.00s)
+2026-01-05 16:04:53,976 - scanner_engine - INFO - [✓] Security Misconfig 완료 (0.00s)
+2026-01-05 16:04:53,980 - scanner_engine - INFO - [✓] SQL Injection 완료 (0.00s)
+2026-01-05 16:04:53,999 - scanner_engine - INFO - [✓] Access Control 완료 (0.00s)
+2026-01-05 16:04:54,010 - scanner_engine - INFO - [✓] Crypto Failures 완료 (0.00s)
+2026-01-05 16:04:54,021 - scanner_engine - INFO - [✓] Command Injection 완료 (0.03s)
+2026-01-05 16:04:54,028 - scanner_engine - INFO - [✓] SSRF 완료 (0.00s)
+2026-01-05 16:04:54,034 - scanner_engine - INFO - [✓] CORS/CSRF 완료 (0.00s)
+2026-01-05 16:04:54,039 - scanner_engine - INFO - [✓] Cross-Site Scripting 완료 (0.07s)
+2026-01-05 16:04:54,040 - scanner_engine - INFO - [✓] Insecure Design 완료 (0.00s)
+2026-01-05 16:04:54,042 - scanner_engine - INFO - [✓] Path Traversal 완료 (0.06s)
+2026-01-05 16:04:54,045 - scanner_engine - INFO - [✓] Vulnerable Components 완료 (0.00s)
+2026-01-05 16:04:54,049 - scanner_engine - INFO - [✓] Integrity Failures 완료 (0.00s)
+2026-01-05 16:04:54,051 - scanner_engine - INFO - [✓] Security Headers 완료 (0.00s)
+2026-01-05 16:04:54,054 - scanner_engine - INFO - [✓] Logging Failures 완료 (0.00s)
+2026-01-05 16:04:54,055 - scanner_engine - INFO - [✓] Information Disclosure 완료 (0.00s)
+2026-01-05 16:04:54,057 - scanner_engine - INFO - [✓] IDOR 완료 (0.00s)
+2026-01-05 16:04:54,059 - scanner_engine - INFO - [✓] File Upload Bypass 완료 (0.00s)
+2026-01-05 16:04:54,064 - scanner_engine - INFO - [✓] JWT Vulnerabilities 완료 (0.00s)
+2026-01-05 16:04:54,067 - scanner_engine - INFO - [✓] Business Logic 완료 (0.01s)
+2026-01-05 16:04:54,069 - scanner_engine - INFO - [✓] Rate Limiting 완료 (0.00s)
+2026-01-05 16:04:54,070 - scanner_engine - INFO - [✓] GraphQL Security 완료 (0.00s)
+2026-01-05 16:04:54,071 - scanner_engine - INFO - [✓] Deserialization 완료 (0.00s)
+2026-01-05 16:04:54,071 - scanner_engine - INFO - [✓] Mass Assignment 완료 (0.00s)
+2026-01-05 16:04:54,071 - scanner_engine - INFO - [✓] Host Header Injection 완료 (0.00s)
+2026-01-05 16:04:54,072 - scanner_engine - INFO - [✓] HTTP Method Abuse 완료 (0.00s)
+2026-01-05 16:04:54,072 - scanner_engine - INFO - [✓] Open Redirect 완료 (0.00s)
+2026-01-05 16:04:54,072 - scanner_engine - INFO - [✓] HTTP Parameter Pollution 완료 (0.00s)
+2026-01-05 16:04:54,073 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/scan_report_20260105_160454.md
+2026-01-05 16:10:59,949 - CLI_Scanner - INFO - Starting Whitebox Scan: 20260105071059_whitebox_b3hqo on https://github.com/jibin1018/sk_rookies_minipj2.git (HEAD)
+2026-01-05 16:10:59,949 - CLI_Scanner - INFO - Cloning https://github.com/jibin1018/sk_rookies_minipj2.git into /Users/user/Documents/Mini_PJT2/Scanner/temp/repo_20260105_161059_HEAD
+2026-01-05 16:11:01,523 - CLI_Scanner - INFO - Checking out HEAD
+2026-01-05 16:18:06,983 - CLI_Scanner - INFO - Starting Whitebox Scan: 20260105071806_whitebox_iwghi on https://github.com/jibin1018/sk_rookies_minipj2.git (HEAD)
+2026-01-05 16:18:06,983 - CLI_Scanner - INFO - Cloning https://github.com/jibin1018/sk_rookies_minipj2.git into /Users/user/Documents/Mini_PJT2/Scanner/temp/repo_20260105_161806_HEAD
+2026-01-05 16:18:08,125 - CLI_Scanner - INFO - Checking out HEAD

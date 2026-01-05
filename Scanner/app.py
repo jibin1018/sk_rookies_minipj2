@@ -202,31 +202,52 @@ def generate_whitebox_report(scan_id, project_path, results, summary):
             for result in results:
                 if result['status'] == 'VULNERABLE':
                     f.write(f"### [{result['category']}] {result['module']}\n\n")
-                    f.write(f"**상태**: {result['status']}\n\n")
-                    f.write(f"**설명**: {result['details']}\n\n")
                     
-                    findings = result.get('findings', [])
-                    if findings:
-                        f.write(f"**발견 항목** ({len(findings)}개):\n\n")
-                        
-                        for idx, finding in enumerate(findings, 1):
-                            f.write(f"{idx}. **{finding.get('file')}:{finding.get('line', '?')}**\n")
-                            f.write(f"   - 유형: {finding.get('type', 'N/A')}\n")
-                            
-                            snippet = finding.get('snippet', '')
-                            if snippet:
-                                f.write(f"   - 코드: `{snippet[:100]}`\n")
-                            
-                            severity = finding.get('severity', 'MEDIUM')
-                            f.write(f"   - 심각도: {severity}\n")
-                            f.write("\n")
-                    
-                    # 권장 사항
+                    # 권장 사항 (상단에 배치)
                     recommendation = result.get('recommendation', '')
                     if recommendation:
-                        f.write("**권장 보안 대책**:\n\n")
-                        f.write(f"{recommendation}\n\n")
+                        f.write(f"💡 **권장 보안 대책**: {recommendation}\n\n")
+
+                    # Group findings by file
+                    files_map = {}
+                    for finding in result.get('findings', []):
+                        fname = finding.get('file', '알 수 없는 파일')
+                        if fname not in files_map:
+                            files_map[fname] = []
+                        files_map[fname].append(finding)
                     
+                    # Generate a terminal block for each file
+                    for fname, file_findings in files_map.items():
+                        f.write(f"#### 📄 File: `{fname}`\n\n")
+                        f.write("```bash\n")
+                        f.write(f"┌── [!] 취약점 탐지: {result['module']}\n")
+                        f.write(f"│\n")
+                        f.write(f"├── 📝 상세 설명 및 잠재적 영향 (Impact):\n")
+                        
+                        # Handle multiline details
+                        details = result.get('details', '설명 없음')
+                        for line in details.split('\n'):
+                            f.write(f"│   {line}\n")
+                            
+                        f.write(f"│\n")
+                        f.write(f"└── 🔍 발견된 코드 위치:\n")
+                        
+                        for finding in file_findings:
+                            line = finding.get('line', '?')
+                            severity = finding.get('severity', 'MEDIUM')
+                            f.write(f"\n    [Line {line}] 심각도: {severity}\n")
+                            f.write(f"    {'-' * 40}\n")
+                            
+                            if 'snippet' in finding:
+                                snippet_lines = finding['snippet'].strip().split('\n')
+                                for s_line in snippet_lines:
+                                    f.write(f"    {s_line}\n")
+                            else:
+                                f.write("    (코드 미리보기 없음)\n")
+                            f.write("\n")
+                        
+                        f.write("```\n\n")
+                        
                     f.write("---\n\n")
         
         logger.info(f"화이트박스 보고서 생성 완료: {report_path}")

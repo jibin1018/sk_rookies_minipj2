@@ -153,15 +153,44 @@ def generate_whitebox_report(scan_id, project_path, results, summary, commit_has
             f.write(f"# Whitebox Scan Report\n\n**Scan ID**: `{scan_id}`\n**Commit**: `{commit_hash}`\n\n---\n\n")
             f.write(f"## Summary\n- Total Findings: {summary.get('total_findings', 0)}\n- Vulnerable Modules: {summary.get('vulnerable_modules', 0)}\n\n")
             f.write("## Vulnerabilities\n\n")
+            
             for result in results:
                 if result['status'] == 'VULNERABLE':
-                    f.write(f"### [{result['category']}] {result['module']}\n")
-                    f.write(f"{result['details']}\n\n")
+                    f.write(f"### [{result['category']}] {result['module']}\n\n")
+                    
+                    # Group findings by file
+                    files_map = {}
                     for finding in result.get('findings', []):
-                        f.write(f"- **{finding.get('file')}:{finding.get('line', '?')}** ({finding.get('severity', 'MEDIUM')})\n")
-                        if 'snippet' in finding:
-                            f.write(f"  ```\n  {finding['snippet'].strip()}\n  ```\n")
+                        fname = finding.get('file', 'Unknown File')
+                        if fname not in files_map:
+                            files_map[fname] = []
+                        files_map[fname].append(finding)
+                    
+                    # Generate a terminal block for each file
+                    for fname, file_findings in files_map.items():
+                        f.write(f"#### File: `{fname}`\n\n")
+                        f.write("```bash\n")
+                        f.write(f"[!] VULNERABILITY DETECTED: {result['module']}\n")
+                        f.write(f"==================================================\n")
+                        f.write(f"IMPACT / DESCRIPTION:\n{result['details']}\n")
+                        f.write(f"==================================================\n\n")
+                        
+                        for finding in file_findings:
+                            line = finding.get('line', '?')
+                            severity = finding.get('severity', 'MEDIUM')
+                            f.write(f"Line {line} [{severity}]:\n")
+                            if 'snippet' in finding:
+                                # Indent snippet for better readability in 'terminal'
+                                snippet = finding['snippet'].strip()
+                                f.write(f"{snippet}\n\n")
+                            else:
+                                f.write("(No snippet available)\n\n")
+                            f.write("-" * 50 + "\n")
+                        
+                        f.write("```\n\n")
+                        
                     f.write("\n---\n")
+
         return report_path
     except Exception as e:
         logger.error(f"Report generation failed: {e}")
@@ -172,6 +201,10 @@ def generate_whitebox_report(scan_id, project_path, results, summary, commit_has
 # -------------------------------------------------------------------------
 
 def run_web_scan(target_url, scan_id=None, scan_types=['all'], use_infra=False):
+    # Normalize URL
+    if not target_url.startswith(('http://', 'https://')):
+        target_url = 'http://' + target_url
+
     if not scan_id:
         scan_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     
