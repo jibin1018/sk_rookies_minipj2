@@ -4,8 +4,11 @@ DB-07: 중요 데이터 암호화
 DB-08: SSL/TLS 연결 암호화
 """
 
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'MySQL 데이터 암호화 점검',

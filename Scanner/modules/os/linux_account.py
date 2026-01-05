@@ -2,7 +2,11 @@
 KISA Linux 보안 가이드 - U-01: 계정 관리
 root 계정 원격 접속 제한, 불필요한 계정 제거, 패스워드 없는 계정 점검
 """
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+from ssh_utils import safe_ssh_connect, create_error_result
 
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
@@ -14,13 +18,17 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
         'recommendation': 'root 원격 접속 차단, 불필요한 계정 제거, 모든 계정 패스워드 설정',
         'details': ''
     }
-    
+
     details = []
-    
+
+    # SSH 연결 (안전)
+    ssh, error = safe_ssh_connect(ssh_host, ssh_user, ssh_pass, ssh_port, ssh_key_file)
+
+    if error:
+        # SSH 연결 실패 시 ERROR 결과 반환
+        return create_error_result('U-01: Linux 계정 관리', error, 'ERROR')
+
     try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, key_filename=ssh_key_file, timeout=10)
         
         # 1. root 원격 접속 제한 확인
         details.append("[계정-1] root 원격 접속 제한 확인")
@@ -252,13 +260,12 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
                 details.append(f"    {line.strip()}")
         
         ssh.close()
-        
-    except paramiko.AuthenticationException:
-        details.append("  [ERROR] SSH 인증 실패")
-        result['status'] = 'ERROR'
+
     except Exception as e:
-        details.append(f"  [ERROR] {str(e)}")
+        # 스캔 중 예외 발생 (SSH 연결은 성공했지만 명령 실행 실패)
+        details.append(f"\n[ERROR] 스캔 중 오류 발생: {str(e)}")
         result['status'] = 'ERROR'
-    
+        result['severity'] = 'ERROR'
+
     result['details'] = '\n'.join(details)
     return result

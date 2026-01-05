@@ -2,8 +2,11 @@
 KISA WAS 보안 가이드 - Apache SSL/TLS 설정 (AP-SSL 관련)
 WS-03: TLS 1.2+ , 약한 cipher 제거
 """
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'Apache SSL/TLS 설정 점검',

@@ -2,8 +2,11 @@
 KISA WAS 보안 가이드 - Apache 버전 정보 및 패치 (AP-01)
 WS-06: ServerTokens Prod, 최신 버전
 """
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'Apache 버전 및 패치 점검',

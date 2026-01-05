@@ -1,8 +1,11 @@
 """
 KISA DB 보안 가이드 - MySQL/MariaDB 보안 설정
 """
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'DB-01~DB-10: MySQL/MariaDB 보안 설정',
@@ -16,10 +19,15 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     
     details = []
     
+    # SSH 연결 (안전)
+    ssh, error = safe_ssh_connect(ssh_host, ssh_user, ssh_pass, ssh_port, ssh_key_file)
+
+    if error:
+        # SSH 연결 실패 시 ERROR 결과 반환
+        module_name = result.get('name', 'Unknown Module')
+        return create_error_result(module_name, error, 'ERROR')
+
     try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, key_filename=ssh_key_file, timeout=10)
         
         # MySQL/MariaDB 설치 확인
         stdin, stdout, stderr = ssh.exec_command("which mysql mysqld 2>/dev/null | head -1")

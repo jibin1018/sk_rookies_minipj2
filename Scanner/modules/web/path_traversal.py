@@ -78,6 +78,11 @@ def scan(target_url):
                     
                     resp = requests.get(endpoint, params=params, headers=headers, timeout=5)
                     
+                    # 404 Optimization
+                    if resp.status_code == 404:
+                        break # Skip this endpoint/param combo if it doesn't exist
+                    
+                    
                     # 민감한 파일 내용 확인
                     if any(indicator in resp.text for indicator in indicators):
                         result['vulnerabilities'].append(f"Path Traversal: {endpoint}?{param_name}={attack_name}")

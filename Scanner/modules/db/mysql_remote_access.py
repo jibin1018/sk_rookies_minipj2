@@ -4,8 +4,11 @@ DB-05: 불필요한 원격 접속 차단
 DB-06: bind-address 설정
 """
 
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'MySQL 원격 접속 제한 점검',

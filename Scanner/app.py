@@ -289,14 +289,19 @@ def run_whitebox_scan_background(scan_id, project_path):
                 scan_status[scan_id]['progress'] = progress
                 scan_status[scan_id]['current_test'] = f'[{category}] {module_name}'
                 
+                module_path = f'modules.whitebox.{category}.{module_name}'
+
                 try:
                     # 동적으로 모듈 임포트
-                    module_path = f'modules.whitebox.{category}.{module_name}'
                     module = importlib.import_module(module_path)
-                    
+
+                    # scan 함수 존재 확인
+                    if not hasattr(module, 'scan'):
+                        raise AttributeError(f"모듈 '{module_path}'에 scan() 함수가 없습니다")
+
                     # scan 함수 실행
                     result = module.scan(project_path, target_files)
-                    
+
                     if result and result.get('status') == 'VULNERABLE':
                         results.append({
                             'category': category,
@@ -306,15 +311,44 @@ def run_whitebox_scan_background(scan_id, project_path):
                             'findings': result.get('findings', []),
                             'recommendation': result.get('recommendation', ''),
                         })
-                
-                except Exception as e:
-                    logger.error(f"[ERROR] {module_path}: {str(e)}")
+
+                except ModuleNotFoundError as e:
+                    # 모듈 파일이 존재하지 않음
+                    error_msg = f'모듈 파일 없음: {module_path}.py'
+                    logger.error(f"[ERROR] {error_msg}")
                     results.append({
                         'category': category,
                         'module': module_name,
                         'status': 'ERROR',
-                        'details': f'모듈 실행 오류: {str(e)}',
+                        'details': error_msg,
                         'findings': [],
+                        'recommendation': f'modules/whitebox/{category}/{module_name}.py 파일을 생성하세요',
+                    })
+
+                except AttributeError as e:
+                    # scan() 함수가 없음
+                    error_msg = f'scan() 함수 없음: {str(e)}'
+                    logger.error(f"[ERROR] {module_path}: {error_msg}")
+                    results.append({
+                        'category': category,
+                        'module': module_name,
+                        'status': 'ERROR',
+                        'details': error_msg,
+                        'findings': [],
+                        'recommendation': 'scan(project_path, target_files) 함수를 구현하세요',
+                    })
+
+                except Exception as e:
+                    # 기타 실행 오류
+                    error_msg = f'모듈 실행 오류: {str(e)}'
+                    logger.error(f"[ERROR] {module_path}: {error_msg}")
+                    results.append({
+                        'category': category,
+                        'module': module_name,
+                        'status': 'ERROR',
+                        'details': error_msg,
+                        'findings': [],
+                        'recommendation': '모듈 코드를 확인하고 수정하세요',
                     })
         
         # 스캔 완료
@@ -398,7 +432,7 @@ def summarize_scan(scan_id, data):
             'total': len(results),
             'vulnerable': sum(1 for r in results if r.get('status') == 'VULNERABLE')
         }
-    
+
     # 보고서 파일 존재 여부 확인
     has_report = False
     report_dirs = ['reports', '../reports']
@@ -409,7 +443,7 @@ def summarize_scan(scan_id, data):
         f'infra_scan_report_{scan_id}.txt',
         f'whitebox_report_{scan_id}.md',
     ]
-    
+
     for report_dir in report_dirs:
         if has_report:
             break
@@ -418,10 +452,20 @@ def summarize_scan(scan_id, data):
             if os.path.exists(file_path):
                 has_report = True
                 break
-        
+
+    # 유형명 한글 변환
+    type_names = {
+        'web': '웹 애플리케이션 블랙박스',
+        'infrastructure': '서버 인프라 진단',
+        'whitebox': '화이트박스 테스트'
+    }
+    scan_type = data.get('type', 'unknown')
+    type_display = type_names.get(scan_type, scan_type)
+
     return {
         'scan_id': scan_id,
-        'type': data.get('type'),
+        'type': scan_type,
+        'type_display': type_display,
         'status': data.get('status'),
         'target': data.get('target_url') or data.get('target') or data.get('project_path'),
         'started_at': data.get('started_at'),
@@ -1327,9 +1371,18 @@ def api_scans_history():
                         except:
                             pass
                         
+                        # 유형명 한글 변환
+                        type_names = {
+                            'web': '웹 애플리케이션 블랙박스',
+                            'infrastructure': '서버 인프라 진단',
+                            'whitebox': '화이트박스 테스트'
+                        }
+                        type_display = type_names.get(scan_type, scan_type)
+
                         scans.append({
                             'scan_id': scan_id,
                             'type': scan_type,
+                            'type_display': type_display,
                             'status': 'completed',
                             'target': target_name,
                             'started_at': dt_object.isoformat(),

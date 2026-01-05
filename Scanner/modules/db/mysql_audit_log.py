@@ -4,8 +4,11 @@ DB-09: 로그 정책 설정
 DB-10: 로그 백업 및 보관
 """
 
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'MySQL 감사 로그 설정 점검',

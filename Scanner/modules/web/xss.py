@@ -99,6 +99,11 @@ def scan(target_url):
                     
                     resp = requests.get(endpoint, params=params, headers=headers, timeout=5)
                     
+                    # 404 Not Found optimization: if endpoint doesn't exist, skip other tests for this endpoint
+                    if resp.status_code == 404:
+                         details.append(f"  • {endpoint} 없음 (404), 테스트 건너뜀")
+                         break
+
                     # 페이로드가 인코딩 없이 반사되는지 확인
                     if payload in resp.text:
                         result['vulnerabilities'].append(f"Reflected XSS: {endpoint}?{param_name}={payload_name}")

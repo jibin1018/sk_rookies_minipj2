@@ -2,8 +2,11 @@
 KISA Linux 보안 가이드 - U-02: 패스워드 정책
 패스워드 최소 길이, 복잡도, 유효기간, 재사용 제한
 """
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'U-02: Linux 패스워드 정책',
@@ -17,10 +20,15 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     
     details = []
     
+    # SSH 연결 (안전)
+    ssh, error = safe_ssh_connect(ssh_host, ssh_user, ssh_pass, ssh_port, ssh_key_file)
+
+    if error:
+        # SSH 연결 실패 시 ERROR 결과 반환
+        module_name = result.get('name', 'Unknown Module')
+        return create_error_result(module_name, error, 'ERROR')
+
     try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, key_filename=ssh_key_file, timeout=10)
         
         # 1. 패스워드 최소 길이 확인
         details.append("[패스워드-1] 패스워드 최소 길이 확인")
@@ -283,12 +291,11 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
         
         ssh.close()
         
-    except paramiko.AuthenticationException:
-        details.append("  [ERROR] SSH 인증 실패")
-        result['status'] = 'ERROR'
     except Exception as e:
-        details.append(f"  [ERROR] {str(e)}")
+        # 스캔 중 예외 발생 (SSH 연결은 성공했지만 명령 실행 실패)
+        details.append(f"\n[ERROR] 스캔 중 오류 발생: {str(e)}")
         result['status'] = 'ERROR'
+        result['severity'] = 'ERROR'
     
     result['details'] = '\n'.join(details)
     return result

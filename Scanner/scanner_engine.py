@@ -181,6 +181,16 @@ class VulnerabilityScanner:
                             
                         logger.info(f"[✓] {test_name} 완료 ({result.get('duration', 0):.2f}s)")
                 except Exception as e:
+                    # 실패한 테스트도 결과에 포함
+                    error_result = {
+                        'name': test_name,
+                        'status': 'ERROR',
+                        'severity': severity,
+                        'error': str(e),
+                        'details': f'테스트 실행 중 오류 발생: {str(e)}',
+                        'duration': 0
+                    }
+                    results.append(error_result)
                     logger.error(f"[✗] {test_name} 실패: {e}")
                     self.metrics['scripts_failed'] += 1
         

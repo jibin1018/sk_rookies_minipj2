@@ -168,3 +168,292 @@
 2026-01-05 16:18:06,983 - CLI_Scanner - INFO - Starting Whitebox Scan: 20260105071806_whitebox_iwghi on https://github.com/jibin1018/sk_rookies_minipj2.git (HEAD)
 2026-01-05 16:18:06,983 - CLI_Scanner - INFO - Cloning https://github.com/jibin1018/sk_rookies_minipj2.git into /Users/user/Documents/Mini_PJT2/Scanner/temp/repo_20260105_161806_HEAD
 2026-01-05 16:18:08,125 - CLI_Scanner - INFO - Checking out HEAD
+2026-01-05 16:58:31,644 - CLI_Scanner - INFO - Starting Web Scan: 20260105075831_wdwrp on http://34.214.105.113
+2026-01-05 16:58:31,645 - scanner_engine - INFO - [*] 스캔 준비 중...
+2026-01-05 16:58:31,675 - scanner_engine - INFO - [*] 크롤링 시작: http://34.214.105.113
+2026-01-05 16:58:32,685 - scanner_engine - INFO - [✓] 크롤링 완료: 6 페이지, 2 API 엔드포인트
+2026-01-05 16:58:32,685 - scanner_engine - INFO - [*] 인프라 탐지 시작...
+2026-01-05 16:58:39,044 - scanner_engine - INFO - [✓] 인프라 탐지 완료: nginx
+2026-01-05 16:58:39,045 - scanner_engine - INFO - [⏭] File Upload 스킵 (인프라 불일치)
+2026-01-05 16:58:39,053 - scanner_engine - INFO - [*] 병렬 스캔 시작 (30개 테스트, 10 워커)
+2026-01-05 16:58:39,909 - scanner_engine - INFO - [✓] Crypto Failures 완료 (0.84s)
+2026-01-05 16:58:41,863 - scanner_engine - INFO - [✓] Deserialization 완료 (2.79s)
+2026-01-05 16:58:42,563 - scanner_engine - INFO - [✓] Security Misconfig 완료 (2.65s)
+2026-01-05 16:58:43,277 - scanner_engine - INFO - [✓] CORS/CSRF 완료 (0.71s)
+2026-01-05 16:58:43,822 - scanner_engine - INFO - [✓] Auth Failures 완료 (4.76s)
+2026-01-05 16:58:46,208 - scanner_engine - INFO - [✓] Access Control 완료 (7.15s)
+2026-01-05 16:58:46,994 - scanner_engine - INFO - [✓] SSRF 완료 (5.13s)
+2026-01-05 16:58:53,271 - scanner_engine - INFO - [✓] Input Bypass 완료 (14.21s)
+2026-01-05 16:58:53,576 - scanner_engine - INFO - [✓] Security Headers 완료 (0.30s)
+2026-01-05 16:58:58,162 - scanner_engine - INFO - [✓] Integrity Failures 완료 (11.95s)
+2026-01-05 16:59:00,904 - scanner_engine - INFO - [✓] Vulnerable Components 완료 (17.08s)
+2026-01-05 16:59:01,168 - scanner_engine - INFO - [✓] Logging Failures 완료 (14.17s)
+2026-01-05 16:59:01,236 - scanner_engine - INFO - [✓] JWT Vulnerabilities 완료 (0.33s)
+2026-01-05 16:59:01,237 - scanner_engine - INFO - [✓] File Upload Bypass 완료 (0.00s)
+2026-01-05 16:59:04,904 - scanner_engine - INFO - [✓] Insecure Design 완료 (21.62s)
+2026-01-05 16:59:07,338 - scanner_engine - INFO - [✓] Business Logic 완료 (6.10s)
+2026-01-05 16:59:11,798 - scanner_engine - INFO - [✓] Information Disclosure 완료 (18.22s)
+2026-01-05 16:59:13,373 - scanner_engine - INFO - [✓] Mass Assignment 완료 (8.46s)
+2026-01-05 16:59:18,441 - scanner_engine - INFO - [✓] IDOR 완료 (20.28s)
+2026-01-05 16:59:21,454 - scanner_engine - INFO - [✓] Host Header Injection 완료 (8.08s)
+2026-01-05 16:59:22,759 - scanner_engine - INFO - [✓] GraphQL Security 완료 (1.30s)
+2026-01-05 16:59:22,883 - scanner_engine - INFO - [✓] HTTP Parameter Pollution 완료 (4.44s)
+2026-01-05 16:59:28,208 - scanner_engine - INFO - [✓] Open Redirect 완료 (20.87s)
+2026-01-05 16:59:28,387 - scanner_engine - INFO - [✓] HTTP Method Abuse 완료 (16.59s)
+2026-01-05 16:59:31,617 - scanner_engine - INFO - [✓] SQL Injection 완료 (52.56s)
+2026-01-05 17:00:06,729 - scanner_engine - INFO - [✓] Command Injection 완료 (87.66s)
+2026-01-05 17:00:49,912 - scanner_engine - INFO - [✓] Rate Limiting 완료 (108.74s)
+2026-01-05 17:01:13,284 - scanner_engine - INFO - [✓] XXE 완료 (154.22s)
+2026-01-05 17:04:41,073 - CLI_Scanner - INFO - Starting Web Scan: 20260105080440_tr0kk on http://34.214.105.113
+2026-01-05 17:04:41,073 - scanner_engine - INFO - [*] 스캔 준비 중...
+2026-01-05 17:04:41,115 - scanner_engine - INFO - [*] 크롤링 시작: http://34.214.105.113
+2026-01-05 17:04:42,256 - scanner_engine - INFO - [✓] 크롤링 완료: 6 페이지, 2 API 엔드포인트
+2026-01-05 17:04:42,256 - scanner_engine - INFO - [*] 인프라 탐지 시작...
+2026-01-05 17:04:48,605 - scanner_engine - INFO - [✓] 인프라 탐지 완료: nginx
+2026-01-05 17:04:48,605 - scanner_engine - INFO - [⏭] File Upload 스킵 (인프라 불일치)
+2026-01-05 17:04:48,616 - scanner_engine - INFO - [*] 병렬 스캔 시작 (30개 테스트, 10 워커)
+2026-01-05 17:04:49,584 - scanner_engine - INFO - [✓] Crypto Failures 완료 (0.96s)
+2026-01-05 17:04:51,766 - scanner_engine - INFO - [✓] Deserialization 완료 (3.13s)
+2026-01-05 17:04:52,387 - scanner_engine - INFO - [✓] Security Misconfig 완료 (2.80s)
+2026-01-05 17:04:53,769 - scanner_engine - INFO - [✓] CORS/CSRF 완료 (1.38s)
+2026-01-05 17:04:54,429 - scanner_engine - INFO - [✓] Auth Failures 완료 (5.81s)
+2026-01-05 17:04:56,627 - scanner_engine - INFO - [✓] Access Control 완료 (8.00s)
+2026-01-05 17:04:57,490 - scanner_engine - INFO - [✓] SSRF 완료 (5.72s)
+2026-01-05 17:05:04,004 - scanner_engine - INFO - [✓] Input Bypass 완료 (15.37s)
+2026-01-05 17:05:04,394 - scanner_engine - INFO - [✓] Security Headers 완료 (0.39s)
+2026-01-05 17:05:09,957 - scanner_engine - INFO - [✓] Integrity Failures 완료 (13.33s)
+2026-01-05 17:05:11,655 - scanner_engine - INFO - [✓] Vulnerable Components 완료 (17.22s)
+2026-01-05 17:05:12,066 - scanner_engine - INFO - [✓] JWT Vulnerabilities 완료 (0.41s)
+2026-01-05 17:05:12,466 - scanner_engine - INFO - [✓] Logging Failures 완료 (14.97s)
+2026-01-05 17:05:12,469 - scanner_engine - INFO - [✓] File Upload Bypass 완료 (0.00s)
+2026-01-05 17:05:16,985 - scanner_engine - INFO - [✓] Insecure Design 완료 (23.22s)
+2026-01-05 17:05:18,610 - scanner_engine - INFO - [✓] Business Logic 완료 (6.14s)
+2026-01-05 17:05:23,012 - scanner_engine - INFO - [✓] Information Disclosure 완료 (18.62s)
+2026-01-05 17:05:25,423 - scanner_engine - INFO - [✓] Mass Assignment 완료 (8.44s)
+2026-01-05 17:05:29,327 - scanner_engine - INFO - [✓] Cross-Site Scripting 완료 (410.26s)
+2026-01-05 17:05:30,622 - scanner_engine - INFO - [✓] IDOR 완료 (20.66s)
+2026-01-05 17:05:33,427 - scanner_engine - INFO - [✓] Host Header Injection 완료 (8.00s)
+2026-01-05 17:05:34,810 - scanner_engine - INFO - [✓] GraphQL Security 완료 (1.38s)
+2026-01-05 17:05:35,361 - scanner_engine - INFO - [✓] HTTP Parameter Pollution 완료 (4.74s)
+2026-01-05 17:05:40,843 - scanner_engine - INFO - [✓] HTTP Method Abuse 완료 (17.83s)
+2026-01-05 17:05:46,000 - scanner_engine - INFO - [✓] SQL Injection 완료 (57.38s)
+2026-01-05 17:05:46,065 - scanner_engine - INFO - [✓] Open Redirect 완료 (27.45s)
+2026-01-05 17:06:08,213 - scanner_engine - INFO - [✓] Cross-Site Scripting 완료 (79.58s)
+2026-01-05 17:06:29,910 - scanner_engine - INFO - [✓] Command Injection 완료 (101.29s)
+2026-01-05 17:06:57,837 - scanner_engine - INFO - [✓] Path Traversal 완료 (498.77s)
+2026-01-05 17:06:57,841 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/scan_report_20260105_170657.md
+2026-01-05 17:07:04,458 - scanner_engine - INFO - [✓] Rate Limiting 완료 (112.39s)
+2026-01-05 17:07:23,425 - scanner_engine - INFO - [✓] XXE 완료 (154.79s)
+2026-01-05 17:10:45,802 - scanner_engine - INFO - [✓] Path Traversal 완료 (357.17s)
+2026-01-05 17:10:45,808 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/scan_report_20260105_171045.md
+2026-01-05 21:03:45,124 - CLI_Scanner - INFO - Starting Whitebox Scan: 20260105120344_whitebox_d8ypl on https://github.com/jibin1018/sk_rookies_minipj2.git (HEAD)
+2026-01-05 21:03:45,125 - CLI_Scanner - INFO - Cloning https://github.com/jibin1018/sk_rookies_minipj2.git into /Users/user/Documents/Mini_PJT2/Scanner/temp/repo_20260105_210345_HEAD
+2026-01-05 21:03:46,276 - CLI_Scanner - INFO - Checking out HEAD
+2026-01-05 21:04:30,234 - CLI_Scanner - INFO - Starting Web Scan: 20260105120429_nu6d8 on http://3.39.161.64
+2026-01-05 21:04:30,235 - scanner_engine - INFO - [*] 스캔 준비 중...
+2026-01-05 21:04:30,275 - scanner_engine - INFO - [*] 크롤링 시작: http://3.39.161.64
+2026-01-05 21:04:30,413 - scanner_engine - INFO - [✓] 크롤링 완료: 1 페이지, 0 API 엔드포인트
+2026-01-05 21:04:30,413 - scanner_engine - INFO - [*] 인프라 탐지 시작...
+2026-01-05 21:04:36,469 - scanner_engine - INFO - [✓] 인프라 탐지 완료: nginx
+2026-01-05 21:04:36,470 - scanner_engine - INFO - [⏭] File Upload 스킵 (인프라 불일치)
+2026-01-05 21:04:36,475 - scanner_engine - INFO - [*] 병렬 스캔 시작 (30개 테스트, 10 워커)
+2026-01-05 21:04:36,491 - scanner_engine - INFO - [✓] SQL Injection 완료 (0.00s)
+2026-01-05 21:04:37,824 - scanner_engine - INFO - [✓] Crypto Failures 완료 (1.33s)
+2026-01-05 21:04:39,753 - scanner_engine - INFO - [✓] Deserialization 완료 (3.25s)
+2026-01-05 21:04:39,781 - scanner_engine - INFO - [✓] Security Misconfig 완료 (3.28s)
+2026-01-05 21:04:40,455 - scanner_engine - INFO - [✓] CORS/CSRF 완료 (0.69s)
+2026-01-05 21:04:41,697 - scanner_engine - INFO - [✓] Auth Failures 완료 (5.21s)
+2026-01-05 21:04:42,829 - scanner_engine - INFO - [✓] SSRF 완료 (4.98s)
+2026-01-05 21:04:43,945 - scanner_engine - INFO - [✓] Access Control 완료 (7.45s)
+2026-01-05 21:04:44,348 - scanner_engine - INFO - [✓] Security Headers 완료 (0.40s)
+2026-01-05 21:04:47,510 - scanner_engine - INFO - [✓] Vulnerable Components 완료 (7.04s)
+2026-01-05 21:04:50,686 - scanner_engine - INFO - [✓] XXE 완료 (14.19s)
+2026-01-05 21:04:51,220 - scanner_engine - INFO - [✓] JWT Vulnerabilities 완료 (0.53s)
+2026-01-05 21:04:52,542 - scanner_engine - INFO - [✓] Input Bypass 완료 (16.05s)
+2026-01-05 21:04:52,545 - scanner_engine - INFO - [✓] File Upload Bypass 완료 (0.00s)
+2026-01-05 21:04:54,894 - scanner_engine - INFO - [✓] Integrity Failures 완료 (13.19s)
+2026-01-05 21:04:55,002 - scanner_engine - INFO - [✓] Logging Failures 완료 (12.17s)
+2026-01-05 21:04:55,645 - scanner_engine - INFO - [✓] Information Disclosure 완료 (11.29s)
+2026-01-05 21:04:58,779 - scanner_engine - INFO - [✓] Business Logic 완료 (6.23s)
+2026-01-05 21:04:59,058 - scanner_engine - INFO - [✓] Mass Assignment 완료 (4.15s)
+2026-01-05 21:05:04,491 - scanner_engine - INFO - [✓] HTTP Parameter Pollution 완료 (5.43s)
+2026-01-05 21:05:04,491 - scanner_engine - INFO - [✓] Insecure Design 완료 (24.71s)
+2026-01-05 21:05:06,266 - scanner_engine - INFO - [✓] GraphQL Security 완료 (1.77s)
+2026-01-05 21:05:07,910 - scanner_engine - INFO - [✓] Host Header Injection 완료 (9.13s)
+2026-01-05 21:05:09,724 - scanner_engine - INFO - [✓] IDOR 완료 (22.21s)
+2026-01-05 21:05:11,777 - scanner_engine - INFO - [✓] HTTP Method Abuse 완료 (16.13s)
+2026-01-05 21:05:13,763 - scanner_engine - INFO - [✓] Open Redirect 완료 (18.75s)
+2026-01-05 21:05:32,019 - scanner_engine - INFO - [✓] Command Injection 완료 (55.53s)
+2026-01-05 21:05:37,986 - scanner_engine - INFO - [✓] Rate Limiting 완료 (46.76s)
+2026-01-05 21:06:02,884 - scanner_engine - INFO - [✓] Path Traversal 완료 (86.39s)
+2026-01-05 21:06:03,134 - scanner_engine - INFO - [✓] Cross-Site Scripting 완료 (86.64s)
+2026-01-05 21:06:03,138 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/scan_report_20260105_210603.md
+2026-01-05 21:08:54,993 - CLI_Scanner - INFO - Starting Infra Scan: 20260105120854_pczgn on 3.39.161.64
+2026-01-05 21:08:54,996 - scanner_engine - INFO - [*] Discovery 모드 활성화
+2026-01-05 21:08:55,004 - scanner_engine - INFO - [*] 포트 스캔 시작: 3.39.161.64
+2026-01-05 21:08:56,008 - scanner_engine - INFO - [✓] 열린 포트: 2개
+2026-01-05 21:08:56,008 - scanner_engine - INFO -     22/tcp - ssh
+2026-01-05 21:08:56,008 - scanner_engine - INFO -     80/tcp - http
+2026-01-05 21:08:56,008 - scanner_engine - INFO - [*] 선별된 테스트: 10개
+2026-01-05 21:08:58,535 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:08:58,691 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:08:58,691 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:08:59,969 - scanner_engine - INFO - [✓] Linux 로그 관리 완료
+2026-01-05 21:08:59,975 - scanner_engine - INFO - [✓] Linux SSH 보안 설정 완료
+2026-01-05 21:09:00,063 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:09:00,212 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:09:00,212 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:09:00,876 - scanner_engine - INFO - [✓] Linux 패스워드 정책 완료
+2026-01-05 21:09:01,040 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:09:01,183 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:09:01,184 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:09:01,314 - scanner_engine - INFO - [✓] Linux 프로세스 감사 완료
+2026-01-05 21:09:01,375 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:09:01,509 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:09:01,510 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:09:01,661 - scanner_engine - INFO - [✓] Linux 네트워크/포트 점검 완료
+2026-01-05 21:09:01,731 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:09:01,880 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:09:01,880 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:09:02,270 - scanner_engine - INFO - [✓] Linux 시스템 기본 정보 완료
+2026-01-05 21:09:02,340 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:09:02,499 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:09:02,504 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:09:03,291 - scanner_engine - INFO - [✓] Linux 계정 관리 완료
+2026-01-05 21:09:03,366 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:09:03,501 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:09:03,501 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:09:05,766 - scanner_engine - INFO - [✓] Linux 서비스 관리 완료
+2026-01-05 21:09:05,858 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:09:06,001 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:09:06,008 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:09:07,682 - scanner_engine - INFO - [✓] Linux 파일 권한 완료
+2026-01-05 21:09:07,690 - scanner_engine - INFO - [✓] Linux 방화벽 설정 완료
+2026-01-05 21:09:07,690 - scanner_engine - INFO - 
+[📊] 인프라 스캔 완료 - 실행: 10, 소요시간: 12.69초
+2026-01-05 21:09:07,692 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/infra_scan_report_20260105_210907.md
+2026-01-05 21:15:35,570 - CLI_Scanner - INFO - Starting Web Scan: 20260105121535_76mcz on http://3.39.161.64
+2026-01-05 21:15:35,571 - scanner_engine - INFO - [*] 스캔 준비 중...
+2026-01-05 21:15:35,616 - scanner_engine - INFO - [*] 크롤링 시작: http://3.39.161.64
+2026-01-05 21:15:35,713 - scanner_engine - INFO - [✓] 크롤링 완료: 1 페이지, 0 API 엔드포인트
+2026-01-05 21:15:35,713 - scanner_engine - INFO - [*] 인프라 탐지 시작...
+2026-01-05 21:15:41,798 - scanner_engine - INFO - [✓] 인프라 탐지 완료: nginx
+2026-01-05 21:15:41,798 - scanner_engine - INFO - [⏭] File Upload 스킵 (인프라 불일치)
+2026-01-05 21:15:41,806 - scanner_engine - INFO - [*] 병렬 스캔 시작 (30개 테스트, 10 워커)
+2026-01-05 21:15:41,828 - scanner_engine - INFO - [✓] SQL Injection 완료 (0.00s)
+2026-01-05 21:15:42,353 - scanner_engine - INFO - [✓] Crypto Failures 완료 (0.54s)
+2026-01-05 21:15:43,926 - scanner_engine - INFO - [✓] Deserialization 완료 (2.09s)
+2026-01-05 21:15:43,948 - scanner_engine - INFO - [✓] Security Misconfig 완료 (2.11s)
+2026-01-05 21:15:44,408 - scanner_engine - INFO - [✓] CORS/CSRF 완료 (0.48s)
+2026-01-05 21:15:45,496 - scanner_engine - INFO - [✓] Auth Failures 완료 (3.68s)
+2026-01-05 21:15:46,254 - scanner_engine - INFO - [✓] SSRF 완료 (3.90s)
+2026-01-05 21:15:47,628 - scanner_engine - INFO - [✓] Access Control 완료 (5.81s)
+2026-01-05 21:15:47,933 - scanner_engine - INFO - [✓] Security Headers 완료 (0.30s)
+2026-01-05 21:15:50,948 - scanner_engine - INFO - [✓] Vulnerable Components 완료 (6.53s)
+2026-01-05 21:15:54,122 - scanner_engine - INFO - [✓] XXE 완료 (12.30s)
+2026-01-05 21:15:54,447 - scanner_engine - INFO - [✓] JWT Vulnerabilities 완료 (0.32s)
+2026-01-05 21:15:54,719 - scanner_engine - INFO - [✓] Input Bypass 완료 (12.90s)
+2026-01-05 21:15:54,722 - scanner_engine - INFO - [✓] File Upload Bypass 완료 (0.00s)
+2026-01-05 21:15:57,120 - scanner_engine - INFO - [✓] Integrity Failures 완료 (11.62s)
+2026-01-05 21:15:57,393 - scanner_engine - INFO - [✓] Logging Failures 완료 (11.14s)
+2026-01-05 21:15:57,952 - scanner_engine - INFO - [✓] Information Disclosure 완료 (10.02s)
+2026-01-05 21:16:00,211 - scanner_engine - INFO - [✓] Business Logic 완료 (5.49s)
+2026-01-05 21:16:00,618 - scanner_engine - INFO - [✓] Mass Assignment 완료 (3.50s)
+2026-01-05 21:16:05,528 - scanner_engine - INFO - [✓] Insecure Design 완료 (21.58s)
+2026-01-05 21:16:05,571 - scanner_engine - INFO - [✓] HTTP Parameter Pollution 완료 (4.95s)
+2026-01-05 21:16:06,954 - scanner_engine - INFO - [✓] GraphQL Security 완료 (1.42s)
+2026-01-05 21:16:08,263 - scanner_engine - INFO - [✓] Host Header Injection 완료 (8.05s)
+2026-01-05 21:16:10,369 - scanner_engine - INFO - [✓] IDOR 완료 (19.42s)
+2026-01-05 21:16:12,913 - scanner_engine - INFO - [✓] HTTP Method Abuse 완료 (14.96s)
+2026-01-05 21:16:15,156 - scanner_engine - INFO - [✓] Open Redirect 완료 (17.76s)
+2026-01-05 21:16:33,730 - scanner_engine - INFO - [✓] Command Injection 완료 (51.91s)
+2026-01-05 21:16:39,832 - scanner_engine - INFO - [✓] Rate Limiting 완료 (45.38s)
+2026-01-05 21:17:03,478 - scanner_engine - INFO - [✓] Path Traversal 완료 (81.65s)
+2026-01-05 21:17:05,475 - scanner_engine - INFO - [✓] Cross-Site Scripting 완료 (83.66s)
+2026-01-05 21:17:05,477 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/scan_report_20260105_211705.md
+2026-01-05 21:31:42,905 - CLI_Scanner - INFO - Starting Whitebox Scan: 20260105123142_whitebox_yhoiw on https://github.com/jibin1018/sk_rookies_minipj2.git (HEAD)
+2026-01-05 21:31:42,905 - CLI_Scanner - INFO - Cloning https://github.com/jibin1018/sk_rookies_minipj2.git into /Users/user/Documents/Mini_PJT2/Scanner/temp/repo_20260105_213142_HEAD
+2026-01-05 21:31:44,894 - CLI_Scanner - INFO - Checking out HEAD
+2026-01-05 21:32:27,902 - CLI_Scanner - INFO - Starting Web Scan: 20260105123227_c7oiy on http://3.39.161.64
+2026-01-05 21:32:27,903 - scanner_engine - INFO - [*] 스캔 준비 중...
+2026-01-05 21:32:27,947 - scanner_engine - INFO - [*] 크롤링 시작: http://3.39.161.64
+2026-01-05 21:32:28,025 - scanner_engine - INFO - [✓] 크롤링 완료: 1 페이지, 0 API 엔드포인트
+2026-01-05 21:32:28,025 - scanner_engine - INFO - [*] 인프라 탐지 시작...
+2026-01-05 21:32:34,074 - scanner_engine - INFO - [✓] 인프라 탐지 완료: nginx
+2026-01-05 21:32:34,074 - scanner_engine - INFO - [⏭] File Upload 스킵 (인프라 불일치)
+2026-01-05 21:32:34,080 - scanner_engine - INFO - [*] 병렬 스캔 시작 (30개 테스트, 10 워커)
+2026-01-05 21:32:34,083 - scanner_engine - INFO - [✓] SQL Injection 완료 (0.00s)
+2026-01-05 21:32:34,592 - scanner_engine - INFO - [✓] Crypto Failures 완료 (0.50s)
+2026-01-05 21:32:36,051 - scanner_engine - INFO - [✓] Deserialization 완료 (1.96s)
+2026-01-05 21:32:36,070 - scanner_engine - INFO - [✓] Security Misconfig 완료 (1.98s)
+2026-01-05 21:32:36,563 - scanner_engine - INFO - [✓] CORS/CSRF 완료 (0.51s)
+2026-01-05 21:32:38,191 - scanner_engine - INFO - [✓] Auth Failures 완료 (4.11s)
+2026-01-05 21:32:39,037 - scanner_engine - INFO - [✓] SSRF 완료 (4.44s)
+2026-01-05 21:32:40,269 - scanner_engine - INFO - [✓] Access Control 완료 (6.18s)
+2026-01-05 21:32:40,539 - scanner_engine - INFO - [✓] Security Headers 완료 (0.26s)
+2026-01-05 21:32:43,956 - scanner_engine - INFO - [✓] Vulnerable Components 완료 (7.39s)
+2026-01-05 21:32:47,273 - scanner_engine - INFO - [✓] XXE 완료 (13.18s)
+2026-01-05 21:32:47,844 - scanner_engine - INFO - [✓] JWT Vulnerabilities 완료 (0.57s)
+2026-01-05 21:32:48,248 - scanner_engine - INFO - [✓] Input Bypass 완료 (14.16s)
+2026-01-05 21:32:48,248 - scanner_engine - INFO - [✓] File Upload Bypass 완료 (0.00s)
+2026-01-05 21:32:50,444 - scanner_engine - INFO - [✓] Integrity Failures 완료 (12.25s)
+2026-01-05 21:32:50,548 - scanner_engine - INFO - [✓] Logging Failures 완료 (11.51s)
+2026-01-05 21:32:51,540 - scanner_engine - INFO - [✓] Information Disclosure 완료 (11.00s)
+2026-01-05 21:32:54,884 - scanner_engine - INFO - [✓] Business Logic 완료 (6.63s)
+2026-01-05 21:32:55,143 - scanner_engine - INFO - [✓] Mass Assignment 완료 (4.70s)
+2026-01-05 21:33:08,618 - scanner_engine - INFO - [✓] HTTP Parameter Pollution 완료 (13.47s)
+2026-01-05 21:33:09,167 - scanner_engine - INFO - [✓] Insecure Design 완료 (33.09s)
+2026-01-05 21:33:11,313 - scanner_engine - INFO - [✓] GraphQL Security 완료 (2.69s)
+2026-01-05 21:33:13,156 - scanner_engine - INFO - [✓] Host Header Injection 완료 (18.27s)
+2026-01-05 21:33:15,625 - scanner_engine - INFO - [✓] IDOR 완료 (31.67s)
+2026-01-05 21:33:18,884 - scanner_engine - INFO - [✓] HTTP Method Abuse 완료 (27.33s)
+2026-01-05 21:33:21,375 - scanner_engine - INFO - [✓] Open Redirect 완료 (30.83s)
+2026-01-05 21:33:44,507 - scanner_engine - INFO - [✓] Command Injection 완료 (70.42s)
+2026-01-05 21:33:51,394 - scanner_engine - INFO - [✓] Rate Limiting 완료 (63.55s)
+2026-01-05 21:34:19,556 - scanner_engine - INFO - [✓] Path Traversal 완료 (105.46s)
+2026-01-05 21:34:21,173 - scanner_engine - INFO - [✓] Cross-Site Scripting 완료 (107.09s)
+2026-01-05 21:34:21,175 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/scan_report_20260105_213421.md
+2026-01-05 21:36:22,481 - CLI_Scanner - INFO - Starting Infra Scan: 20260105123621_ykc0j on 3.39.161.64
+2026-01-05 21:36:22,484 - scanner_engine - INFO - [*] Discovery 모드 활성화
+2026-01-05 21:36:22,496 - scanner_engine - INFO - [*] 포트 스캔 시작: 3.39.161.64
+2026-01-05 21:36:23,544 - scanner_engine - INFO - [✓] 열린 포트: 2개
+2026-01-05 21:36:23,545 - scanner_engine - INFO -     22/tcp - ssh
+2026-01-05 21:36:23,545 - scanner_engine - INFO -     80/tcp - http
+2026-01-05 21:36:23,545 - scanner_engine - INFO - [*] 선별된 테스트: 10개
+2026-01-05 21:36:24,318 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:36:24,492 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:36:24,493 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:36:24,897 - scanner_engine - INFO - [✓] Linux 프로세스 감사 완료
+2026-01-05 21:36:24,976 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:36:25,129 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:36:25,130 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:36:25,293 - scanner_engine - INFO - [✓] Linux 네트워크/포트 점검 완료
+2026-01-05 21:36:25,365 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:36:25,516 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:36:25,516 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:36:27,309 - scanner_engine - INFO - [✓] Linux 서비스 관리 완료
+2026-01-05 21:36:27,311 - scanner_engine - INFO - [✓] Linux 방화벽 설정 완료
+2026-01-05 21:36:27,313 - scanner_engine - INFO - [✓] Linux SSH 보안 설정 완료
+2026-01-05 21:36:27,387 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:36:27,550 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:36:27,551 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:36:28,154 - scanner_engine - INFO - [✓] Linux 패스워드 정책 완료
+2026-01-05 21:36:28,224 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:36:28,356 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:36:28,356 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:36:29,342 - scanner_engine - INFO - [✓] Linux 로그 관리 완료
+2026-01-05 21:36:29,402 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:36:29,558 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:36:29,558 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:36:29,891 - scanner_engine - INFO - [✓] Linux 시스템 기본 정보 완료
+2026-01-05 21:36:29,996 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:36:30,141 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:36:30,141 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:36:30,893 - scanner_engine - INFO - [✓] Linux 계정 관리 완료
+2026-01-05 21:36:30,969 - paramiko.transport - INFO - Connected (version 2.0, client OpenSSH_8.7)
+2026-01-05 21:36:31,130 - paramiko.transport - INFO - Authentication (publickey) successful!
+2026-01-05 21:36:31,130 - ssh_utils - INFO - SSH 연결 성공: ec2-user@3.39.161.64:22
+2026-01-05 21:36:32,495 - scanner_engine - INFO - [✓] Linux 파일 권한 완료
+2026-01-05 21:36:32,495 - scanner_engine - INFO - 
+[📊] 인프라 스캔 완료 - 실행: 10, 소요시간: 10.01초
+2026-01-05 21:36:32,497 - scanner_engine - INFO - 보고서 생성 완료: /Users/user/Documents/Mini_PJT2/Scanner/reports/infra_scan_report_20260105_213632.md

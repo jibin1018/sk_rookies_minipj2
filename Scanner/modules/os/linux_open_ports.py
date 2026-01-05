@@ -2,8 +2,11 @@
 인프라 진단: Linux 오픈 포트 및 서비스 확인
 netstat/ss 명령어를 사용하여 리스닝 중인 포트와 서비스 식별
 """
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'Linux 오픈 포트 점검',
@@ -17,10 +20,15 @@ def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     
     details = []
     
+    # SSH 연결 (안전)
+    ssh, error = safe_ssh_connect(ssh_host, ssh_user, ssh_pass, ssh_port, ssh_key_file)
+
+    if error:
+        # SSH 연결 실패 시 ERROR 결과 반환
+        module_name = result.get('name', 'Unknown Module')
+        return create_error_result(module_name, error, 'ERROR')
+
     try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ssh_host, port=ssh_port, username=ssh_user, password=ssh_pass, key_filename=ssh_key_file, timeout=10)
         
         # 1. ss 명령어로 TCP 리스닝 포트 확인 (netstat은 없을 수 있음)
         # -t: tcp, -u: udp, -l: listening, -n: numeric, -p: process

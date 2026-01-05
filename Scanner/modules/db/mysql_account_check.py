@@ -4,8 +4,11 @@ DB-01: 불필요한 계정 제거
 DB-02: 계정 권한 최소화
 """
 
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'MySQL 계정 및 권한 점검',

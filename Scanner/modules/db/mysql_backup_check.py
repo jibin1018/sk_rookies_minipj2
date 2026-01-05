@@ -4,8 +4,11 @@ DB-17: 정기 백업 설정
 DB-18: 백업 파일 암호화 및 보관
 """
 
-import paramiko
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from ssh_utils import safe_ssh_connect, create_error_result
 def scan(ssh_host, ssh_user, ssh_pass, ssh_port=22, ssh_key_file=None):
     result = {
         'name': 'MySQL 백업 설정 점검',
