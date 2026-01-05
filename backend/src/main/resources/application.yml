@@ -3,9 +3,9 @@ spring:
     name: company-portal
   
   datasource:
-    url: jdbc:mysql://192.168.0.75:3307/company_portal?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/company_portal?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: root
-    password: sk28  # 여기에 MySQL 비밀번호 입력
+    password: 1111  # 여기에 MySQL 비밀번호 입력
     driver-class-name: com.mysql.cj.jdbc.Driver
   
   jpa:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 통합 보안 취약점 스캐너 API 서버
-웹 애플리케이션 + 인프라 보안 진단
+웹 애플리케이션 + 인프라 + 화이트박스(소스코드) 보안 진단
 """
 
 from flask import Flask, render_template, request, jsonify, send_file
@@ -16,6 +16,8 @@ from infra_detector import InfraDetector, detect_infrastructure
 from batch_scanner import BatchScanner
 import threading
 import logging
+from pathlib import Path
+import importlib
 
 # Flask 앱 초기화
 app = Flask(__name__)
@@ -35,6 +37,304 @@ scan_status = {}
 
 # Claude 분석기 초기화
 claude_analyzer = ClaudeAnalyzer()
+
+# 배치 스캔 상태 저장소
+batch_status = {}
+
+# ============================================================================
+# 화이트박스 스캐너 설정
+# ============================================================================
+
+# 화이트박스 모듈 매핑
+WHITEBOX_MODULES = {
+    'access_control': [
+        'missing_auth_check',
+        'idor',
+        'admin_exposure',
+        'missing_method_security',
+    ],
+    'injection': [
+        'sql_injection',
+        'command_injection',
+        'path_traversal',
+        'ldap_nosql_injection',
+        'template_injection',
+    ],
+    'xss_output': [
+        'stored_reflected_xss',
+        'dom_xss',
+        'weak_csp',
+    ],
+    'session_management': [
+        'csrf_missing',
+        'insecure_cookie',
+        'session_fixation',
+        'weak_jwt',
+    ],
+    'secrets_crypto': [
+        'hardcoded_secrets',
+        'env_exposure',
+        'weak_crypto',
+    ],
+    'file_handling': [
+        'weak_upload_validation',
+        'webroot_upload',
+        'path_manipulation',
+        'upload_size_limit',
+    ],
+    'deserialization': [
+        'unsafe_deserialization',
+        'xxe',
+        'zip_slip',
+    ],
+    'logging_errors': [
+        'debug_mode_production',
+        'sensitive_data_logging',
+        'error_disclosure',
+    ],
+    'security_headers': [
+        'missing_https_redirect',
+        'missing_security_headers',
+        'weak_cors',
+    ],
+    'dependencies': [
+        'vulnerable_dependencies',
+        'missing_lockfile',
+        'risky_package_scripts',
+    ],
+}
+
+def get_target_files(project_path):
+    """스캔 대상 파일 수집"""
+    project_path = Path(project_path)
+    
+    if not project_path.exists():
+        raise ValueError(f"프로젝트 경로가 존재하지 않습니다: {project_path}")
+    
+    # 제외할 디렉토리
+    exclude_dirs = {
+        '.git', '.svn', '.hg',
+        'node_modules', '__pycache__', '.pytest_cache',
+        'venv', 'env', '.env',
+        'build', 'dist', 'target',
+        '.idea', '.vscode',
+        'coverage', '.coverage',
+        'htmlcov', '.tox',
+    }
+    
+    # 스캔할 파일 확장자
+    include_extensions = {
+        '.py', '.java', '.js', '.jsx', '.ts', '.tsx',
+        '.php', '.rb', '.go', '.cs', '.cpp', '.c', '.h',
+        '.jsp', '.asp', '.aspx',
+        '.json', '.xml', '.yml', '.yaml',
+        '.properties', '.conf', '.config',
+        '.html', '.htm', '.vue',
+        '.sh', '.bash',
+        'Dockerfile', 'requirements.txt', 'package.json',
+        'pom.xml', 'build.gradle', '.env',
+    }
+    
+    target_files = []
+    
+    for file_path in project_path.rglob('*'):
+        # 디렉토리 제외
+        if file_path.is_dir():
+            continue
+        
+        # 제외 디렉토리 체크
+        if any(excluded in file_path.parts for excluded in exclude_dirs):
+            continue
+        
+        # 확장자 체크
+        if file_path.suffix.lower() in include_extensions or file_path.name in include_extensions:
+            target_files.append(file_path)
+    
+    return target_files
+
+def generate_whitebox_report(scan_id, project_path, results, summary):
+    """화이트박스 스캔 보고서 생성"""
+    try:
+        os.makedirs('reports', exist_ok=True)
+        report_path = os.path.join('reports', f'whitebox_report_{scan_id}.md')
+        
+        with open(report_path, 'w', encoding='utf-8') as f:
+            f.write("# 화이트박스 보안 스캔 보고서\n\n")
+            f.write(f"**스캔 ID**: `{scan_id}`\n")
+            f.write(f"**대상 프로젝트**: `{project_path}`\n")
+            f.write(f"**스캔 시간**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+            
+            f.write("---\n\n")
+            
+            # 요약
+            f.write("## 📊 스캔 요약\n\n")
+            f.write(f"- **검사한 파일**: {summary.get('files_scanned', 0)}개\n")
+            f.write(f"- **전체 모듈**: {summary.get('total_modules', 0)}개\n")
+            f.write(f"- **취약점 발견 모듈**: {summary.get('vulnerable_modules', 0)}개\n")
+            f.write(f"- **총 발견 항목**: {summary.get('total_findings', 0)}개\n\n")
+            
+            # 심각도별 통계
+            severity_stats = {
+                'CRITICAL': 0,
+                'HIGH': 0,
+                'MEDIUM': 0,
+                'LOW': 0
+            }
+            
+            for result in results:
+                if result['status'] == 'VULNERABLE':
+                    findings = result.get('findings', [])
+                    for finding in findings:
+                        severity = finding.get('severity', 'MEDIUM')
+                        severity_stats[severity] = severity_stats.get(severity, 0) + 1
+            
+            f.write("### 심각도별 통계\n\n")
+            f.write(f"- 🔴 **CRITICAL**: {severity_stats.get('CRITICAL', 0)}개\n")
+            f.write(f"- 🟠 **HIGH**: {severity_stats.get('HIGH', 0)}개\n")
+            f.write(f"- 🟡 **MEDIUM**: {severity_stats.get('MEDIUM', 0)}개\n")
+            f.write(f"- 🟢 **LOW**: {severity_stats.get('LOW', 0)}개\n\n")
+            
+            f.write("---\n\n")
+            
+            # 상세 결과
+            f.write("## 🔍 발견된 취약점\n\n")
+            
+            for result in results:
+                if result['status'] == 'VULNERABLE':
+                    f.write(f"### [{result['category']}] {result['module']}\n\n")
+                    f.write(f"**상태**: {result['status']}\n\n")
+                    f.write(f"**설명**: {result['details']}\n\n")
+                    
+                    findings = result.get('findings', [])
+                    if findings:
+                        f.write(f"**발견 항목** ({len(findings)}개):\n\n")
+                        
+                        for idx, finding in enumerate(findings, 1):
+                            f.write(f"{idx}. **{finding.get('file')}:{finding.get('line', '?')}**\n")
+                            f.write(f"   - 유형: {finding.get('type', 'N/A')}\n")
+                            
+                            snippet = finding.get('snippet', '')
+                            if snippet:
+                                f.write(f"   - 코드: `{snippet[:100]}`\n")
+                            
+                            severity = finding.get('severity', 'MEDIUM')
+                            f.write(f"   - 심각도: {severity}\n")
+                            f.write("\n")
+                    
+                    # 권장 사항
+                    recommendation = result.get('recommendation', '')
+                    if recommendation:
+                        f.write("**권장 보안 대책**:\n\n")
+                        f.write(f"{recommendation}\n\n")
+                    
+                    f.write("---\n\n")
+        
+        logger.info(f"화이트박스 보고서 생성 완료: {report_path}")
+        return report_path
+        
+    except Exception as e:
+        logger.error(f"화이트박스 보고서 생성 오류: {str(e)}")
+        return None
+
+def run_whitebox_scan_background(scan_id, project_path):
+    """백그라운드 화이트박스 스캔 실행"""
+    try:
+        scan_status[scan_id]['status'] = 'running'
+        scan_status[scan_id]['started_at'] = datetime.now().isoformat()
+        
+        project_path = Path(project_path)
+        
+        # 대상 파일 수집
+        scan_status[scan_id]['current_test'] = '스캔 대상 파일 수집 중...'
+        target_files = get_target_files(project_path)
+        scan_status[scan_id]['files_scanned'] = len(target_files)
+        
+        if len(target_files) == 0:
+            scan_status[scan_id]['status'] = 'error'
+            scan_status[scan_id]['error'] = '스캔 대상 파일이 없습니다.'
+            scan_status[scan_id]['completed_at'] = datetime.now().isoformat()
+            save_scan_result(scan_id, scan_status[scan_id])
+            return
+        
+        results = []
+        total_modules = sum(len(modules) for modules in WHITEBOX_MODULES.values())
+        current_module = 0
+        
+        # 각 카테고리별 모듈 실행
+        for category, modules in WHITEBOX_MODULES.items():
+            for module_name in modules:
+                current_module += 1
+                progress = int((current_module / total_modules) * 100)
+                scan_status[scan_id]['progress'] = progress
+                scan_status[scan_id]['current_test'] = f'[{category}] {module_name}'
+                
+                try:
+                    # 동적으로 모듈 임포트
+                    module_path = f'modules.whitebox.{category}.{module_name}'
+                    module = importlib.import_module(module_path)
+                    
+                    # scan 함수 실행
+                    result = module.scan(project_path, target_files)
+                    
+                    if result and result.get('status') == 'VULNERABLE':
+                        results.append({
+                            'category': category,
+                            'module': module_name,
+                            'status': result.get('status'),
+                            'details': result.get('details'),
+                            'findings': result.get('findings', []),
+                            'recommendation': result.get('recommendation', ''),
+                        })
+                
+                except Exception as e:
+                    logger.error(f"[ERROR] {module_path}: {str(e)}")
+                    results.append({
+                        'category': category,
+                        'module': module_name,
+                        'status': 'ERROR',
+                        'details': f'모듈 실행 오류: {str(e)}',
+                        'findings': [],
+                    })
+        
+        # 스캔 완료
+        scan_status[scan_id]['status'] = 'completed'
+        scan_status[scan_id]['completed_at'] = datetime.now().isoformat()
+        scan_status[scan_id]['results'] = results
+        scan_status[scan_id]['progress'] = 100
+        
+        # 통계 계산
+        vulnerable_count = len([r for r in results if r['status'] == 'VULNERABLE'])
+        total_findings = sum(len(r.get('findings', [])) for r in results)
+        
+        scan_status[scan_id]['summary'] = {
+            'total_modules': total_modules,
+            'vulnerable_modules': vulnerable_count,
+            'total_findings': total_findings,
+            'files_scanned': len(target_files),
+        }
+        
+        # 보고서 생성
+        scan_status[scan_id]['current_test'] = '보고서 생성 중...'
+        report_path = generate_whitebox_report(
+            scan_id, 
+            str(project_path), 
+            results, 
+            scan_status[scan_id]['summary']
+        )
+        scan_status[scan_id]['report_path'] = report_path
+        scan_status[scan_id]['current_test'] = '스캔 완료!'
+        
+        # 결과 JSON 저장
+        save_scan_result(scan_id, scan_status[scan_id])
+        
+        logger.info(f"[{scan_id}] 화이트박스 스캔 완료")
+        
+    except Exception as e:
+        logger.error(f"[{scan_id}] 화이트박스 스캔 오류: {str(e)}")
+        scan_status[scan_id]['status'] = 'error'
+        scan_status[scan_id]['error'] = str(e)
+        scan_status[scan_id]['completed_at'] = datetime.now().isoformat()
+        save_scan_result(scan_id, scan_status[scan_id])
 
 # ============================================================================
 # 유틸리티 함수
@@ -80,12 +380,13 @@ def summarize_scan(scan_id, data):
     
     # 보고서 파일 존재 여부 확인
     has_report = False
-    report_dirs = ['reports', '../reports']  # Scanner 기준 + 루트 기준
+    report_dirs = ['reports', '../reports']
     report_filenames = [
         f'scan_report_{scan_id}.md',
         f'scan_report_{scan_id}.txt',
         f'infra_scan_report_{scan_id}.md',
         f'infra_scan_report_{scan_id}.txt',
+        f'whitebox_report_{scan_id}.md',
     ]
     
     for report_dir in report_dirs:
@@ -101,7 +402,7 @@ def summarize_scan(scan_id, data):
         'scan_id': scan_id,
         'type': data.get('type'),
         'status': data.get('status'),
-        'target': data.get('target_url') or data.get('target'),
+        'target': data.get('target_url') or data.get('target') or data.get('project_path'),
         'started_at': data.get('started_at'),
         'completed_at': data.get('completed_at'),
         'summary': summary,
@@ -161,10 +462,11 @@ def download_report(scan_id):
         possible_names = [
             f"scan_report_{scan_id}.md",
             f"scan_report_{scan_id}.txt",
-            f"infra_scan_report_{scan_id}.txt"
+            f"infra_scan_report_{scan_id}.txt",
+            f"whitebox_report_{scan_id}.md",
         ]
         
-        # 검색할 디렉토리 목록 (현재 디렉토리의 reports와 상위 디렉토리의 reports)
+        # 검색할 디렉토리 목록
         search_dirs = ['reports', '../reports', os.path.join(os.getcwd(), 'reports')]
         
         for directory in search_dirs:
@@ -183,6 +485,103 @@ def download_report(scan_id):
         return send_file(report_path, as_attachment=True)
         
     return "보고서 파일을 찾을 수 없습니다", 404
+
+# ============================================================================
+# 화이트박스 스캔 API
+# ============================================================================
+
+@app.route('/api/whitebox/scan/start', methods=['POST'])
+def api_start_whitebox_scan():
+    """화이트박스 스캔 시작"""
+    try:
+        data = request.json
+        project_path = data.get('project_path', '').strip()
+        
+        if not project_path:
+            return jsonify({'error': '프로젝트 경로를 입력하세요'}), 400
+        
+        # 경로 검증
+        project_path_obj = Path(project_path)
+        if not project_path_obj.exists():
+            return jsonify({'error': f'프로젝트 경로가 존재하지 않습니다: {project_path}'}), 400
+        
+        if not project_path_obj.is_dir():
+            return jsonify({'error': '프로젝트 경로는 디렉토리여야 합니다'}), 400
+        
+        scan_id = datetime.now().strftime("%Y%m%d_%H%M%S_whitebox")
+        
+        scan_status[scan_id] = {
+            'scan_id': scan_id,
+            'type': 'whitebox',
+            'status': 'starting',
+            'progress': 0,
+            'current_test': '',
+            'results': [],
+            'project_path': str(project_path),
+            'files_scanned': 0,
+            'started_at': datetime.now().isoformat(),
+            'completed_at': None
+        }
+        
+        # 백그라운드 스레드로 스캔 실행
+        thread = threading.Thread(
+            target=run_whitebox_scan_background, 
+            args=(scan_id, str(project_path))
+        )
+        thread.daemon = True
+        thread.start()
+        
+        logger.info(f"화이트박스 스캔 시작: {scan_id} - {project_path}")
+        
+        return jsonify({
+            'success': True,
+            'scan_id': scan_id,
+            'message': '화이트박스 스캔이 시작되었습니다'
+        })
+        
+    except Exception as e:
+        logger.error(f"화이트박스 스캔 시작 오류: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/whitebox/scan/status/<scan_id>')
+def api_whitebox_scan_status(scan_id):
+    """화이트박스 스캔 상태 조회"""
+    if scan_id in scan_status:
+        return jsonify(scan_status[scan_id])
+        
+    data = load_scan_result(scan_id)
+    if data:
+        scan_status[scan_id] = data
+        return jsonify(data)
+    
+    return jsonify({'error': '스캔을 찾을 수 없습니다'}), 404
+
+@app.route('/api/whitebox/scan/results/<scan_id>')
+def api_whitebox_scan_results(scan_id):
+    """화이트박스 스캔 결과 상세 조회"""
+    data = scan_status.get(scan_id)
+    if not data:
+        data = load_scan_result(scan_id)
+        
+    if not data:
+        return jsonify({'error': '스캔을 찾을 수 없습니다'}), 404
+    
+    if data['status'] != 'completed' and data['status'] != 'error':
+        return jsonify({'error': '스캔이 완료되지 않았습니다'}), 400
+    
+    results = data.get('results', [])
+    summary = data.get('summary', {})
+    
+    return jsonify({
+        'scan_id': scan_id,
+        'project_path': data.get('project_path'),
+        'type': data.get('type'),
+        'status': data.get('status'),
+        'started_at': data.get('started_at'),
+        'completed_at': data.get('completed_at'),
+        'summary': summary,
+        'results': results,
+    })
 
 # ============================================================================
 # 웹 애플리케이션 스캔 API
@@ -387,8 +786,6 @@ def generate_report_api(scan_id):
                     scan_status[scan_id] = scan_data
                 save_scan_result(scan_id, scan_data)
         
-        # 보고서 재생성 로직은 생략 (기존 파일 활용)
-        
         return jsonify({
             'success': True,
             'scan_id': scan_id,
@@ -403,46 +800,53 @@ def generate_report_api(scan_id):
 @app.route('/api/report/raw/<scan_id>')
 def get_raw_report(scan_id):
     """보고서 파일의 원문 텍스트 반환"""
-    # 1. 스캔 정보 로드
     scan_data = scan_status.get(scan_id) or load_scan_result(scan_id)
     
-    # 2. 파일 경로 찾기 (download_report 로직 재활용)
     report_path = None
     if scan_data and scan_data.get('report_path'):
         report_path = scan_data.get('report_path')
         if not os.path.isabs(report_path):
-            if os.path.exists(report_path): report_path = os.path.abspath(report_path)
-            elif os.path.exists(os.path.join('..', report_path)): report_path = os.path.abspath(os.path.join('..', report_path))
+            if os.path.exists(report_path): 
+                report_path = os.path.abspath(report_path)
+            elif os.path.exists(os.path.join('..', report_path)): 
+                report_path = os.path.abspath(os.path.join('..', report_path))
 
     if not report_path or not os.path.exists(report_path):
         possible_names = [
             f"scan_report_{scan_id}.md", 
             f"scan_report_{scan_id}.txt", 
             f"infra_scan_report_{scan_id}.md",
-            f"infra_scan_report_{scan_id}.txt"
+            f"infra_scan_report_{scan_id}.txt",
+            f"whitebox_report_{scan_id}.md",
         ]
         search_dirs = ['reports', '../reports', os.path.join(os.getcwd(), 'reports')]
         for directory in search_dirs:
-            if not os.path.exists(directory): continue
+            if not os.path.exists(directory): 
+                continue
             for name in possible_names:
                 path = os.path.join(directory, name)
                 if os.path.exists(path):
                     report_path = os.path.abspath(path)
                     break
-            if report_path: break
+            if report_path: 
+                break
 
     if report_path and os.path.exists(report_path):
         try:
             with open(report_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-            return jsonify({'success': True, 'content': content, 'filename': os.path.basename(report_path)})
+            return jsonify({
+                'success': True, 
+                'content': content, 
+                'filename': os.path.basename(report_path)
+            })
         except Exception as e:
             return jsonify({'error': str(e)}), 500
             
     return jsonify({'error': '보고서 파일을 찾을 수 없습니다'}), 404
 
 # ============================================================================
-# 인프라 스캔 API
+# 인프라 스캔 API (기존 코드 유지)
 # ============================================================================
 
 @app.route('/api/infra/scan/start', methods=['POST'])
@@ -638,11 +1042,8 @@ def run_infra_scan_background_pem(scan_id, ssh_host, ssh_user, ssh_port, pem_fil
             logger.error(f"[{scan_id}] .pem 파일 삭제 실패: {str(e)}")
 
 # ============================================================================
-# 인프라 탐지 및 배치 스캔 API
+# 인프라 탐지 및 배치 스캔 API (기존 코드 유지)
 # ============================================================================
-
-# 배치 스캔 상태 저장소
-batch_status = {}
 
 @app.route('/api/detect-infra', methods=['POST'])
 def api_detect_infra():
@@ -671,7 +1072,6 @@ def api_detect_infra():
     except Exception as e:
         logger.error(f"인프라 탐지 오류: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
 
 @app.route('/api/batch-scan', methods=['POST'])
 def api_batch_scan():
@@ -732,7 +1132,6 @@ def api_batch_scan():
         logger.error(f"배치 스캔 시작 오류: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-
 def run_batch_scan_background(batch_id, urls, use_infra_detection, scan_types):
     """백그라운드 배치 스캔 실행"""
     try:
@@ -764,14 +1163,12 @@ def run_batch_scan_background(batch_id, urls, use_infra_detection, scan_types):
         batch_status[batch_id]['error'] = str(e)
         batch_status[batch_id]['completed_at'] = datetime.now().isoformat()
 
-
 @app.route('/api/batch-status/<batch_id>')
 def api_batch_status(batch_id):
     """배치 스캔 상태 조회"""
     if batch_id in batch_status:
         return jsonify(batch_status[batch_id])
     return jsonify({'error': '배치 스캔을 찾을 수 없습니다'}), 404
-
 
 # ============================================================================
 # 기타 API
@@ -824,11 +1221,25 @@ def api_tests_list():
             for module_name, test_name, severity in tests
         ]
     
+    # 화이트박스 테스트 목록
+    whitebox_tests = {}
+    for category, modules in WHITEBOX_MODULES.items():
+        whitebox_tests[category] = [
+            {
+                'id': module_name,
+                'name': module_name.replace('_', ' ').title(),
+                'category': category
+            }
+            for module_name in modules
+        ]
+    
     return jsonify({
         'web_tests': web_tests,
         'infra_tests': infra_tests,
+        'whitebox_tests': whitebox_tests,
         'total_web': len(web_tests),
-        'total_infra': sum(len(tests) for tests in infra_tests.values())
+        'total_infra': sum(len(tests) for tests in infra_tests.values()),
+        'total_whitebox': sum(len(modules) for modules in WHITEBOX_MODULES.values())
     })
 
 @app.route('/api/scans/history')
@@ -842,8 +1253,8 @@ def api_scans_history():
         scans.append(summarize_scan(scan_id, data))
         existing_ids.add(scan_id)
         
-    # 2. reports 폴더(Scanner/reports 및 루트 reports) 스캔
-    report_dirs = ['reports', '../reports'] # Scanner 기준 reports와 루트 reports
+    # 2. reports 폴더 스캔
+    report_dirs = ['reports', '../reports']
     
     try:
         for report_dir in report_dirs:
@@ -860,28 +1271,36 @@ def api_scans_history():
                             scans.append(summarize_scan(scan_id, data))
                             existing_ids.add(scan_id)
                 
-                # 메타데이터가 없는 순수 보고서 파일 (.md, .txt) 처리
-                elif (filename.endswith('.md') or filename.endswith('.txt')) and ('scan_report_' in filename):
-                    # 파일명에서 ID 추출
-                    # 예: scan_report_20260102_141417.txt -> 20260102_141417
+                # 보고서 파일 처리
+                elif (filename.endswith('.md') or filename.endswith('.txt')) and ('report_' in filename):
                     is_infra = 'infra_scan_report_' in filename
-                    prefix = 'infra_scan_report_' if is_infra else 'scan_report_'
+                    is_whitebox = 'whitebox_report_' in filename
+                    
+                    if is_infra:
+                        prefix = 'infra_scan_report_'
+                        scan_type = 'infrastructure'
+                    elif is_whitebox:
+                        prefix = 'whitebox_report_'
+                        scan_type = 'whitebox'
+                    else:
+                        prefix = 'scan_report_'
+                        scan_type = 'web'
+                    
                     scan_id = filename.replace(prefix, '').split('.')[0]
                     
                     if scan_id not in existing_ids:
                         file_path = os.path.abspath(os.path.join(report_dir, filename))
-                        # 파일 생성 시간을 시작 시간으로 활용
                         ctime = os.path.getctime(file_path)
                         dt_object = datetime.fromtimestamp(ctime)
                         
-                        # 보고서 파일에서 대상 정보 추출
                         target_name = '점검 기록'
                         try:
                             with open(file_path, 'r', encoding='utf-8') as f:
-                                content = f.read(500)  # 처음 500자만 읽기
-                                # **대상**: `IP주소` 또는 **대상**: `URL` 패턴 찾기
+                                content = f.read(500)
                                 import re
                                 match = re.search(r'\*\*대상\*\*:\s*`([^`]+)`', content)
+                                if not match:
+                                    match = re.search(r'\*\*대상 프로젝트\*\*:\s*`([^`]+)`', content)
                                 if match:
                                     target_name = match.group(1)
                         except:
@@ -889,7 +1308,7 @@ def api_scans_history():
                         
                         scans.append({
                             'scan_id': scan_id,
-                            'type': 'infrastructure' if is_infra else 'web',
+                            'type': scan_type,
                             'status': 'completed',
                             'target': target_name,
                             'started_at': dt_object.isoformat(),
@@ -941,115 +1360,55 @@ def api_docs():
     """API 문서 - 모든 엔드포인트 상세 정보"""
     docs = {
         "title": "Cyber Sentinel API Documentation",
-        "version": "2.0.0",
-        "description": "통합 보안 취약점 스캐너 API",
+        "version": "3.0.0",
+        "description": "통합 보안 취약점 스캐너 API (웹 + 인프라 + 화이트박스)",
         "base_url": request.host_url.rstrip('/'),
         "endpoints": [
             {
                 "path": "/api/scan/start",
                 "method": "POST",
-                "description": "웹 애플리케이션 보안 스캔 시작",
+                "description": "웹 애플리케이션 보안 스캔 시작"
+            },
+            {
+                "path": "/api/whitebox/scan/start",
+                "method": "POST",
+                "description": "화이트박스(소스코드) 보안 스캔 시작",
                 "request_body": {
-                    "target_url": {"type": "string", "required": True, "description": "스캔 대상 URL"},
-                    "use_claude": {"type": "boolean", "default": False, "description": "Claude AI 분석 활성화"},
-                    "use_infra_detection": {"type": "boolean", "default": True, "description": "인프라 자동 감지"},
-                    "scan_types": {"type": "array", "default": ["all"], "description": "스캔 유형 (all, injection, xss 등)"}
-                },
-                "response": {"scan_id": "string", "success": "boolean", "message": "string"}
-            },
-            {
-                "path": "/api/scan/status/<scan_id>",
-                "method": "GET",
-                "description": "스캔 진행 상태 조회",
-                "response": {
-                    "scan_id": "string",
-                    "status": "running|completed|error",
-                    "progress": "0-100",
-                    "current_test": "string"
-                }
-            },
-            {
-                "path": "/api/scan/results/<scan_id>",
-                "method": "GET",
-                "description": "스캔 결과 상세 조회",
-                "response": {
-                    "scan_id": "string",
-                    "target_url": "string",
-                    "summary": {"total": "int", "vulnerable": "int", "safe": "int"},
-                    "results": "array",
-                    "metrics": {
-                        "scan_duration": "float",
-                        "scripts_executed": "int",
-                        "scripts_skipped": "int",
-                        "avg_response_time": "float"
-                    },
-                    "claude_analysis": "object|null"
+                    "project_path": {"type": "string", "required": True, "description": "스캔 대상 프로젝트 경로"}
                 }
             },
             {
                 "path": "/api/infra/scan/start",
                 "method": "POST",
-                "description": "인프라 보안 스캔 시작",
-                "request_body": {
-                    "ssh_host": {"type": "string", "required": True},
-                    "ssh_port": {"type": "integer", "default": 22},
-                    "ssh_username": {"type": "string", "required": True},
-                    "ssh_password": {"type": "string", "required": False},
-                    "ssh_key_file": {"type": "string", "required": False}
-                }
+                "description": "인프라 보안 스캔 시작"
             },
             {
-                "path": "/api/report/generate/<scan_id>",
-                "method": "POST",
-                "description": "보고서 파일 생성"
-            },
-            {
-                "path": "/api/report/raw/<scan_id>",
+                "path": "/api/scan/status/<scan_id>",
                 "method": "GET",
-                "description": "보고서 원본 텍스트 조회"
+                "description": "스캔 진행 상태 조회"
+            },
+            {
+                "path": "/api/whitebox/scan/status/<scan_id>",
+                "method": "GET",
+                "description": "화이트박스 스캔 상태 조회"
             },
             {
                 "path": "/api/scans/history",
                 "method": "GET",
-                "description": "스캔 히스토리 목록 조회",
-                "response": {"scans": "array", "total": "int"}
-            },
-            {
-                "path": "/api/claude/analyze",
-                "method": "POST",
-                "description": "Claude AI 분석 요청",
-                "request_body": {
-                    "target_url": {"type": "string", "required": True},
-                    "results": {"type": "array", "required": True}
-                }
-            },
-            {
-                "path": "/api/scripts/list",
-                "method": "GET",
-                "description": "사용 가능한 스크립트 목록"
-            },
-            {
-                "path": "/health",
-                "method": "GET",
-                "description": "서버 상태 확인"
+                "description": "스캔 히스토리 목록 조회"
             }
-        ],
-        "error_codes": {
-            "400": "잘못된 요청",
-            "404": "리소스 없음",
-            "500": "서버 오류"
-        }
+        ]
     }
     return jsonify(docs)
 
-@app.route('/api/health')
 @app.route('/health')
 def health_check():
     """헬스 체크"""
     return jsonify({
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
-        'claude_available': claude_analyzer.is_available()
+        'claude_available': claude_analyzer.is_available(),
+        'scan_types': ['web', 'infrastructure', 'whitebox']
     })
 
 @app.errorhandler(404)
@@ -1065,10 +1424,15 @@ if __name__ == '__main__':
     os.makedirs('reports', exist_ok=True)
     os.makedirs('temp', exist_ok=True)
     
-    port = int(os.getenv('PORT', '5003'))
+    port = int(os.getenv('PORT', '5000'))
     
     print("\n" + "="*80)
     print(f"통합 보안 취약점 스캐너 API 서버 (Port: {port})")
+    print("="*80)
+    print("📌 지원 스캔 유형:")
+    print("  ✅ 웹 애플리케이션 보안 스캔 (블랙박스)")
+    print("  ✅ 인프라 보안 스캔 (SSH)")
+    print("  ✅ 화이트박스 스캔 (소스코드 정적 분석)")
     print("="*80 + "\n")
 
     app.run(debug=True, host='0.0.0.0', port=port, threaded=True)
