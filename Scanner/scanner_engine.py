@@ -8,11 +8,13 @@
 import importlib
 import os
 import time
+import logging
 from datetime import datetime
 
 from infra_detector import InfraDetector
 from infra_mapping import get_scripts_for_infra
 
+logger = logging.getLogger(__name__)
 
 class VulnerabilityScanner:
     """웹 애플리케이션 취약점 스캐너"""
@@ -91,31 +93,31 @@ class VulnerabilityScanner:
         self.metrics['start_time'] = time.time()
         
         # 1. 인프라 탐지 및 크롤링
-        print("[*] 스캔 준비 중...")
+        logger.info("[*] 스캔 준비 중...")
         
         # 크롤러 실행 (동적 URL 수집)
         try:
             from web_crawler import WebCrawler
-            print(f"[*] 크롤링 시작: {self.target_url}")
+            logger.info(f"[*] 크롤링 시작: {self.target_url}")
             # 인증 정보 전달
             crawler = WebCrawler(self.target_url, cookies=self.auth_cookies, headers=self.auth_headers)
             crawler.crawl(max_pages=20)
             visited_urls = crawler.get_visited_urls()
             api_endpoints = crawler.get_api_endpoints()
-            print(f"[✓] 크롤링 완료: {len(visited_urls)} 페이지, {len(api_endpoints)} API 엔드포인트")
+            logger.info(f"[✓] 크롤링 완료: {len(visited_urls)} 페이지, {len(api_endpoints)} API 엔드포인트")
         except Exception as e:
-            print(f"[!] 크롤러 실행 오류: {e}")
+            logger.error(f"[!] 크롤러 실행 오류: {e}")
             visited_urls = [self.target_url]
             api_endpoints = []
 
         # 인프라 탐지
         if self.use_infra_detection:
-            print("[*] 인프라 탐지 시작...")
+            logger.info("[*] 인프라 탐지 시작...")
             detector = InfraDetector()
             self.infra_profile = detector.detect(self.target_url)
             self._allowed_scripts = get_scripts_for_infra(self.infra_profile)
             
-            print(f"[✓] 인프라 탐지 완료: {self.infra_profile.get('web_server', 'Unknown')}")
+            logger.info(f"[✓] 인프라 탐지 완료: {self.infra_profile.get('web_server', 'Unknown')}")
         
         # 2. 실행할 테스트 작업 큐 생성
         tasks = []
@@ -129,7 +131,7 @@ class VulnerabilityScanner:
             # 인프라 기반 필터링
             if self.use_infra_detection and self._allowed_scripts:
                 if module_path not in self._allowed_scripts:
-                    print(f"[⏭] {test_name} 스킵 (인프라 불일치)")
+                    logger.info(f"[⏭] {test_name} 스킵 (인프라 불일치)")
                     self.metrics['scripts_skipped'] += 1
                     continue
             
@@ -138,7 +140,7 @@ class VulnerabilityScanner:
         # 3. 병렬 실행 (ThreadPoolExecutor)
         from concurrent.futures import ThreadPoolExecutor, as_completed
         
-        print(f"[*] 병렬 스캔 시작 ({len(tasks)}개 테스트, 10 워커)")
+        logger.info(f"[*] 병렬 스캔 시작 ({len(tasks)}개 테스트, 10 워커)")
         total_tests = len(tasks)
         completed = 0
         
@@ -155,10 +157,12 @@ class VulnerabilityScanner:
                 # 진행률 및 결과 실시간 업데이트
                 if self.scan_status and self.scan_id:
                      progress = int((completed / total_tests) * 100)
-                     self.scan_status[self.scan_id]['progress'] = progress
-                     self.scan_status[self.scan_id]['current_test'] = f'{test_name} 완료 ({completed}/{total_tests})'
-                     # 중요: 실시간 결과 반영 (복사본 전달)
-                     self.scan_status[self.scan_id]['results'] = list(results)
+                     # FileUpdatingDict의 __setitem__을 트리거하기 위해 전체 딕셔너리 재할당 필요
+                     scan_data = self.scan_status[self.scan_id]
+                     scan_data['progress'] = progress
+                     scan_data['current_test'] = f'{test_name} 완료 ({completed}/{total_tests})'
+                     scan_data['results'] = list(results)
+                     self.scan_status[self.scan_id] = scan_data
 
                 try:
                     result = future.result()
@@ -175,9 +179,9 @@ class VulnerabilityScanner:
                             elif sev == 'MEDIUM': self.metrics['medium_count'] += 1
                             else: self.metrics['low_count'] += 1
                             
-                        print(f"[✓] {test_name} 완료 ({result.get('duration', 0):.2f}s)")
+                        logger.info(f"[✓] {test_name} 완료 ({result.get('duration', 0):.2f}s)")
                 except Exception as e:
-                    print(f"[✗] {test_name} 실패: {e}")
+                    logger.error(f"[✗] {test_name} 실패: {e}")
                     self.metrics['scripts_failed'] += 1
         
         self.metrics['end_time'] = time.time()
@@ -310,7 +314,7 @@ class VulnerabilityScanner:
 
                 f.write("---\n\n")
 
-        print(f"보고서 생성 완료: {md_path}")
+        logger.info(f"보고서 생성 완료: {md_path}")
         return md_path
     
     def _calculate_summary(self, results):
@@ -425,19 +429,19 @@ class InfraScanner:
         try:
             from discovery.port_scanner import PortScanner
             
-            print(f"[*] 포트 스캔 시작: {self.ssh_host}")
+            logger.info(f"[*] 포트 스캔 시작: {self.ssh_host}")
             scanner = PortScanner(timeout=1.0)
             result = scanner.scan_common_ports(self.ssh_host)
             
-            print(f"[✓] 열린 포트: {result['total_open']}개")
+            logger.info(f"[✓] 열린 포트: {result['total_open']}개")
             for port_info in result['open_ports']:
-                print(f"    {port_info['port']}/tcp - {port_info['service']}")
+                logger.info(f"    {port_info['port']}/tcp - {port_info['service']}")
             
             self.discovered_services = result
             return result
             
         except Exception as e:
-            print(f"[✗] 포트 스캔 실패: {str(e)}")
+            logger.error(f"[✗] 포트 스캔 실패: {str(e)}")
             return {'open_ports': [], 'services': {}}
     
     def _get_tests_for_discovered_services(self):
@@ -468,11 +472,11 @@ class InfraScanner:
         
         # Discovery 모드: 포트 스캔 후 선별 실행
         if self.use_discovery:
-            print("[*] Discovery 모드 활성화")
+            logger.info("[*] Discovery 모드 활성화")
             self.discover_services()
             tests_to_run = self._get_tests_for_discovered_services()
             
-            print(f"[*] 선별된 테스트: {len(tests_to_run)}개")
+            logger.info(f"[*] 선별된 테스트: {len(tests_to_run)}개")
             
             for category, module_name, test_name in tests_to_run:
                 try:
@@ -485,12 +489,12 @@ class InfraScanner:
                         self.ssh_key_file
                     )
                     results.append(result)
-                    self.metrics['executed'] += 1
-                    print(f"[✓] {test_name} 완료")
+                    self.metrics['scripts_executed'] += 1
+                    logger.info(f"[✓] {test_name} 완료")
                     
                 except Exception as e:
-                    print(f"[✗] {test_name} 실패: {str(e)}")
-                    self.metrics['executed'] += 1
+                    logger.error(f"[✗] {test_name} 실패: {str(e)}")
+                    self.metrics['scripts_executed'] += 1
                     results.append({
                         'name': test_name,
                         'status': 'ERROR',
@@ -518,10 +522,10 @@ class InfraScanner:
                         )
                         results.append(result)
                         self.metrics['scripts_executed'] += 1
-                        print(f"[✓] {test_name} 완료")
+                        logger.info(f"[✓] {test_name} 완료")
                         
                     except Exception as e:
-                        print(f"[✗] {test_name} 실패: {str(e)}")
+                        logger.error(f"[✗] {test_name} 실패: {str(e)}")
                         self.metrics['scripts_executed'] += 1
                         results.append({
                             'name': test_name,
@@ -534,7 +538,7 @@ class InfraScanner:
         self.metrics['end_time'] = time.time()
         self.metrics['scan_duration'] = self.metrics['end_time'] - self.metrics['start_time']
         
-        print(f"\n[📊] 인프라 스캔 완료 - 실행: {self.metrics['scripts_executed']}, "
+        logger.info(f"\n[📊] 인프라 스캔 완료 - 실행: {self.metrics['scripts_executed']}, "
               f"소요시간: {self.metrics['scan_duration']:.2f}초")
         
         return results
@@ -618,7 +622,7 @@ class InfraScanner:
 
                 f.write("---\n\n")
 
-        print(f"보고서 생성 완료: {md_path}")
+        logger.info(f"보고서 생성 완료: {md_path}")
         return md_path
     
     def _calculate_summary(self, results):

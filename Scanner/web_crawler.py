@@ -69,7 +69,9 @@ class WebCrawler:
                         self.api_endpoints.add(full_action)
                         
             except Exception as e:
-                print(f"[Crawler] Error crawling {current_url}: {e}")
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"[Crawler] Error crawling {current_url}: {e}")
                 
     def _is_same_domain(self, url):
         """같은 도메인인지 확인 (서브도메인 포함 여부는 프로젝트 정책에 따름)"""

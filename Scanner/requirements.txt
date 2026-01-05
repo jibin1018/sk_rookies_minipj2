@@ -16,3 +16,4 @@ paramiko==3.4.0
 
 # Utilities
 Werkzeug==3.0.1
+beautifulsoup4==4.12.2

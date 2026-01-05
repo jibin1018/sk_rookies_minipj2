@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense, useState, useEffect, useRef } from "react"
-import { Shield, Search, Server, Database, Globe, Layers, CheckCircle2, Award, FileCheck, Wifi, WifiOff, AlertTriangle, Loader2, ArrowLeft, History, FileText, Check, XCircle, BookOpen, Lock } from "lucide-react"
+import { Shield, Search, Server, Database, Globe, Layers, CheckCircle2, Award, FileCheck, Wifi, WifiOff, AlertTriangle, Loader2, ArrowLeft, History, FileText, Check, XCircle, BookOpen, Lock, Github } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -19,8 +19,8 @@ import rehypeRaw from "rehype-raw"
 // --- Types ---
 interface ScanResult {
   scan_id: string
-  type: 'web' | 'infrastructure'
-  status: 'running' | 'completed' | 'error'
+  type: 'web' | 'infrastructure' | 'whitebox'
+  status: 'running' | 'completed' | 'error' | 'preparing'
   progress: number
   target: string
   started_at: string
@@ -33,6 +33,8 @@ interface ScanResult {
   current_test?: string
   error?: string
   report_path?: string
+  metrics?: any
+  infra_profile?: any
 }
 
 interface HistoryItem {
@@ -218,7 +220,7 @@ function ProgressView({ scanId, onBack }: { scanId: string, onBack: () => void }
                 {status.status === 'running' ? '보안 진단 진행 중' : (status.status === 'completed' ? '진단 완료' : '진단 실패')}
               </CardTitle>
               <CardDescription className="mt-1">
-                대상: {status.target} | 유형: {status.type === 'web' ? '웹' : '인프라'}
+                대상: {status.target} | 유형: {status.type === 'web' ? '웹' : (status.type === 'whitebox' ? '화이트박스' : '인프라')}
               </CardDescription>
             </div>
             <Badge variant="outline" className="text-sm px-3 py-1 bg-white">ID: {scanId}</Badge>
@@ -229,9 +231,9 @@ function ProgressView({ scanId, onBack }: { scanId: string, onBack: () => void }
           <div className="space-y-2">
             <div className="flex justify-between text-sm font-medium text-slate-700">
               <span>진행률</span>
-              <span>{Math.round(status.progress)}%</span>
+              <span>{typeof status.progress === 'number' && !isNaN(status.progress) ? Math.round(status.progress) : 0}%</span>
             </div>
-            <Progress value={status.progress} className="h-3 w-full bg-slate-100" />
+            <Progress value={typeof status.progress === 'number' && !isNaN(status.progress) ? status.progress : 0} className="h-3 w-full bg-slate-100" />
           </div>
 
           <div className="bg-slate-900 text-slate-200 p-6 rounded-lg font-mono text-sm min-h-[240px] max-h-[400px] overflow-y-auto shadow-inner">
@@ -556,12 +558,15 @@ function HistoryView() {
   )
 }
 
+
+
 function DashboardContent() {
-  const [activeTab, setActiveTab] = useState("web")
+  const [activeTab, setActiveTab] = useState("whitebox")
   const [viewState, setViewState] = useState<'dashboard' | 'progress'>('dashboard')
   const [currentScanId, setCurrentScanId] = useState<string>("")
 
   // Form States
+  const [repoUrl, setRepoUrl] = useState("https://github.com/jibin1018/sk_rookies_minipj2.git")
   const [webUrl, setWebUrl] = useState("")
   const [serverType, setServerType] = useState<string>("")
   const [serverAddress, setServerAddress] = useState("")
@@ -577,7 +582,7 @@ function DashboardContent() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch('/api/health')
+        const res = await fetch('/api/scans/history')
         setBackendStatus(res.ok)
       } catch (err) {
         setBackendStatus(false)
@@ -587,7 +592,7 @@ function DashboardContent() {
   }, [])
 
   const handleInfraScan = async () => {
-    if (!serverAddress || !serverType || !sshUser) {
+    if (!serverAddress || !sshUser) {
       alert("모든 필수 정보를 입력해주세요")
       return
     }
@@ -604,12 +609,11 @@ function DashboardContent() {
           setIsLoading(false)
           return
         }
-        endpoint = '/api/infra/scan/start/pem'
+        endpoint = '/api/infra/scan/start'
         const formData = new FormData()
         formData.append('ssh_host', serverAddress)
         formData.append('ssh_user', sshUser)
         formData.append('ssh_port', sshPort)
-        formData.append('categories', JSON.stringify(['all']))
         formData.append('pem_file', pemFile)
         body = formData
       } else {
@@ -624,7 +628,6 @@ function DashboardContent() {
           ssh_user: sshUser,
           ssh_pass: sshPass,
           ssh_port: parseInt(sshPort),
-          categories: ['all']
         })
       }
 
@@ -662,7 +665,6 @@ function DashboardContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           target_url: webUrl,
-          scan_types: ['all'],
           use_infra_detection: true
         }),
       })
@@ -682,6 +684,36 @@ function DashboardContent() {
     }
   }
 
+  const handleWhiteboxScan = async () => {
+    if (!repoUrl) {
+      alert("레포지토리 URL을 입력해주세요")
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/whitebox/scan/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repo: repoUrl,
+          commit: 'HEAD' // Default or handle commit input if needed
+        }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setCurrentScanId(data.scan_id)
+        setViewState('progress')
+      } else {
+        alert("화이트박스 분석 실패: " + data.error)
+      }
+    } catch (error) {
+      alert("서버 오류가 발생했습니다.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white p-6 md:p-10 font-[family-name:var(--font-pretendard)]">
       <div className="max-w-[1400px] mx-auto space-y-8">
@@ -690,18 +722,18 @@ function DashboardContent() {
         <div className="flex justify-between items-start mb-8">
           <div className="space-y-2 cursor-pointer" onClick={() => setViewState('dashboard')}>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">보안 취약점 진단</h1>
-            <p className="text-slate-500">웹 애플리케이션 및 인프라 서버에 대한 종합적인 보안 취약점 스캐닝</p>
+            <p className="text-slate-500">화이트박스 및 블랙박스 통합 취약점 진단 시스템</p>
           </div>
 
           <div className="flex gap-2">
             {backendStatus === true && (
               <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
-                <Wifi className="w-3 h-3 mr-1" /> 온라인
+                <Wifi className="w-3 h-3 mr-1" /> 시스템 정상
               </Badge>
             )}
             {backendStatus === false && (
               <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">
-                <WifiOff className="w-3 h-3 mr-1" /> 연결 끊김
+                <WifiOff className="w-3 h-3 mr-1" /> 연결 확인 필요
               </Badge>
             )}
           </div>
@@ -712,157 +744,218 @@ function DashboardContent() {
 
         {/* Main Interface */}
         {viewState === 'progress' ? (
-          /* Progress View - Takes up the main content area */
           <ProgressView scanId={currentScanId} onBack={() => { setViewState('dashboard'); setActiveTab('history'); }} />
         ) : (
-          /* Dashboard View - Tabs and Inputs */
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-8">
             <TabsList className="bg-slate-100 p-1 rounded-lg w-auto inline-flex h-auto">
-              <TabsTrigger value="web" className="px-6 py-2.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md transition-all">
-                <Globe className="w-4 h-4 mr-2" /> 웹 스캔
+              <TabsTrigger value="whitebox" className="px-6 py-2.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md transition-all">
+                <BookOpen className="w-4 h-4 mr-2" /> 화이트박스 진단
               </TabsTrigger>
-              <TabsTrigger value="infra" className="px-6 py-2.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm rounded-md transition-all">
-                <Server className="w-4 h-4 mr-2" /> 인프라 진단
+              <TabsTrigger value="blackbox" className="px-6 py-2.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm rounded-md transition-all">
+                <Search className="w-4 h-4 mr-2" /> 블랙박스 진단
               </TabsTrigger>
               <TabsTrigger value="history" className="px-6 py-2.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm rounded-md transition-all">
                 <History className="w-4 h-4 mr-2" /> 진단 기록
               </TabsTrigger>
             </TabsList>
 
-            {/* Web Scan Tab */}
-            <TabsContent value="web" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Input Area (Left 2/3) */}
-                <Card className="lg:col-span-2 border-slate-200 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Search className="w-5 h-5 text-blue-500" />
-                      웹 애플리케이션 스캔
-                    </CardTitle>
-                    <CardDescription>웹 애플리케이션의 보안 취약점, 설정 오류, 컴플라이언스 문제를 분석합니다</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
+            {/* Whitebox Tab */}
+            <TabsContent value="whitebox" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <Github className="w-6 h-6" /> 타겟 리포지토리 설정
+                  </h3>
+
+                  <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="web-url">대상 URL</Label>
-                      <Input
-                        id="web-url"
-                        placeholder="https://example.com"
-                        className="h-14 text-lg bg-slate-50 border-slate-200"
-                        value={webUrl}
-                        onChange={(e) => setWebUrl(e.target.value)}
-                      />
-                    </div>
-                    <Button
-                      className="w-full h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700"
-                      onClick={handleWebScan}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />스캔 시작 중...</> : '웹 스캔 시작'}
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Info sidebar (Right 1/3) */}
-                <div className="h-full">
-                  <ScanInfoSidebar />
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Infra Scan Tab */}
-            <TabsContent value="infra" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-2 border-slate-200 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Server className="w-5 h-5 text-slate-700" />
-                      서버 인프라 진단
-                    </CardTitle>
-                    <CardDescription>SSH 접속을 통해 서버 OS 및 서비스 설정 취약점을 정밀 점검합니다</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>서버 선택</Label>
-                        <Select value={serverType} onValueChange={setServerType}>
-                          <SelectTrigger className="h-12 bg-slate-50">
-                            <SelectValue placeholder="서버 타입 선택" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="web">WEB</SelectItem>
-                            <SelectItem value="was">WAS</SelectItem>
-                            <SelectItem value="db">DB</SelectItem>
-                            <SelectItem value="single">Single Server</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>서버 주소 (IP)</Label>
+                      <Label>GitHub Repository URL</Label>
+                      <div className="flex gap-2">
                         <Input
-                          placeholder="192.168.0.1"
-                          className="h-12 bg-slate-50 font-mono"
-                          value={serverAddress}
-                          onChange={(e) => setServerAddress(e.target.value)}
+                          value={repoUrl || ""}
+                          onChange={(e) => setRepoUrl(e.target.value)}
+                          placeholder="https://github.com/username/repo.git"
+                          className="flex-1"
                         />
                       </div>
                     </div>
 
-                    <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 space-y-4">
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="col-span-2 space-y-2">
-                          <Label>SSH 사용자</Label>
-                          <Input placeholder="root / ec2-user" className="bg-white" value={sshUser} onChange={(e) => setSshUser(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>포트</Label>
-                          <Input placeholder="22" className="bg-white font-mono" value={sshPort} onChange={(e) => setSshPort(e.target.value)} />
-                        </div>
-                      </div>
-
-                      <Tabs value={authMethod} onValueChange={setAuthMethod} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 h-9 mb-2">
-                          <TabsTrigger value="password" className="text-xs">비밀번호</TabsTrigger>
-                          <TabsTrigger value="key" className="text-xs">키 파일</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="password">
-                          <Input type="password" placeholder="SSH Password" className="bg-white" value={sshPass} onChange={(e) => setSshPass(e.target.value)} />
-                        </TabsContent>
-                        <TabsContent value="key">
-                          <Input type="file" className="bg-white pt-2" onChange={(e) => { if (e.target.files) setPemFile(e.target.files[0]) }} />
-                        </TabsContent>
-                      </Tabs>
-                    </div>
-
                     <Button
-                      className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-900"
-                      onClick={handleInfraScan}
+                      className="w-full"
+                      size="lg"
                       disabled={isLoading}
+                      onClick={handleWhiteboxScan}
                     >
-                      {isLoading ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />접속 중...</> : '인프라 진단 시작'}
+                      {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <BookOpen className="w-4 h-4 mr-2" />}
+                      소스코드 분석 시작
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <div className="h-full">
+                <div className="space-y-6">
                   <ScanInfoSidebar />
+                  <Card className="bg-slate-50 border-slate-200 shadow-none">
+                    <CardHeader>
+                      <CardTitle className="text-base text-slate-700">화이트박스 진단 안내</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm text-slate-500 space-y-2">
+                      <p>소스코드 레벨에서 보안 취약점을 분석합니다.</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>입력 데이터 검증 누락</li>
+                        <li>하드코딩된 비밀번호/키</li>
+                        <li>취약한 라이브러리 사용</li>
+                        <li>SQL Injection 및 XSS 패턴</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             </TabsContent>
 
-            {/* History Tab */}
+            {/* Blackbox Tab (Web + Infra) */}
+            <TabsContent value="blackbox" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <Tabs defaultValue="web" className="space-y-6">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <Label className="text-lg font-semibold text-slate-700">블랙박스 진단 유형</Label>
+                    <TabsList className="bg-slate-50">
+                      <TabsTrigger value="web" className="w-[140px]">웹 애플리케이션</TabsTrigger>
+                      <TabsTrigger value="infra" className="w-[140px]">서버 인프라</TabsTrigger>
+                    </TabsList>
+                  </div>
+
+                  <TabsContent value="web" className="mt-0">
+                    {/* Existing Web Scan UI */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                      <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-blue-50/50 p-6 rounded-lg border border-blue-100 mb-6">
+                          <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                            <Globe className="w-5 h-5" /> 웹 스캔
+                          </h3>
+                          <p className="text-sm text-blue-700 mb-4">
+                            URL을 입력하여 외부에서 접근 가능한 취약점을 진단합니다.
+                          </p>
+                          <div className="flex gap-4">
+                            <Input
+                              placeholder="https://example.com"
+                              className="h-12 text-lg bg-white"
+                              value={webUrl || ""}
+                              onChange={(e) => setWebUrl(e.target.value)}
+                            />
+                            <Button
+                              size="lg"
+                              className="bg-blue-600 hover:bg-blue-700 h-12 px-8"
+                              onClick={handleWebScan}
+                              disabled={isLoading}
+                            >
+                              {isLoading ? <Loader2 className="animate-spin" /> : '스캔 시작'}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="lg:col-span-1">
+                        <ScanInfoSidebar />
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="infra" className="mt-0">
+                    {/* Existing Infra Scan UI */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                      <div className="lg:col-span-2">
+                        <Card className="border-slate-200 border shadow-none">
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-lg">
+                              <Server className="w-5 h-5 text-slate-700" />
+                              인프라 접속 정보 입력
+                            </CardTitle>
+                            <CardDescription>SSH 접속을 통해 서버 설정을 정밀 진단합니다.</CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>서버 타입</Label>
+                                <Select value={serverType} onValueChange={setServerType}>
+                                  <SelectTrigger><SelectValue placeholder="선택하세요" /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="web">WEB Server</SelectItem>
+                                    <SelectItem value="was">WAS</SelectItem>
+                                    <SelectItem value="db">Database</SelectItem>
+                                    <SelectItem value="linux">Linux 호스트</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>호스트 주소</Label>
+                                <Input placeholder="192.168.1.100" value={serverAddress || ""} onChange={e => setServerAddress(e.target.value)} />
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="space-y-2">
+                                <Label>SSH 사용자</Label>
+                                <Input placeholder="root" value={sshUser || ""} onChange={e => setSshUser(e.target.value)} />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>포트</Label>
+                                <Input value={sshPort || ""} onChange={e => setSshPort(e.target.value)} />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>인증 방식</Label>
+                                <Select value={authMethod} onValueChange={setAuthMethod}>
+                                  <SelectTrigger><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="password">비밀번호</SelectItem>
+                                    <SelectItem value="key">PEM 키 파일</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            {authMethod === 'password' ? (
+                              <div className="space-y-2" key="auth-method-password">
+                                <Label>SSH 비밀번호</Label>
+                                <Input type="password" value={sshPass || ""} onChange={e => setSshPass(e.target.value)} />
+                              </div>
+                            ) : (
+                              <div className="space-y-2" key="auth-method-pem">
+                                <Label>PEM 키 파일</Label>
+                                <Input type="file" onChange={e => setPemFile(e.target.files ? e.target.files[0] : null)} />
+                              </div>
+                            )}
+
+                            <Button className="w-full h-12 mt-4 text-base font-bold bg-slate-900" onClick={handleInfraScan} disabled={isLoading}>
+                              {isLoading ? <Loader2 className="animate-spin mr-2" /> : '인프라 진단 시작'}
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </div>
+                      <div className="lg:col-span-1">
+                        <ScanInfoSidebar />
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </TabsContent>
+
             <TabsContent value="history" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
               <HistoryView />
             </TabsContent>
           </Tabs>
         )}
       </div>
-    </div>
+
+      <footer className="mt-20 py-8 border-t border-slate-100 text-center text-slate-400 text-sm">
+        <p>© 2026 Security Scanner Pro. All rights reserved.</p>
+      </footer>
+    </div >
   )
 }
 
-export default function ScannerDashboard() {
+
+export default function Page() {
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin w-10 h-10 text-blue-600" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>}>
       <DashboardContent />
     </Suspense>
   )
